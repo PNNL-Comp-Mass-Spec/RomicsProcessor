@@ -6,7 +6,7 @@ data analysis. The package also supports creating analytical pipelines from
 previously processed objects and applying these pipeline to other objects.
 This allows for rapid development and reuse of bioinformatics methods.
 
-[![DOI](https://zenodo.org/badge/TBD.svg)](https://zenodo.org/badge/latestdoi/TBD)
+[![DOI](https://zenodo.org/badge/206400976.svg)](https://zenodo.org/badge/latestdoi/206400976)
 
 ## Contacts
 
