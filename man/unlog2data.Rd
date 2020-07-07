@@ -2,8 +2,7 @@
 % Please edit documentation in R/05_Transformation_normalization.R
 \name{unlog2data}
 \alias{unlog2data}
-\title{unlog2data
-reverse the log2 tranformation of the romics_object data layer.}
+\title{unlog2data()}
 \usage{
 unlog2data(romics_object)
 }
@@ -14,8 +13,7 @@ unlog2data(romics_object)
 This function returns the transformed romics_object with updated data layer
 }
 \description{
-unlog2data
-reverse the log2 tranformation of the romics_object data layer.
+Reverses the log2 tranformation of the romics_object data layer.
 }
 \details{
 will reverse the log2 transformation of the romics_object

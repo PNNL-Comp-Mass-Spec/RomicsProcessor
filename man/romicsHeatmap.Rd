@@ -2,21 +2,35 @@
 % Please edit documentation in R/09_Heatmap.R
 \name{romicsHeatmap}
 \alias{romicsHeatmap}
-\title{romicsHeatmap()
-This function will plot a scaled heatmap of the data layer from a romics_object. This data can (or not be filtered) based on the statistics layer of the romics_object.}
+\title{romicsHeatmap()}
 \usage{
-romicsHeatmap(romics_object, color_palette = viridis(20),
-  color_boundaries = c(-2, 2), sample_hclust = TRUE,
+romicsHeatmap(
+  romics_object,
+  color_palette = viridis(20),
+  color_boundaries = c(-2, 2),
+  sample_hclust = TRUE,
   sample_hclust_method_dist = "euclidean",
-  sample_hclust_method_hclust = "ward.D", variable_hclust = TRUE,
+  sample_hclust_method_hclust = "ward.D",
+  variable_hclust = TRUE,
   variable_hclust_method_dist = "euclidean",
-  variable_hclust_method_hclust = "ward.D", variable_hclust_number = 1,
-  ANOVA_filter = "none", p = 0.05, statCol_filter = "none",
-  statCol_text = "<=0.05", statCol_filter2 = "none",
-  statCol_text2 = "<=0.05", statCol_filter3 = "none",
-  statCol_text3 = "<=0.05", notecol = "black", density.info = "none",
-  trace = "none", labRow = FALSE, cexCol = 1, margins = c(15, 5),
-  key.title = "Scaled Heatmap", key.xlab = "Z-scores", ...)
+  variable_hclust_method_hclust = "ward.D",
+  variable_hclust_number = 1,
+  ANOVA_filter = "none",
+  p = 0.05,
+  statCol = "none",
+  statCol_filter = "<=0.05",
+  statCol2 = "none",
+  statCol2_filter = "<=0.05",
+  notecol = "black",
+  density.info = "none",
+  trace = "none",
+  labRow = FALSE,
+  cexCol = 1,
+  margins = c(15, 5),
+  key.title = "Scaled Heatmap",
+  key.xlab = "Z-scores",
+  ...
+)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject().}
@@ -43,17 +57,13 @@ romicsHeatmap(romics_object, color_palette = viridis(20),
 
 \item{p}{Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).}
 
-\item{statCol_filter}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
+\item{statCol}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
 
-\item{statCol_text}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
+\item{statCol_filter}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
 
-\item{statCol_filter2}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
+\item{statCol2}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
 
-\item{statCol_text2}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
-
-\item{statCol_filter3}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
-
-\item{statCol_text3}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
+\item{statCol2_filter}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
 
 \item{notecol}{(optional) character string specifying the color for cellnote text. Defaults to "black".}
 
@@ -75,13 +85,12 @@ romicsHeatmap(romics_object, color_palette = viridis(20),
 A heatmap generated using the gplots::heatmap.2() function. Subsequently any adjustment of the heatmap.2 can be performed as described in gplots::heatmap.2() documentation.
 }
 \description{
-romicsHeatmap()
-This function will plot a scaled heatmap of the data layer from a romics_object. This data can (or not be filtered) based on the statistics layer of the romics_object.
+Plots a scaled heatmap of the data layer from a romics_object using the function heatmaps.2 from the package gplots. This data can (or not) be filtered based on the statistics layer of the romics_object.
 }
 \details{
 Create a customizable and filterable heatmap based on the romics_object statistics Layer. the ANOVA filter enables to restrict the variable displayed to be only the ones passing an ANOVA
 
-3 stat column filters (StatCol) can be set simultaneously to restrict the variable displayed. Each filter enable to sort based on a given column of the statistics layer (statCol_filter) of an romics_object (the list of columns can be obtained by using the function romicsCalculatedStats()) using a specific text (statCol_text) this text indicate what parameter should be used to filter this column (example: column has to be positive -> statCol_text= '>0'). Note that the ANOVA filter is applied first (if any) and then the filters are applied sequencially (first, then second, then third).
+2 stat column filters (StatCol) can be set simultaneously to restrict the variable displayed. Each filter enable to sort based on a given column of the statistics layer (statCol_filter) of an romics_object (the list of columns can be obtained by using the function romicsCalculatedStats()) using a specific text (statCol_text) this text indicate what parameter should be used to filter this column (example: column has to be positive -> statCol_text= '>0'). Note that the ANOVA filter is applied first (if any) and then the filters are applied sequencially (first, then second, then third).
 }
 \author{
 Geremy Clair

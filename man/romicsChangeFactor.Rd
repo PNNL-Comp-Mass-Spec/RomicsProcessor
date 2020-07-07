@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsChangeFactor}
 \alias{romicsChangeFactor}
-\title{romicsChangeFactor()
-change the main factor for romics object}
+\title{romicsChangeFactor()}
 \usage{
 romicsChangeFactor(romics_object, main_factor = "none")
 }
@@ -16,8 +15,7 @@ romicsChangeFactor(romics_object, main_factor = "none")
 This function returns a modified romics object, please see the create_romics_object() documentation.
 }
 \description{
-romicsChangeFactor()
-change the main factor for romics object
+Change the main factor of the romics_object
 }
 \details{
 changes the main_factor of an romics_object and updates the colors to this new factor.

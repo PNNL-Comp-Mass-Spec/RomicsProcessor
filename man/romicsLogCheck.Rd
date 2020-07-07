@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsLogCheck}
 \alias{romicsLogCheck}
-\title{romicsLogCheck()
-This function identifies if the romics_object has been log_transformed or not using the functions log2}
+\title{romicsLogCheck()}
 \usage{
 romicsLogCheck(romics_object)
 }
@@ -14,8 +13,7 @@ romicsLogCheck(romics_object)
 This function will return TRUE or FALSE indicating if the object was or not log transformed using the function log2transform
 }
 \description{
-romicsLogCheck()
-This function identifies if the romics_object has been log_transformed or not using the functions log2
+Identifies if the romics_object is log_transformed or not
 }
 \author{
 Geremy Clair

@@ -2,8 +2,7 @@
 % Please edit documentation in R/05_Transformation_normalization.R
 \name{log10transform}
 \alias{log10transform}
-\title{Log10transform
-log10 tranform the romics_object data layer.}
+\title{log10transform()}
 \usage{
 log10transform(romics_object)
 }
@@ -14,8 +13,7 @@ log10transform(romics_object)
 This function returns the transformed romics_object with updated data layer
 }
 \description{
-Log10transform
-log10 tranform the romics_object data layer.
+log10-tranforms the romics_object data layer.
 }
 \details{
 will log10 transform the romics object

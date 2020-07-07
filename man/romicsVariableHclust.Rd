@@ -2,24 +2,27 @@
 % Please edit documentation in R/09_Heatmap.R
 \name{romicsVariableHclust}
 \alias{romicsVariableHclust}
-\title{romicsVariableHclust
-This function will plot a hierarchical clustering for the variables. It will also add two new column in the statistical layer of the romics object indicating the order of the clustering and the clusters to which the variables belong.}
+\title{romicsVariableHclust()}
 \usage{
-romicsVariableHclust(romics_object, clusters = 8,
-  ANOVA_filter = "none", p = 0.05, method_dist = "euclidean",
-  method_hclust = "ward.D", plot = TRUE, scale_data = TRUE,
-  statCol_filter = "none", statCol_text = "<=0.05",
-  statCol_filter2 = "none", statCol_text2 = "<=0.05",
-  statCol_filter3 = "none", statCol_text3 = "<=0.05")
+romicsVariableHclust(
+  romics_object,
+  clusters = 8,
+  method_dist = "euclidean",
+  method_hclust = "ward.D",
+  plot = TRUE,
+  scale_data = TRUE,
+  ANOVA_filter = "none",
+  p = 0.05,
+  statCol = "none",
+  statCol_filter = "<=0.05",
+  statCol2 = "none",
+  statCol2_filter = "<=0.05"
+)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{clusters}{Numerical of length 1. Indicates the number of clusters to be used for the coloring of the variable hclust. 8 by default.}
-
-\item{ANOVA_filter}{Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the proteins below the filter will be displayed on the heatmap)}
-
-\item{p}{Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).}
 
 \item{method_dist}{Dist method to be used. This must be one of "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski", "pearson", "spearman" or "kendall".}
 
@@ -29,29 +32,28 @@ romicsVariableHclust(romics_object, clusters = 8,
 
 \item{scale_data}{Boolean indicating wether the data should be scaled or not.}
 
-\item{statCol_filter}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
+\item{ANOVA_filter}{Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the proteins below the filter will be displayed on the heatmap)}
 
-\item{statCol_text}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
+\item{p}{Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).}
 
-\item{statCol_filter2}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
+\item{statCol}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
 
-\item{statCol_text2}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
+\item{statCol_filter}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
 
-\item{statCol_filter3}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
+\item{statCol2}{A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().}
 
-\item{statCol_text3}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
+\item{statCol2_filter}{Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')}
 }
 \value{
-return an Romics_object containing two new columns in its statistical layer : hclust_cluster, hclust_order. if those columns were pre-existing they'll be replaced
+return an Romics_object containing a new columns in its statistical layer : hclust_cluster. If this column was pre-existing it will be replaced
 }
 \description{
-romicsVariableHclust
-This function will plot a hierarchical clustering for the variables. It will also add two new column in the statistical layer of the romics object indicating the order of the clustering and the clusters to which the variables belong.
+Plots a hierarchical clustering for the variables and adds two columns in the statistical layer of the romics_object indicating the order of the clustering and the clusters identifier of each variable.
 }
 \details{
 Create a customizable and filterable hierarchical clustering based on the romics_object statistics Layer. The ANOVA filter enables to restrict the variable displayed to be only the ones passing an ANOVA
 
-3 stat column filters (StatCol) can be set simultaneously to restrict the variable displayed. Each filter enable to sort based on a given column of the statistics layer (statCol_filter) of an romics_object (the list of columns can be obtained by using the function romicsCalculatedStats()) using a specific text (statCol_text) this text indicate what parameter should be used to filter this column (example: column has to be positive -> statCol_text= '>0'). Note that the ANOVA filter is applied first (if any) and then the filters are applied sequencially (first, then second, then third).
+2 stat column filters (StatCol) can be set simultaneously to restrict the variable displayed. Each filter enable to sort based on a given column of the statistics layer (statCol_filter) of an romics_object (the list of columns can be obtained by using the function romicsCalculatedStats()) using a specific text (statCol_text) this text indicate what parameter should be used to filter this column (example: column has to be positive -> statCol_text= '>0'). Note that the ANOVA filter is applied first (if any) and then the filters are applied sequencially (first, then second, then third).
 }
 \author{
 Geremy Clair

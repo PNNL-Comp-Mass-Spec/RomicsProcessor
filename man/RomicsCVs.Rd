@@ -2,8 +2,7 @@
 % Please edit documentation in R/03_CV_calculations.R
 \name{RomicsCVs}
 \alias{RomicsCVs}
-\title{romicsCVs()
-Calculate the CVs (works properly for non logged romics_objects only) for each level of a metadata factor and eventually plot the CV boxplot and/or barplot (on demand)}
+\title{romicsCVs()}
 \usage{
 RomicsCVs(romics_object, factor = "main", plot = "all")
 }
@@ -14,12 +13,8 @@ RomicsCVs(romics_object, factor = "main", plot = "all")
 
 \item{plot}{can be either FALSE, 'boxplot', 'barplot', or 'all'}
 }
-\value{
-
-}
 \description{
-romicsCVs()
-Calculate the CVs (works properly for non logged romics_objects only) for each level of a metadata factor and eventually plot the CV boxplot and/or barplot (on demand)
+Calculates the CVs (works properly for non logged romics_objects only) for each level of a metadata factor. This function can also be used to plot the CV boxplot and/or barplot on demand. The CVs are generated in a separate object and won’t be included in the statistics layer.
 }
 \details{
 This function will calculate the CVs, the percentage CVs, and on demand will plot the barplot and/or the boxplot of the CVs per sampletype. The CVs are calculated on unlogged romics_object only.

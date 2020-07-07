@@ -2,11 +2,15 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsSubset}
 \alias{romicsSubset}
-\title{romicsSubset()
-keep only a subset or drop specific elements/columns from an romics_object}
+\title{romicsSubset()}
 \usage{
-romicsSubset(romics_object, subset_vector, type = "keep",
-  by = "colnames", factor = "main")
+romicsSubset(
+  romics_object,
+  subset_vector,
+  type = "keep",
+  by = "colnames",
+  factor = "main"
+)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject()}
@@ -23,8 +27,7 @@ romicsSubset(romics_object, subset_vector, type = "keep",
 This function generate a subseted romics_object
 }
 \description{
-romicsSubset()
-keep only a subset or drop specific elements/columns from an romics_object
+Keeps or drop a subset of specific elements/columns from the romics_object
 }
 \details{
 This function create a new object based on a previous romics_object to include or drops a list of specified columns from the original object. The created object will have a new step object created that will indicate the name of the original object to be subsetted and the log/non-log status of the object.

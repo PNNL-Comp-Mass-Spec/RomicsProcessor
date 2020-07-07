@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsCreatePipeline}
 \alias{romicsCreatePipeline}
-\title{romicsCreatePipeline()
-This function extract a pipeline from an romics_object and add the pipeline in the main environment.}
+\title{romicsCreatePipeline()}
 \usage{
 romicsCreatePipeline(romics_object)
 }
@@ -14,8 +13,7 @@ romicsCreatePipeline(romics_object)
 This function will return character vector containing the stat columns previously calculated for a romics_object, if no stats were previously calculated an error message will be displayed
 }
 \description{
-romicsCreatePipeline()
-This function extract a pipeline from an romics_object and add the pipeline in the main environment.
+Extracts a pipeline from the romics_object. the pipeline can then be saved in a classic R object.
 }
 \author{
 Geremy Clair

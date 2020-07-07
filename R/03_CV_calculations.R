@@ -1,22 +1,15 @@
 #' romicsCVs()
-#' Calculate the CVs (works properly for non logged romics_objects only) for each level of a metadata factor and eventually plot the CV boxplot and/or barplot (on demand)
-#'
+#' @description Calculates the CVs (works properly for non logged romics_objects only) for each level of a metadata factor. This function can also be used to plot the CV boxplot and/or barplot on demand. The CVs are generated in a separate object and won’t be included in the statistics layer.
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param factor A string indicating a factor from the romics_object. The factors usable for a given romics_object names can be obtain using the function romicsFactorNames(romics_object)
 #' @param plot can be either FALSE, 'boxplot', 'barplot', or 'all'
-#'
-#' @details This function will calculate the CVs, the percentage CVs, and on demand will plot the barplot and/or the boxplot of the CVs per sampletype. The CVs are calculated on unlogged romics_object only.
-#' @return
-#'
+#' @details This function will calculate the CVs, the percentage CVs, and on demand will plot the barplot and/or the boxplot of the CVs per sampletype. The CVs are calculated on unlogged romics_object only, if the data was logged transformed, it will be unlogged prior to perform the calculations.
 #' @author Geremy Clair
 #' @export
-#'
 
-#this function needs to be modified to be able to act by factor
-RomicsCVs<-function(romics_object, factor="main", plot="all"){
-  arguments<-as.list(match.call())
+romicsCVs<-function(romics_object, factor="main", plot="all"){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
-  if(missing(factor)|factor=="main"){factor=romics_object$main_factor}
+  if(factor=="main") {factor<-romics_object$main_factor}
   if(!factor %in% romicsFactorNames(romics_object)){
     print("Your factor does not exist in your data, here is the list of the existing factors:")
     print(romicsFactorNames(romics_object))
@@ -28,6 +21,11 @@ RomicsCVs<-function(romics_object, factor="main", plot="all"){
   if(!plot %in% c(FALSE,"boxplot","barplot","all")){
     print("<plot> was not properly defined, by defaults the CVs will not be plotted.")
     plot=FALSE}
+
+  if(romicsLogCheck(romics_object)==TRUE){
+    print("The romics_object used was log transformed, it was unlogged in order to perform the CVs calculation")
+    if(sum(grepl("log2transform\\(",romics_object$steps))>0){romics_object<-unlog2data(romics_object)}else{romics_object<-unlog10data(romics_object)}
+  }
 
   #obtain the levels_factor of the selected factor and the colors from the romics_object
   levels_factor<-unique(as.character(t(romics_object$metadata[rownames(romics_object$metadata)==factor,])))
@@ -81,11 +79,6 @@ RomicsCVs<-function(romics_object, factor="main", plot="all"){
 
   results<-list(CVs_table=CVs, CVs_means_and_medians=CVs_mean_and_median)
 
-  romics_object<-romicsUpdateSteps(romics_object,arguments)
 
-  if(plot==FALSE){return(results)}
+  return(results)
 }
-
-
-
-

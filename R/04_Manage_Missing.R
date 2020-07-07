@@ -1,14 +1,10 @@
-#' romicsZeroToMissing
-#' replaces zeros in an Romics_processor object by NA values
-#'
+#' romicsZeroToMissing()
+#' @description Replaces zeros in the romics_object by NA values
 #' @param romics_object has to be an romics_object created using romicsCreateObject()
-#'
 #' @details This function will convert 0 values to NA in the data and missingdata layers
 #' @return This function returns the transformed romics_object with updated data and missingdata layers
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsZeroToMissing<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -21,19 +17,15 @@ romicsZeroToMissing<-function(romics_object){
   return(romics_object)
 }
 
-#' romicsFilterMissing
-#' this function allows to do missingness filtering and to keep proteins with a certain percentage of completeness it can also beeing
-#'
+#' romicsFilterMissing()
+#' @description Filters out the variables of the romics_object below the choosen percentage of completeness. The percentage of completeness can either be global or by factor of a given factor (in this later case if the percentage of completeness is achieved for at least one level of the factor it the variable will be kept).
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param percentage_completeness Numerical vector indicating the minimum percentage of data to be considered
-
-#'@param main_factor has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames() on the romics_object
+#' @param main_factor has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames() on the romics_object
 #' @details  This function will use the completeness of the protein in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default main_factor is the main factor of the object, the percentage_completeness is set at 50%
 #' @return  The function will return a filtered romics_object with the rows of the data and missing data object removed when appropriate.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_factor = "main"){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -49,12 +41,14 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
   #extract main factor
   if(main_factor=="none"){
     selected_factor<-rep("overal_sample_number",ncol(romics_object$metadata))}
-  if(main_factor %in% rownames(romics_object$metadata)){
+  if(main_factor %in% romicsFactorNames(romics_object) ){
     selected_factor<-romics_object$metadata[romicsFactorNames(romics_object)==main_factor,]}
   if(main_factor=="main"){
     selected_factor<-romics_object$main_factor
     selected_factor<-romics_object$metadata[romicsFactorNames(romics_object)==selected_factor,]
-    }else{stop("The selected <main_factor> was not present in the list of factor of this romics_object use the function romicsFactorNames() to identify the usable factors.")}
+  }else{
+    if(main_factor!="none"){
+    stop("The selected <main_factor> was not present in the list of factor of this romics_object use the function romicsFactorNames() to identify the usable factors.")}}
 
   #transform in character
   selected_factor<-as.character(t(selected_factor))
@@ -115,18 +109,14 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
   return(romics_object)
 }
 
-#' romicsPlotMissing
-#' this function allows to do missingness filtering and to keep proteins with a certain percentage of completeness it can also beeing
-#'
+#' romicsPlotMissing()
+#' @description Plots the missingness of each sample contained in the romics_object. The colors used for the plotting will correspond to the main_factor of the romics_object.
 #' @param romics_object has to be an romics_object created using romicsCreateObject()
 #' @param main_factor has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames()
-#'
 #' @details This function does not alter the romics_object, it plots the the missingness of each sample in a barplot.
 #' @return This function will return a ggplot2 geom_bar plot. it can then be further visually adjusted using the ggplot2 commands
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsPlotMissing<-function(romics_object,custom_colors= "colorlist"){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(custom_colors)){custom_colors<-romics_object$custom_colors}
@@ -171,17 +161,13 @@ romicsPlotMissing<-function(romics_object,custom_colors= "colorlist"){
   return(p)
 }
 
-#' romicsDeleteRowMissing
-#' This function completely removes the rows that have any missing values
-#'
+#' romicsDeleteRowMissing()
+#' @description Removes the rows that have any missing values from the romics_object
 #' @param romics_object has to be an romics_object created using romicsCreateObject()
-#'
 #' @details  This function will remove rows that have any missing values in the data and missingdata layers
 #' @return  The function will return a filtered romics_object with the rows of the data and missing data object removed when appropriate.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsDeleteRowMissing<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -208,17 +194,13 @@ romicsDeleteRowMissing<-function(romics_object){
   return(romics_object)
   }
 
-#' imputeMissingEval
-#' This function enable to evaluate the distribution of the imputed data prior to actually perform the imputation using the imputeMissing() function
-#'
+#' imputeMissingEval()
+#' @description Plots the distribution of the data to be imputed using the imputeMissing() function. Enables  to optimize the parameters prior to apply the imputeMissing() function.
 #' @param romics_object has to be an romics_object created using romicsCreateObject()
-#'
 #' @details  This function does not alter the romics_object, it plots the distribution of the whole data and of the imputed values using the method described in the Perseus paper by Tyranova et al. 2016 (Nature Method). By default the data is imputed with values in a normal distribution 1.8 standard deviation away from the median  and a width of distribution of 0.5.
 #' @return This function will return a ggplot2 geom_bar plot. it can then be further visually adjusted using the ggplot2 commands
-#'
 #' @author Geremy Clair
 #' @export
-#'
 imputeMissingEval<-function(romics_object,nb_stdev=1.8,width_stdev=0.5,bin=1,scale_x=c(-10,10)){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(nb_stdev)){nb_stdev<-1.8}
@@ -264,17 +246,13 @@ imputeMissingEval<-function(romics_object,nb_stdev=1.8,width_stdev=0.5,bin=1,sca
 
 }
 
-#' imputeMissing
-#' This function enable to impute the data using a normal distribution down-shifted from the median by a user defined number of standard deviations and a user defined width.
-#'
+#' imputeMissing()
+#' @description Imputes the data using a normal distribution down-shifted from the median by a user defined number of standard deviations and a user defined width. the distribution of the imputed data can be evaluated using the function imputeMissingEval().
 #' @param romics_object has to be an romics_object created using romicsCreateObject()
-#'
 #' @details  This function will impute the data using the method described in the Perseus paper by Tyranova et al. 2016 (Nature Method). By default the data is imputed with values in a normal distribution 1.8 standard deviation away from the median  and a width of distribution of 0.5.
 #' @return  The function will return a modified romics_object that will have imputed data, however the missingdata layer will conserve the location of the missingness, the missingness can subsequently be restored using the function romicsRestoreMissing().
-#'
 #' @author Geremy Clair
 #' @export
-#'
 imputeMissing<-function(romics_object,nb_stdev=1.8,width_stdev=0.5, seed=42){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -317,17 +295,13 @@ imputeMissing<-function(romics_object,nb_stdev=1.8,width_stdev=0.5, seed=42){
   return(romics_object)
 }
 
-#' imputeMinDiv2
-#' This function enable to impute the data using the minimum value of the table divided by 2. only works with all positive data.
-#'
+#' imputeMinDiv2()
+#' @description Imputes the data layer of the romics_object using the minimum value of the table divided by 2. this function will work if the data only contains positive values.
 #' @param romics_object has to be an romics_object created using romicsCreateObject()
-#'
 #' @details This function will use the minimum value of the data table divided by 2 to impute the missing values of the data layer
 #' @return  The function will return a modified romics_object that will have imputed data, however the missingdata layer will conserve the location of the missingness, the missingness can subsequently be restored using the function romicsRestoreMissing().
-#'
 #' @author Geremy Clair
 #' @export
-#'
 imputeMinDiv2<- function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -346,17 +320,13 @@ imputeMinDiv2<- function(romics_object){
   return(romics_object)
 }
 
-#' romicsRestoreMissing
-#' This function enable to restaure the missingness of the data layer based on the content of the missingdata layer.
-#'
+#' romicsRestoreMissing()
+#' @description Restores the missingness of the data layer of the romics_object based on the content of the missingdata layer.
 #' @param romics_object has to be an romics_object created using romicsCreateObject()
-#'
 #' @details  This function will renmove any imputed value based on the content of the missingdata layer.
 #' @return  The function will return a modified romics_object that will have NA instead of the imputed data.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsRestoreMissing<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}

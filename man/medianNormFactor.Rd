@@ -2,8 +2,7 @@
 % Please edit documentation in R/05_Transformation_normalization.R
 \name{medianNormFactor}
 \alias{medianNormFactor}
-\title{MediaNormFactor
-median normalize the samples within a given factor the median of the median of this factor will be used as new factor median.}
+\title{medianNormFactor()}
 \usage{
 medianNormFactor(romics_object, main_factor = "factor")
 }
@@ -14,8 +13,7 @@ medianNormFactor(romics_object, main_factor = "factor")
 This function returns the transformed romics_object with updated data layer.
 }
 \description{
-MediaNormFactor
-median normalize the samples within a given factor the median of the median of this factor will be used as new factor median.
+Normalizes the samples by their median within a given factor. The median of the median within this factor will be used as factor-specific median center.
 }
 \details{
 median normalize the samples within a given factor the median of the median of this factor will be used as new factor median.

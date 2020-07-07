@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsUpdateColor}
 \alias{romicsUpdateColor}
-\title{romicsUpdateColor()
-change the colors contained in a romics_object for further analysis}
+\title{romicsUpdateColor()}
 \usage{
 romicsUpdateColor(romics_object)
 }
@@ -14,8 +13,7 @@ romicsUpdateColor(romics_object)
 This function returns a romics_object with updated colors.
 }
 \description{
-romicsUpdateColor()
-change the colors contained in a romics_object for further analysis
+Updates the colors layer contained in the romics_object
 }
 \author{
 Geremy Clair

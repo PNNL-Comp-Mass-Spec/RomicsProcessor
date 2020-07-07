@@ -1,16 +1,11 @@
 #' romicsMean()
-#' Calculate the variable mean within each factor and add the columns in the statistics layer of an romics_object.
-#'
+#' @description Calculates the means of each variable within each level of the selected factor and add the generated columns in the statistics layer of the romics_object.
 #' @param romics_object A object created using the function romicsCreateObject().
-#' @param main_factor Either 'main' OR any factor from the romics_object, the list of factors from an romics object can be obtained using the function romicsFactorNames().
-#'
+#' @param main_factor Either 'main' OR any factor from the romics_object, the list of factors from a romics object can be obtained using the function romicsFactorNames().
 #' @details Adds the means columns to the statistics layer. enable to choose a different factor than the main one to do those calculation
-#'
 #' @return This function returns a modified romics object, containing mean columns in the statistics layer.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsMean<-function(romics_object, factor="main"){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -77,18 +72,13 @@ romicsMean<-function(romics_object, factor="main"){
 }
 
 #' romicsSd()
-#' Calculate the standard deviation within each factor and add the columns in the statistics layer of an romics_object.
-#'
+#' @description Calculates the standard deviation of each variable within each level of the selected factor and add the generated columns in the statistics layer of the romics_object.
 #' @param romics_object A object created using the function romicsCreateObject().
 #' @param main_factor Either 'main' OR any factor from the romics_object, the list of factors from an romics object can be obtained using the function romicsFactorNames().
-#'
 #' @details Adds the sd columns to the statistics layer. enable to choose a different factor than the main one to do those calculation
-#'
 #' @return This function returns a modified romics object, containing sd columns in the statistics layer.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsSd<-function(romics_object, factor="main"){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -154,8 +144,7 @@ romicsSd<-function(romics_object, factor="main"){
 }
 
 #' romicsTtest()
-#' Perform all possible paired T.tests for a given factor based of a romics_object.
-#'
+#' @description Performs all possible paired-T.tests for each variable using the levels of the selected factor of the romics_object. The results are added as new columns in the statistics layers.
 #' @param romics_object has to be an romics_object created with the function romicsCreateObject(),
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
 #' @param paired a logical indicating whether you want a paired t-test.
@@ -164,14 +153,10 @@ romicsSd<-function(romics_object, factor="main"){
 #' @param padj a logical variable indincating wheter to perform or not adjustment of pvalues
 #' @param padj_method correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}
 #' @param factor a character string indicating the factor to use for the test, the list of the available factor can be obtained by using the function romics_factors(), if missing the function will use the main factor of the object
-#'
 #' @details When paired T.test are performed it is possible to include a second factor to generate the pairs. This function will also calculate the fold-changes or log2(fold-change). Please, note that the test will automatically determine if a log tranformation was performed to the object, subsequently we recommend to import not pre-logged data.frames when creating the object. For paired T.tests, it is possible to set a second factor containing the pairs, if missing the function will consider the pairs based on the column order in the romics_object.
-#'
 #' @return an romics_object with the statistical layer containing the newly generated t.tests and fold-changes
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pairing_factor="none", var.equal=FALSE, factor = "main", padj=TRUE, padj_method="BH"){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -302,20 +287,15 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
 }
 
 #' romicsANOVA()
-#' Perform an ANOVA using a factor of the romics_object
-#'
+#' @description Performs the ANOVA for each variable contained in the data layer of the romics_object. The factor of the romics_object to be used for the analysis can be selected.
 #' @param romics_object A romics_object created with the function romicsCreateObject(),
 #' @param padj Boolean indincating wheter to perform or not adjustment of pvalues
 #' @param padj_method correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}
 #' @param factor A character string indicating the factor to use for the test, the list of the available factor can be obtained by using the function romics_factors(), if missing the function will use the main factor of the object.
-#'
 #' @details perform an ANOVA for each variable of the romics_object the factor used will be the main_factor of the romics_object unless specified differently.
-#'
 #' @return an romics_object with the statistical layer containing the newly generated ANOVA columns
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main"){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -384,17 +364,12 @@ romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main")
 }
 
 #' romicsZscores()
-#' adds the Zscores columns to the statistics Layer of a romics_object
-#'
+#' @description Calculates the Zscores for each cell of the data layer of the romics_object. the generated results are added to the statistics Layer as new columns.
 #' @param romics_object A romics_object created with the function romicsCreateObject(),
-#'
 #' @details adds the Zscores columns to the statistics Layer of a romics_object
-#'
 #' @return an romics_object with the statistical layer containing the newly generated Zscores columns
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsZscores<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -442,4 +417,3 @@ romicsZscores<-function(romics_object){
 
   return(romics_object)
   }
-

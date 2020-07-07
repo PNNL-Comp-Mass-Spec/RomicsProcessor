@@ -1,20 +1,15 @@
-#' singleVariablePlot
-#' plot the abundances for a given variable based on a given factor contained in the metadata of an Romics_object.
-#'
+#' singleVariablePlot()
+#' @description Plots the abundances for a given variable based on a given factor contained in the metadata of the romics_object. This function will use the factor selected to group the samples and will color the plots based on the level of this factor. This function will function with partial matches.
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param variable A string, the function will look for any string containing this name (partial match work, however if multiple rows contain the same partial name, the function will stop and indicate the multiple options)
 #' @param type Must be in the following list: 'jitter','boxplot','violin','jb',or 'jv'. Indicates the type of plot to be returned. 'jb' is for both a jitter and a boxplot. 'jv' is for both a jitter and a violin
 #' @param factor has to be either 'main" or a factor of the romics_object, the list of factor can be retrieved using the function romicsFactorNames()
 #' @param limits is corresponding to the y_limits of the plot, by default ggplot will automatically define these, has to be a numeric vector of length 2 c(limit_min, limit_max)
 #' @param title String. Indicate the title of the plot. automatically it will use the full feature name found for the chosen variable (in the case of partial match).
-#'
 #' @details This function allows to quickly plot a the values for a given variable accross multiple levels of a given factor
-#'
 #' @return a ggplot figure
-#'
 #' @author Geremy Clair
 #' @export
-#'
 singleVariablePlot<-function(romics_object, variable="variable", type = "jb", factor="main", limits=c(-10,10), title="auto"){
   #general checkings
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -46,7 +41,7 @@ singleVariablePlot<-function(romics_object, variable="variable", type = "jb", fa
   data<-data.frame(t(data))
   colnames(data)<-c("intensity","group","fill")
 
-  data$intensity<-as.numeric(as.numeric(levels(data$intensity)[data$intensity]))
+  data$intensity<-as.numeric(data$intensity)
 
   fill<-unique(as.character(t(fill)))
 

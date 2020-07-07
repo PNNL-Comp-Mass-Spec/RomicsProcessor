@@ -2,8 +2,7 @@
 % Please edit documentation in R/07_Distribution_Plots.R
 \name{distribSina}
 \alias{distribSina}
-\title{distribSina
-This function will plot the Sina plot of the sample distribution using ggplot2}
+\title{distribSina()}
 \usage{
 distribSina(romics_object)
 }
@@ -14,8 +13,7 @@ distribSina(romics_object)
 a plot generated using ggplot2 is generated with this function.
 }
 \description{
-distribSina
-This function will plot the Sina plot of the sample distribution using ggplot2
+Plots the Sina plot of the sample distribution using ggplot2. The colors used for the plotting will correspond to the main_factor of the romics_object.
 }
 \details{
 create a ggplot2 graphic output displaying the normalized or not intensites (or logged intensities) within each sample. ggplot2 methods can be used to visually adjust the plot.

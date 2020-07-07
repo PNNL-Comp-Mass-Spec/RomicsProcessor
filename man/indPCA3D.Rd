@@ -2,8 +2,7 @@
 % Please edit documentation in R/08_Grouping.R
 \name{indPCA3D}
 \alias{indPCA3D}
-\title{indPCA3D
-similarly to the function indPCAplot this function will create with the coordinate of the samples on a PCA plot in 3D.}
+\title{indPCA3D()}
 \usage{
 indPCA3D(romics_object, Xcomp = 1, Ycomp = 2, Zcomp = 3, ...)
 }
@@ -22,8 +21,7 @@ indPCA3D(romics_object, Xcomp = 1, Ycomp = 2, Zcomp = 3, ...)
 Returns a 3D plot generated with the plot3D::scatter3D() function.
 }
 \description{
-indPCA3D
-similarly to the function indPCAplot this function will create with the coordinate of the samples on a PCA plot in 3D.
+Plots the coordinate of the samples on a PCA plot in 3D. The colors used for the plotting will correspond to the main_factor of the romics_object. The axis to be plotted can be chosen. The PCA results are calculated using the function romicsPCA (see the documentation of this function for more details).
 }
 \details{
 This function will plot the results of a PCA calculated on the romics_object data layer using the function romicsPCA() (see documentation for more details).

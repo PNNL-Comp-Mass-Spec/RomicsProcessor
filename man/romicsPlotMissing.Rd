@@ -2,8 +2,7 @@
 % Please edit documentation in R/04_Manage_Missing.R
 \name{romicsPlotMissing}
 \alias{romicsPlotMissing}
-\title{romicsPlotMissing
-this function allows to do missingness filtering and to keep proteins with a certain percentage of completeness it can also beeing}
+\title{romicsPlotMissing()}
 \usage{
 romicsPlotMissing(romics_object, custom_colors = "colorlist")
 }
@@ -16,8 +15,7 @@ romicsPlotMissing(romics_object, custom_colors = "colorlist")
 This function will return a ggplot2 geom_bar plot. it can then be further visually adjusted using the ggplot2 commands
 }
 \description{
-romicsPlotMissing
-this function allows to do missingness filtering and to keep proteins with a certain percentage of completeness it can also beeing
+Plots the missingness of each sample contained in the romics_object. The colors used for the plotting will correspond to the main_factor of the romics_object.
 }
 \details{
 This function does not alter the romics_object, it plots the the missingness of each sample in a barplot.

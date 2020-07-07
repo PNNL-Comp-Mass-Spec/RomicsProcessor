@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsApplyPipeline}
 \alias{romicsApplyPipeline}
-\title{romicsApplyPipeline()
-Apply a pipeline created with the romicsCreatePipeline() function, pipelines can be edited prior to run them.}
+\title{romicsApplyPipeline()}
 \usage{
 romicsApplyPipeline(romics_object, romics_pipeline)
 }
@@ -16,6 +15,5 @@ romicsApplyPipeline(romics_object, romics_pipeline)
 This function will return an romics_object that has been processed through a pipeline
 }
 \description{
-romicsApplyPipeline()
-Apply a pipeline created with the romicsCreatePipeline() function, pipelines can be edited prior to run them.
+Applies a pipeline created with the romicsCreatePipeline() function, pipelines can be edited prior to run them.
 }

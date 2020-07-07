@@ -1,11 +1,8 @@
 #' theme_ROP
-#' This function is a ggplot2 theme function
-#'
+#' @description This function is a ggplot2 theme function
 #' @details This function is the ROP theme for ggplot2, it utilization is similar to any other ggplot2 theme function
-#'
 #' @author Geremy Clair
 #' @export
-#'
 theme_ROP <- function(){
   theme_bw() %+replace%
     theme(panel.background  = element_blank(),

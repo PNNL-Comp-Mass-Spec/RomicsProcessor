@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsSteps}
 \alias{romicsSteps}
-\title{romicsSteps()
-display the steps of an romics_object}
+\title{romicsSteps()}
 \usage{
 romicsSteps(romics_object, show_dates = TRUE, show_details = TRUE)
 }
@@ -18,6 +17,5 @@ romicsSteps(romics_object, show_dates = TRUE, show_details = TRUE)
 This function will return the steps of an romics_object
 }
 \description{
-romicsSteps()
-display the steps of an romics_object
+Displays the content steps layer of the romics_object
 }

@@ -1,21 +1,15 @@
-#' extractMaxQuant
-#' Extracts the quantification information from a MaxQuant ProteinGroup file
-#'
+#' extractMaxQuant()
+#' @description Extracts the quantification information from a MaxQuant ProteinGroup.txt file
 #' @param file This has to be the file path and file name of the maxQuant proteinGroup.txt file from which the information has to be extracted
 #' @param quantification_type has to be one of the following options : 'LFQ','Intensity','iBAQ','MS.MS'. Indicate what type of quantification needs to be extracted from the ProteinGroup table, can be either
 #' @param cont.rm has to be TRUE or FALSE, indicates if the contaminant have to be removed
 #' @param site.rm has to be TRUE or FALSE, indicates if the identification by site only have to be removed
 #' @param rev.rm has to be TRUE or FALSE, indicates if the False Positive entries have to be removed
-#'
 #' @details This function will extracts the quantification information from one quantification time of a MaxQuant ProteinGroup.txt file.
-#'
 #' @return it will return a data.frame with a first column containing the Protein IDs as first column, the other columns will be the Quantitative columns corresponding to the quantitation mode selected.
-#'
-#'
 #' @author Geremy Clair
 #' @export
-#'
-extractMaxQ_quant<-function(file= "/filepath/proteinGroups.txt",quantification_type="LFQ", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE){
+extractMaxQuant<-function(file= "/filepath/proteinGroups.txt",quantification_type="LFQ", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE){
 #ensure that the file is named ProteinGroups.txt
 if(substr(file,nchar(file)-16, nchar(file))!="proteinGroups.txt"){stop("The specified file is not a ProteinGroup file")}
 if(!quantification_type %in% c("LFQ","Intensity","iBAQ","MS.MS", "Identification.Type")){stop("The quantification_type is not appropriate")}
@@ -95,22 +89,17 @@ if(counts$reverse>0&&rev.rm==TRUE){prGR <- prGR[as.character(prGR$reverse)!="+",
 
 }
 
-#' extractMaxQuant
-#' Extracts the IDs information from a MaxQuant ProteinGroup file
-#'
+#' extractMaxQuant()
+#' @description Extracts the IDs information from a MaxQuant ProteinGroup.txt file
 #' @param file This has to be the file path and file name of the maxQuant proteinGroup.txt file from which the information has to be extracted
 #' @param cont.rm has to be TRUE or FALSE, indicates if the contaminant have to be removed
 #' @param site.rm has to be TRUE or FALSE, indicates if the identification by site only have to be removed
 #' @param rev.rm has to be TRUE or FALSE, indicates if the False Positive entries have to be removed
-#'
 #' @details This function will extracts the IDs information from one quantification time of a MaxQuant ProteinGroup.txt file.
-#'
 #' @return it will return a data.frame with a first column containing the Protein IDs the following columns will be the following : 'majority.protein.ids', 'fasta.headers', 'peptide.counts.all','peptide.counts.razor.unique','peptide.counts..unique.','fasta.headers','number.of.proteins','peptides','razor...unique.peptides', 'unique.peptides'
-#'
 #' @author Geremy Clair
 #' @export
-#'
-extractMaxQ_IDs<-function(file= "/filepath/proteinGroups.txt", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE){
+extractMaxQuantIDs<-function(file= "/filepath/proteinGroups.txt", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE){
   #ensure that the file is named ProteinGroups.txt
   if(substr(file,nchar(file)-16, nchar(file))!="proteinGroups.txt"){stop("The specified file is not a ProteinGroup file")}
   if(missing(cont.rm)){cont.rm<-TRUE}

@@ -2,8 +2,7 @@
 % Please edit documentation in R/14_PmartConvert.R
 \name{RomicsPmartR}
 \alias{RomicsPmartR}
-\title{RomicsPmartR()
-Converts romics_object to pmartR object.}
+\title{RomicsPmartR()}
 \usage{
 RomicsPmartR(romics_object, type = "proData")
 }
@@ -16,8 +15,7 @@ RomicsPmartR(romics_object, type = "proData")
 return the pmartR object
 }
 \description{
-RomicsPmartR()
-Converts romics_object to pmartR object.
+Converts romics_object to pmartR object (requires the "pmartR' package to be installed).
 }
 \details{
 This function converts an romics_object to a pmartR object

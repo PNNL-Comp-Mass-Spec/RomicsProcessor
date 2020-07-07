@@ -2,8 +2,7 @@
 % Please edit documentation in R/05_Transformation_normalization.R
 \name{medianNormSample}
 \alias{medianNormSample}
-\title{MediaNormSample
-Median normalize within each sample the median of each sample median will be used as alignment point.}
+\title{MedianNormSample()}
 \usage{
 medianNormSample(romics_object)
 }
@@ -14,8 +13,7 @@ medianNormSample(romics_object)
 This function returns the transformed romics_object with updated data layer.
 }
 \description{
-MediaNormSample
-Median normalize within each sample the median of each sample median will be used as alignment point.
+Normalizes the samples by their median. The median of the medians of all the samples is used as the alignment point.
 }
 \details{
 Median normalize within each sample the median of each sample median will be used as alignment point. If you waht to center the median at 0 please use the function medianCenterSample().

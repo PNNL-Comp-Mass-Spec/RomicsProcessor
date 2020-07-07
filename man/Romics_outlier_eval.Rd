@@ -2,8 +2,7 @@
 % Please edit documentation in R/15_Manage_Outliers.R
 \name{Romics_outlier_eval}
 \alias{Romics_outlier_eval}
-\title{Romics_outlier_eval
-uses the pmartR method for the evaluation of outliers (require the installation of the package pmartR).}
+\title{Romics_outlier_eval()}
 \usage{
 Romics_outlier_eval(romics_object, seed = 42,
   metrics = c("Correlation", "Proportion_Missing", "MAD", "Skewness"),
@@ -24,8 +23,7 @@ Romics_outlier_eval(romics_object, seed = 42,
 This function will print the pmartR filtering details and will return 2 plots the first one is a scatter plot of the pvalue by log2(Robust Mahalanobis Distance) the second one is a scatter plot of the log2(Robust Mahalanobis Distance) per sample.
 }
 \description{
-Romics_outlier_eval
-uses the pmartR method for the evaluation of outliers (require the installation of the package pmartR).
+Plots the the pmartR method for the evaluation of outliers (require the installation of the package pmartR). To remove the outlier below a certain treshold use the function Romics_outlier_remove()
 }
 \details{
 This function requires the package 'pmartR' to be installed and loaded to be excecuted. It will calculate and plot the samples to be filtered out using the function Romics_outlier_eval().

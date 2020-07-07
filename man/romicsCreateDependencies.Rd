@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsCreateDependencies}
 \alias{romicsCreateDependencies}
-\title{romicsCreateDependencies()
-This function indicates the RomicsProcessor package dependencies and versions at the time the code was run}
+\title{romicsCreateDependencies()}
 \usage{
 romicsCreateDependencies()
 }
@@ -11,8 +10,7 @@ romicsCreateDependencies()
 This function will return a data.frame with two columns the required packages and the version at the time the code was run
 }
 \description{
-romicsCreateDependencies()
-This function indicates the RomicsProcessor package dependencies and versions at the time the code was run
+Creates the original dependencies of the romics_object (only when it is created to add dependencies use the romicsAddDependency() function)
 }
 \author{
 Geremy Clair

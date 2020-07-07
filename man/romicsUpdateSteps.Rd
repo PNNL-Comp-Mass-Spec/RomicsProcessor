@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsUpdateSteps}
 \alias{romicsUpdateSteps}
-\title{stepUpdater()
-This function participate in the process of updating the steps}
+\title{stepUpdater()}
 \usage{
 romicsUpdateSteps(romics_object, arguments)
 }
@@ -16,8 +15,7 @@ romicsUpdateSteps(romics_object, arguments)
 This function add the description of the processing to the step layer of an Romics object
 }
 \description{
-stepUpdater()
-This function participate in the process of updating the steps
+Updates the steps of the romics_object, require to have recorded the argument in earlier steps of the function
 }
 \details{
 The goal of Romics processor is to provide a trackable and reproducible pipeline for processing omics data. Subsequently it is necessary when a function is created to implement a way to record the user input that will be recorded in the steps layer of the Romics_object.

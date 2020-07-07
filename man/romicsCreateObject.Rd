@@ -2,12 +2,16 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsCreateObject}
 \alias{romicsCreateObject}
-\title{romicsCreateObject()
-prepare an object for further analysis}
+\title{romicsCreateObject()}
 \usage{
-romicsCreateObject(data, metadata, main_factor = "none",
-  custom_colors = ROP_colors, omics_type = "unknown",
-  quantif_type = "unknown")
+romicsCreateObject(
+  data,
+  metadata,
+  main_factor = "none",
+  custom_colors = ROP_colors,
+  omics_type = "unknown",
+  quantif_type = "unknown"
+)
 }
 \arguments{
 \item{data}{A data frame corresponding to the data.}
@@ -26,12 +30,10 @@ romicsCreateObject(data, metadata, main_factor = "none",
 This function generate an romics_object containing the following layers : data, metadata, missingdata, original_data, main_factor, colors, steps, custom_colors, omics_type, quantif_type
 }
 \description{
-romicsCreateObject()
-prepare an object for further analysis
+Create a romics_object by combining a data and a metadata data frames
 }
 \examples{
 ROP_romics_object <- romicsCreateObject(ROP_data,ROP_metadata,main_factor="condition")
-
 }
 \author{
 Geremy Clair

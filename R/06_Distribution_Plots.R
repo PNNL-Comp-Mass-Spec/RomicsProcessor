@@ -1,15 +1,10 @@
-#' distribBoxplot
-#' This function will plot the boxplot of the sample distribution using ggplot2
-#'
+#' distribBoxplot()
+#' @description Plots the boxplot of the sample distribution using ggplot2. The colors used for the plotting will correspond to the main_factor of the romics_object.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
-#'
 #' @details create a ggplot2 graphic output displaying the normalized or not intensites (or logged intensities) within each sample. ggplot2 methods can be used to visually adjust the plot.
-#'
 #' @return a plot generated using ggplot2 is generated with this function.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 distribBoxplot <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -38,18 +33,13 @@ if(romicsLogCheck(romics_object)==T)
 return(p)
 }
 
-#' distribViolin
-#' This function will plot the Violin plot of the sample distribution using ggplot2
-#'
+#' distribViolin()
+#' @description Plots the violin plot of the sample distribution using ggplot2. The colors used for the plotting will correspond to the main_factor of the romics_object.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
-#'
 #' @details create a ggplot2 graphic output displaying the normalized or not intensites (or logged intensities) within each sample. ggplot2 methods can be used to visually adjust the plot.
-#'
 #' @return a plot generated using ggplot2 is generated with this function.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 distribViolin <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -78,18 +68,13 @@ distribViolin <- function(romics_object){
   return(p)
 }
 
-#' distribJitter
-#' This function will plot the jitter plot of the sample distribution using ggplot2
-#'
+#' distribJitter()
+#' @description Plots the Jitter plot of the sample distribution using ggplot2. The colors used for the plotting will correspond to the main_factor of the romics_object.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
-#'
 #' @details create a ggplot2 graphic output displaying the normalized or not intensites (or logged intensities) within each sample. ggplot2 methods can be used to visually adjust the plot.
-#'
 #' @return a plot generated using ggplot2 is generated with this function.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 distribJitter <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -118,18 +103,13 @@ distribJitter <- function(romics_object){
   return(p)
 }
 
-#' distribSina
-#' This function will plot the Sina plot of the sample distribution using ggplot2
-#'
+#' distribSina()
+#' @description Plots the Sina plot of the sample distribution using ggplot2. The colors used for the plotting will correspond to the main_factor of the romics_object.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
-#'
 #' @details create a ggplot2 graphic output displaying the normalized or not intensites (or logged intensities) within each sample. ggplot2 methods can be used to visually adjust the plot.
-#'
 #' @return a plot generated using ggplot2 is generated with this function.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 distribSina <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -159,18 +139,13 @@ distribSina <- function(romics_object){
 
 }
 
-#' distribRidges
-#' This function will plot the Density ridges plot of the sample distribution using ggplot2
-#'
+#' distribRidges()
+#' @description Plots the ridges plot of the sample distribution using ggplot2. The colors used for the plotting will correspond to the main_factor of the romics_object.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
-#'
 #' @details create a ggplot2 graphic output displaying the normalized or not intensites (or logged intensities) within each sample. ggplot2 methods can be used to visually adjust the plot.
-#'
 #' @return a plot generated using ggplot2 is generated with this function.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 distribRidges <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -199,22 +174,17 @@ distribRidges <- function(romics_object){
   return(p)
 }
 
-#' distribHistogram
-#' This function will display a grid.arranged histogram plot showing the distribution of the data in each sample
-#'
+#' distribHistogram()
+#' @description Plots individual frequency plots showing the discribution of the data in each sample using grid.Extra and ggplots2. Please use the function distribHistogramGlobal() to plot the global distribution of the whole dataset.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
 #' @param bin has to be a numerical value indicating the width of the frequency bins to use for the visualization
 #' @param scale_y has to be a numerical/double vector of length 2 indicating the y_limits of each graph. if too low those will be automatically adjusted. by default  scale_y=c(0,100) will be used
 #' @param scale_x has to be a numerical/double vector of length 2 indicating the x_limits of each graph. if too low those will be automatically adjusted. by default  scale_x=c(0,100) will be used
 #' @param col has to be a double vector of lenght 1 indicating in how many columns the graphics will be displayed.
-#'
 #' @details plots a complex graphic output displaying the data distribution within each sample
-#'
 #' @return a plot generated using ggplot2 is generated with this function.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 distribHistogram<- function(romics_object, bin=1, scale_y=c(0,100), scale_x=c(-10,10), col=3){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(bin)){bin<-1}
@@ -293,19 +263,15 @@ distribHistogram<- function(romics_object, bin=1, scale_y=c(0,100), scale_x=c(-1
   options(warn = 1)
 
 }
-#' distribHistogram
-#' This function will display a grid.arranged histogram plot showing the distribution of the data in each sample
-#'
+
+#' distribHistogramGlobal()
+#' @description Plots the frequency plot showing the discribution of the data in the whole data layer using ggplots2. Please use the function distribHistogram() to plot the global distribution for each sample.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
 #' @param bin has to be a numerical value indicating the width of the frequency bins to use for the visualization
-#'
 #' @details plots a complex graphic output displaying the data distribution within each sample
-#'
 #' @return a plot generated using ggplot2 is generated with this function.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 distribHistogramGlobal<-function(romics_object,bin=1){
   if(missing(romics_object)){stop("romics_object is missing")}
   if(class(romics_object)!="romics_object"){stop("your romics_object was not created using the function romicsCreateObject")}

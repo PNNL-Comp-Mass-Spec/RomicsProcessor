@@ -2,11 +2,12 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsAddDependency}
 \alias{romicsAddDependency}
-\title{romicsAddDependency()
-This function adds a package to the list of the RomicsProcessor package dependencies}
+\title{romicsAddDependency()}
 \usage{
-romicsAddDependency(romics_object, new_dependency = c("package_1",
-  "package_2"))
+romicsAddDependency(
+  romics_object,
+  new_dependency = c("package_1", "package_2")
+)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject()}
@@ -17,8 +18,7 @@ romicsAddDependency(romics_object, new_dependency = c("package_1",
 This function will return an romics_object updated with the new dependency.
 }
 \description{
-romicsAddDependency()
-This function adds a package to the list of the RomicsProcessor package dependencies
+Adds a package to the list of dependencies of the romics_object. Enables developpers to add automatically a dependency when their function has been applied by the user on their romics_object.
 }
 \author{
 Geremy Clair

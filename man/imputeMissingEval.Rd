@@ -2,11 +2,15 @@
 % Please edit documentation in R/04_Manage_Missing.R
 \name{imputeMissingEval}
 \alias{imputeMissingEval}
-\title{imputeMissingEval
-This function enable to evaluate the distribution of the imputed data prior to actually perform the imputation using the imputeMissing() function}
+\title{imputeMissingEval()}
 \usage{
-imputeMissingEval(romics_object, nb_stdev = 1.8, width_stdev = 0.5,
-  bin = 1, scale_x = c(-10, 10))
+imputeMissingEval(
+  romics_object,
+  nb_stdev = 1.8,
+  width_stdev = 0.5,
+  bin = 1,
+  scale_x = c(-10, 10)
+)
 }
 \arguments{
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
@@ -15,8 +19,7 @@ imputeMissingEval(romics_object, nb_stdev = 1.8, width_stdev = 0.5,
 This function will return a ggplot2 geom_bar plot. it can then be further visually adjusted using the ggplot2 commands
 }
 \description{
-imputeMissingEval
-This function enable to evaluate the distribution of the imputed data prior to actually perform the imputation using the imputeMissing() function
+Plots the distribution of the data to be imputed using the imputeMissing() function. Enables  to optimize the parameters prior to apply the imputeMissing() function.
 }
 \details{
 This function does not alter the romics_object, it plots the distribution of the whole data and of the imputed values using the method described in the Perseus paper by Tyranova et al. 2016 (Nature Method). By default the data is imputed with values in a normal distribution 1.8 standard deviation away from the median  and a width of distribution of 0.5.

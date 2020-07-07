@@ -1,20 +1,15 @@
 #' romicsCreateObject()
-#' prepare an object for further analysis
-#'
+#' @description Create a romics_object by combining a data and a metadata data frames
 #' @param data A data frame corresponding to the data.
 #' @param metadata A data frame corresponding to the metadata, the columns must be the same as the data ones.
 #' @param main_factor The rowname of a metadata factor, by default the first row will be used as main factor.
 #' @param custom_colors A character vector containing the colors you want to use for your figures generated from an romics_object.
 #' @param omics_type A character vector of length 1 indicating the type of omics data used.
 #' @param quantif_type A character vector of length 1 indicating the type of quantification performed.
-#'
 #' @return This function generate an romics_object containing the following layers : data, metadata, missingdata, original_data, main_factor, colors, steps, custom_colors, omics_type, quantif_type
-#'
 #' @examples ROP_romics_object <- romicsCreateObject(ROP_data,ROP_metadata,main_factor="condition")
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsCreateObject<-function(data, metadata, main_factor="none", custom_colors=ROP_colors, omics_type="unknown", quantif_type="unknown"){
   arguments<-as.list(match.call())
   funName<-arguments[[1]]
@@ -153,88 +148,93 @@ romicsCreateObject<-function(data, metadata, main_factor="none", custom_colors=R
 }
 
 #' romicsChangeFactor()
-#' change the main factor for romics object
-#'
+#' @description Change the main factor of the romics_object
 #' @param romics_object A object created using the function romicsCreateObject().
 #' @param main_factor Either 'none' OR a factor from the romics_object (corresponding to a row from the original metadata file), the list of factors from an romics object can be obtained using the function romicsFactorNames().
-#'
 #' @details changes the main_factor of an romics_object and updates the colors to this new factor.
-#'
 #' @return This function returns a modified romics object, please see the create_romics_object() documentation.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsChangeFactor<- function(romics_object , main_factor = "none" ) {
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+
   if(missing(main_factor) | main_factor=="none"){
     warning("The first row of your metadata was used as factor")
     warning(paste0("main_factor='",romicsFactorNames(romics_object)[1]),"'")
     main_factor<-romicsFactorNames(romics_object)[1]
-    }
+  }
+
   if(!main_factor %in% romicsFactorNames(romics_object)){
     warning("Your main_factor has to be present in your metadata, the following list of factor are in the romics_object:")
     print(romicsFactorNames(romics_object))
-    }
+  }
+
+  data<-romics_object$data
+  metadata<-romics_object$metadata
+  missingdata<-romics_object$missingdata
+
   #update romics_object$main_factor
   romics_object$main_factor<-main_factor
 
-  #read main_factor from metadata
-  main_factor<-as.character(t(romics_object$metadata[rownames(romics_object$metadata)==main_factor,]))
+  #extract the main factor
+  main_factor<-  romicsExtractFactor(romics_object,factor = main_factor)
+  #establish the lvls of the main factor
+  main_factor_lvl<-levels(main_factor)
 
-  #define the main factor levels
-  main_factor_lvl<- main_factor
-  main_factor_lvl<- unique(main_factor_lvl)
+  tp_data<-data.frame(matrix(nrow=nrow(data),ncol=0))
+  tp_metadata<-data.frame(matrix(nrow=nrow(metadata),ncol=0))
+  tp_missingdata<-data.frame(matrix(nrow=nrow(missingdata),ncol=0))
+  tp_main_factor<-character()
 
-  #main factor as df
-  main_factor<-rbind(main_factor,1:length(main_factor))
-  colnames(main_factor)<-colnames(romics_object$metadata)
+  #reorder data, metadata and missingdata based on the factors which will make visualization more pretty
+  for(i in 1:length(main_factor_lvl))
+  {
+    tp_data<-cbind(tp_data,data[,main_factor==as.character(main_factor_lvl[i])])
+    tp_metadata<- cbind(tp_metadata,metadata[,main_factor==as.character(main_factor_lvl[i])])
+    tp_missingdata<-cbind(tp_missingdata,missingdata[,main_factor==as.character(main_factor_lvl[i])])
+    tp_main_factor<- c(tp_main_factor,main_factor[main_factor==as.character(main_factor_lvl[i])])
+  }
 
-  #create an order vector to reorder the columns
-  order<-integer()
-  #establish the order
-  for(i in 1:length(main_factor_lvl)){
-    order<-c(order,as.numeric(main_factor[2,main_factor[1,]==main_factor_lvl[i]]))
-    }
+  data<-tp_data
+  metadata<-tp_metadata
+  missingdata<-tp_missingdata
+  main_factor<-tp_main_factor
+  remove(tp_data,tp_metadata,tp_missingdata)
 
-  #reorder data, metadata and missingdata layers
- # romics_object$data <- setcolorder(romics_object$data,order)
-  romics_object$metadata<- setcolorder(romics_object$metadata,order)
-  romics_object$missingdata <- setcolorder(romics_object$missingdata,order)
+  #remove the previous color line in the metadata
+  metadata<-metadata[rownames(metadata)!="colors_romics",]
 
-  #verify if the custom colors are long enough
+  #establish a custom_color vector of the same lenght of the number of levels
   custom_colors<-romics_object$custom_colors
+
+  #add a color_romics line in metadata
   if(length(custom_colors)<length(main_factor_lvl)){
     warning("your color vector is shorter than the number of factors selected, some colors will be picked automatically")
     custom_colors<- c(custom_colors,ROP_colors)
   }
 
-  #create an colors_romics of same lenght as the number of factors
-  colors_romics<- custom_colors[1:length(main_factor_lvl)]
+  colors_romics<-data.frame(matrix(ncol=ncol(metadata),nrow=0))
+  colors_romics<-rbind(colors_romics,custom_colors[as.numeric(main_factor)])
+  colnames(colors_romics)<-colnames(metadata)
+  metadata<-rbind(metadata, colors_romics)
+  rownames(metadata)[nrow(metadata)]<-"colors_romics"
 
-  #get the lvls and colors matching in a df
-  colors_romics<-rbind(main_factor_lvl,colors_romics)
+  #create a vector containing the colors for the whole data points and store it in colors layer
+  colors_romics<- t(colors_romics)
+  fill <- character(length = 0)
+  for (i in 1:length(colors_romics))
+  {
+    fill<- c(fill,rep(as.character(colors_romics[i]),nrow(data)))
+  }
+  colors<-fill
+  remove(fill,colors_romics, main_factor_lvl,i)
 
-  #main_factor remove numbers
-  main_factor<-main_factor[1,]
-
-  #create the colors_romics
-  colors<-character()
-  for (i in 1:ncol(romics_object$metadata)){colors[i]<-colors_romics[2,colors_romics[1,]==main_factor[i]]}
-  colors_romics<-t(data.frame(colors))
-  colnames(colors_romics)<-colnames(romics_object$metadata)
-  rownames(colors_romics)<-"colors_romics"
-
-  #pass it to the metadata
-  romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata)!="colors_romics",]
-  romics_object$metadata <- rbind(romics_object$metadata,colors_romics)
-
-  #update the color layer
-  romics_object<-romicsUpdateColor(romics_object)
-
-  #update the custom colors
-  romics_object$custom_colors<-custom_colors
+  #replace the different transformed layer in the romics_object
+  romics_object$data<-data
+  romics_object$metadata<-metadata
+  romics_object$missingdata<-missingdata
+  romics_object$colors<-colors
 
   #Update the steps
   romics_object<-romicsUpdateSteps(romics_object,arguments)
@@ -244,22 +244,17 @@ romicsChangeFactor<- function(romics_object , main_factor = "none" ) {
 }
 
 #' romicsSubset()
-#' keep only a subset or drop specific elements/columns from an romics_object
-#'
+#' @description Keeps or drop a subset of specific elements/columns from the romics_object
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param subset_vector A character vector of factor levels or colnames to keep in the object.
 #' @param type Either 'keep' or 'drop' to indicate if you want to conserve or to drop the elements from a given factor
 #' @param by Either 'colnames' or 'level' to indicate what you want to keep or drop.
 #' @param factor A factor contained in the metadata of the romics_object, to obtain the list of factors please use the function romicsFactorNames()
-#'
 #' @details This function create a new object based on a previous romics_object to include or drops a list of specified columns from the original object. The created object will have a new step object created that will indicate the name of the original object to be subsetted and the log/non-log status of the object.
 #' @details Note that this function will remove the stat layer from your object
-#'
 #' @return This function generate a subseted romics_object
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsSubset<-function(romics_object, subset_vector,type= "keep", by= "colnames", factor="main"){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -316,19 +311,15 @@ romicsSubset<-function(romics_object, subset_vector,type= "keep", by= "colnames"
 }
 
 #' romicsSampleNameFromFactor()
-#' change the samples identifiers using values contained in the metadata file
-#'
+#' @description Changes the samples identifiers using values contained in one of the factors of the metadata of the romics_object
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param factor A factor contained in the metadata of the romics_object, to obtain the list of factors please use the function romicsFactorNames().
 #' @param original_name Either 'keep' or 'drop', this indicate what to do with the original name either store it in a row of the metadata, OR drop it completely.
 #' @param colname_factor The name of a factor from the romics object of which the values are unique for each sample. the factors names can be obtain using the function romicsFactorNames()
-#'
 #' @details enaables the quick renaming of the sample names from a factor contained in metadata, the factor has to contain only unique values.
 #' @return a romics_object with its columns of the layers data, metadata, and missingdata renamed.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsSampleNameFromFactor<-function(romics_object, factor, original_colnames="keep", factor_name="original_colnames"){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -349,9 +340,9 @@ romicsSampleNameFromFactor<-function(romics_object, factor, original_colnames="k
 
  if(original_colnames=="keep"){
  original_colnames<- data.frame(t(colnames(romics_object$metadata)))
-  colnames(original_colnames)<-colnames(romics_object$metadata)
-  rownames(original_colnames)<-factor_name
- romics_object$metadata<- rbind(romics_object$metadata, original_colnames)
+ colnames(original_colnames)<-colnames(romics_object$metadata)
+ rownames(original_colnames)<-factor_name
+ romics_object$metadata<- rbind(original_colnames,romics_object$metadata)
  }
 
  colnames(romics_object$data)<- colnames(romics_object$metadata)<-colnames(romics_object$missingdata)<-new_names
@@ -364,33 +355,25 @@ romicsSampleNameFromFactor<-function(romics_object, factor, original_colnames="k
 }
 
 #' romicsFactorNames()
-#' obtain the factor names from an Romics_object
-#'
+#' @description Indicates the list of factor names from the romics_object
 #' @param romics_object A romics_object created using romicsCreateObject()
-#'
 #' @details This function allows to quickly get a vector containing all the factor names present in a romics_object
 #' @return A character vector containing the list of factor contained in an romics_object
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsFactorNames<-function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   rownames(romics_object$metadata)
 }
 
 #' romicsExtractFactor()
-#' extract a factor from an romics_object
-#'
+#' @description Extract a factor from the romics_object
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param factor A factor contained in the romics_object, the list of factors can be obtained using the function romicsFactorNames()
-#'
 #' @details This function allows to quickly extract the content of a factor present in the romics_object.
 #' @return a factor contained in an romics_object the order is the same as the columns of the romics_object$data.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsExtractFactor<-function(romics_object, factor = "factor"){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(factor) | !factor %in% romicsFactorNames(romics_object)){stop("The <factor> is missing or is not in the list of factors for this romics_object. The list of available factors can be obtained with the function romicsFactorNames()")}
@@ -400,15 +383,11 @@ romicsExtractFactor<-function(romics_object, factor = "factor"){
   }
 
 #' romicsUpdateColor()
-#' change the colors contained in a romics_object for further analysis
-#'
+#' @description Updates the colors layer contained in the romics_object
 #' @param romics_object A romics_object created using romicsCreateObject()
-#'
 #' @return This function returns a romics_object with updated colors.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsUpdateColor<- function(romics_object) {
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -428,21 +407,16 @@ romicsUpdateColor<- function(romics_object) {
 }
 
 #' stepUpdater()
-#' This function participate in the process of updating the steps
-#'
+#' @description Updates the steps of the romics_object, require to have recorded the argument in earlier steps of the function
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param arguments the arguments of a function are required to read the user input of a function, this user input will be used to generate the steps, the arguments are obtained by running the following code <arguments<-as.list(match.call())> in the first line of a function
-#'
 #' @details The goal of Romics processor is to provide a trackable and reproducible pipeline for processing omics data. Subsequently it is necessary when a function is created to implement a way to record the user input that will be recorded in the steps layer of the Romics_object.
 #' @details This function will enable to simplify the work of developers who want to contribute to Romics by simplifying this process. Only two lines of codes are then necessary to update the steps.
 #' @details The first line of code has to be placed in the first line after the function declaration : <arguments<-as.list(match.call())>
 #' @details The second line of code has to be <romics_object<-stepUpdater(romics_object,arguments)> placed at the end of the function code (ideally right before returning the processed romics_object or graphic generated by the function)
-#'
 #' @return This function add the description of the processing to the step layer of an Romics object
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsUpdateSteps<-function(romics_object, arguments){
   if(missing(arguments)){
     steps<- c(paste0("date|",gsub(" ","_",format(Sys.time(),"%b_%d_%Y_%X")),"|step_not_recorded"), "note|The arguments of the function were not recorded using arguments<-as.list(match.call())")
@@ -475,15 +449,11 @@ romicsUpdateSteps<-function(romics_object, arguments){
 }
 
 #' is.romics_object()
-#' This function enable to check if the Romics object is in the appropriate format
-#'
+#' @description Enables to check if the romics_object is in the appropriate format
 #' @param romics_object A romics_object created using romicsCreateObject()
-#'
 #' @return This function will return TRUE or FALSE indicating if the object is or not an romics_object
-#'
 #' @author Geremy Clair
 #' @export
-#'
 is.romics_object<-function(romics_object){
   if(class(romics_object)!="romics_object"){
     warning("Your romics_object was not created using the function romicsCreateObject")
@@ -498,28 +468,21 @@ is.romics_object<-function(romics_object){
 }
 
 #' romicsLogCheck()
-#' This function identifies if the romics_object has been log_transformed or not using the functions log2
-#'
+#' @description Identifies if the romics_object is log_transformed or not
 #' @param romics_object A romics_object created using romicsCreateObject()
-#'
 #' @return This function will return TRUE or FALSE indicating if the object was or not log transformed using the function log2transform
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsLogCheck<-function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(sum(grepl("log2transform\\(",romics_object$steps))>0 | sum(grepl("log10transform\\(",romics_object$steps))>0){return(TRUE)}else{return(FALSE)}
 }
 
 #' romicsCreateDependencies()
-#' This function indicates the RomicsProcessor package dependencies and versions at the time the code was run
-#'
+#' @description Creates the original dependencies of the romics_object (only when it is created to add dependencies use the romicsAddDependency() function)
 #' @return This function will return a data.frame with two columns the required packages and the version at the time the code was run
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsCreateDependencies<-function(){
   Required<-data.frame(Required=as.character(getDependencies("RomicsProcessor")), Version_used=NA)
   for(i in 1:nrow(Required)){
@@ -532,16 +495,12 @@ romicsCreateDependencies<-function(){
   }
 
 #' romicsAddDependency()
-#' This function adds a package to the list of the RomicsProcessor package dependencies
-#'
+#' @description Adds a package to the list of dependencies of the romics_object. Enables developpers to add automatically a dependency when their function has been applied by the user on their romics_object.
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param new_dependency The name of one or more R package
-#'
 #' @return This function will return an romics_object updated with the new dependency.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsAddDependency<-function(romics_object,new_dependency=c("package_1", "package_2")){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(new_dependency)){stop("<new_dependencies> was empty. No dependencies were added.")}
@@ -565,15 +524,11 @@ romicsAddDependency<-function(romics_object,new_dependency=c("package_1", "packa
 
 
 #' romicsCalculatedStats()
-#' This function indicates the stat columns calculated for an romics_object
-#'
+#' @description Indicates the stat columns calculated for the romics_object
 #' @param romics_object A romics_object created using romicsCreateObject()
-#'
 #' @return This function will return character vector containing the stat columns previously calculated for a romics_object, if no stats were previously calculated an error message will be displayed
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsCalculatedStats<-function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(is.null(romics_object$statistics)){
@@ -584,15 +539,12 @@ romicsCalculatedStats<-function(romics_object){
   }
 
 #' romicsSteps()
-#' display the steps of an romics_object
-#'
+#' @description Displays the content steps layer of the romics_object
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param show_dates Boolean indicating if the dates have to be displayed
 #' @param show_details Boolean indicating if the details have to be displayed
-#'
 #' @return This function will return the steps of an romics_object
 #' @export
-#'
 romicsSteps<-function(romics_object, show_dates=TRUE, show_details=TRUE){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(show_dates)){show_dates=TRUE}
@@ -607,15 +559,11 @@ romicsSteps<-function(romics_object, show_dates=TRUE, show_details=TRUE){
 }
 
 #' romicsCreatePipeline()
-#' This function extract a pipeline from an romics_object and add the pipeline in the main environment.
-#'
+#' @description Extracts a pipeline from the romics_object. the pipeline can then be saved in a classic R object.
 #' @param romics_object A romics_object created using romicsCreateObject()
-#'
 #' @return This function will return character vector containing the stat columns previously calculated for a romics_object, if no stats were previously calculated an error message will be displayed
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsCreatePipeline<- function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -645,14 +593,11 @@ romicsCreatePipeline<- function(romics_object){
   }
 
 #' romicsApplyPipeline()
-#' Apply a pipeline created with the romicsCreatePipeline() function, pipelines can be edited prior to run them.
-#'
+#' @description Applies a pipeline created with the romicsCreatePipeline() function, pipelines can be edited prior to run them.
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param romics_pipeline A pipeline created with the romicsCreatePipeline() function.
-#'
 #' @return This function will return an romics_object that has been processed through a pipeline
 #' @export
-#'
 romicsApplyPipeline<- function(romics_object, romics_pipeline){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(typeof(romics_pipeline)!= "character" |sum(substr(romics_pipeline, 1, 15)=="romics_object<-")!=length(romics_pipeline)){stop("Your pipeline will not be applied to the romics_object. Please check the text of your pipeline")}
@@ -664,19 +609,14 @@ romicsApplyPipeline<- function(romics_object, romics_pipeline){
   return(romics_object)
 }
 
-
 #' romicsOutputData()
-#' Create an exportable data frame containing the processed data, the statistics and the missing status of the data on demand.
-#'
+#' @description Creates an exportable data frame from the romics_object. The generated data.frame contains the processed data, the statistics and the missing status of the data on demand.
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param statistics boolean, has to be TRUE or FALSE. Indicates if the statistics should be exported along with the data (FALSE by default).
 #' @param missing_data boolean, has to be TRUE or FALSE. Indicates if the missing status of the data should be exported along with the data (FALSE by default).
-#'
 #' @return This function will return an data frame containing the results of the processing, the statistics and the missingness status of the data as specified by the user.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsExportData<-function(romics_object, statistics = FALSE, missing_data = FALSE){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(statistics)){statistics = FALSE}
@@ -693,13 +633,8 @@ romicsExportData<-function(romics_object, statistics = FALSE, missing_data = FAL
   if(missing_data==TRUE){
     md <- romics_object$missingdata
     colnames(md)<-paste0("missing_data_",colnames(md))
-    romics_object<-cbind(df,romics_object$statistics)
+    df<-cbind(df,md)
     }
 
   return(df)
 }
-
-
-
-
-

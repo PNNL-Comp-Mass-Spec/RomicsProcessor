@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsFactorNames}
 \alias{romicsFactorNames}
-\title{romicsFactorNames()
-obtain the factor names from an Romics_object}
+\title{romicsFactorNames()}
 \usage{
 romicsFactorNames(romics_object)
 }
@@ -14,8 +13,7 @@ romicsFactorNames(romics_object)
 A character vector containing the list of factor contained in an romics_object
 }
 \description{
-romicsFactorNames()
-obtain the factor names from an Romics_object
+Indicates the list of factor names from the romics_object
 }
 \details{
 This function allows to quickly get a vector containing all the factor names present in a romics_object

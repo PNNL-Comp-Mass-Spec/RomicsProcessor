@@ -2,11 +2,16 @@
 % Please edit documentation in R/11_Variable_Plots.R
 \name{singleVariablePlot}
 \alias{singleVariablePlot}
-\title{singleVariablePlot
-plot the abundances for a given variable based on a given factor contained in the metadata of an Romics_object.}
+\title{singleVariablePlot()}
 \usage{
-singleVariablePlot(romics_object, variable = "variable", type = "jb",
-  factor = "main", limits = c(-10, 10), title = "auto")
+singleVariablePlot(
+  romics_object,
+  variable = "variable",
+  type = "jb",
+  factor = "main",
+  limits = c(-10, 10),
+  title = "auto"
+)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject()}
@@ -25,8 +30,7 @@ singleVariablePlot(romics_object, variable = "variable", type = "jb",
 a ggplot figure
 }
 \description{
-singleVariablePlot
-plot the abundances for a given variable based on a given factor contained in the metadata of an Romics_object.
+Plots the abundances for a given variable based on a given factor contained in the metadata of the romics_object. This function will use the factor selected to group the samples and will color the plots based on the level of this factor. This function will function with partial matches.
 }
 \details{
 This function allows to quickly plot a the values for a given variable accross multiple levels of a given factor

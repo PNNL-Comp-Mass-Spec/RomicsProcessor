@@ -2,11 +2,16 @@
 % Please edit documentation in R/08_Grouping.R
 \name{indPCAplot}
 \alias{indPCAplot}
-\title{indPCAplot
-This function will plot the percentage explained by the different component OR/AND the coordinate of the samples on a PCA plot}
+\title{indPCAplot()}
 \usage{
-indPCAplot(romics_object, Xcomp = 1, Ycomp = 2, label = TRUE,
-  plotType = "dual", ...)
+indPCAplot(
+  romics_object,
+  Xcomp = 1,
+  Ycomp = 2,
+  label = TRUE,
+  plotType = "dual",
+  ...
+)
 }
 \arguments{
 \item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
@@ -25,8 +30,7 @@ indPCAplot(romics_object, Xcomp = 1, Ycomp = 2, label = TRUE,
 Returns either one ggplot2 or a combination plot generated with grid.arrange. On the sample PCA plot the colors plotted correspond to the main_factor utilized.
 }
 \description{
-indPCAplot
-This function will plot the percentage explained by the different component OR/AND the coordinate of the samples on a PCA plot
+Plots the samples on the PCA sample plot, the percentage of explained variance, or both on demand using ggplots2. The colors used for the plotting will correspond to the main_factor of the romics_object. The axis to be plotted can be chosen. The PCA results are calculated using the function romicsPCA (see the documentation of this function for more details).
 }
 \details{
 This function will plot the results of a PCA calculated on the romics_object data layer using the function romicsPCA() (see documentation for more details). The function can plot different plots based on user input. The first type of plot is a classical sample PCA plot the principal components to be plotted on each axis depend on the user input. The second type of plot is the calculation of the percentage of variance explained by each component. By using dual both plot will be returned. the plots are generated using ggplot2 and are subsequently adjustable using ggplot2 commands.

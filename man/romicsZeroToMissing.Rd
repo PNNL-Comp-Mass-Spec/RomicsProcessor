@@ -2,8 +2,7 @@
 % Please edit documentation in R/04_Manage_Missing.R
 \name{romicsZeroToMissing}
 \alias{romicsZeroToMissing}
-\title{romicsZeroToMissing
-replaces zeros in an Romics_processor object by NA values}
+\title{romicsZeroToMissing()}
 \usage{
 romicsZeroToMissing(romics_object)
 }
@@ -14,8 +13,7 @@ romicsZeroToMissing(romics_object)
 This function returns the transformed romics_object with updated data and missingdata layers
 }
 \description{
-romicsZeroToMissing
-replaces zeros in an Romics_processor object by NA values
+Replaces zeros in the romics_object by NA values
 }
 \details{
 This function will convert 0 values to NA in the data and missingdata layers

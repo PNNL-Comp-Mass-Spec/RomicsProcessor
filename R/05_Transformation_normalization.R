@@ -1,11 +1,8 @@
-#' Log2transform
-#' log2 tranform the romics_object data layer.
-#'7++7+++
+#' log2transform()
+#' @description log2-tranforms the romics_object data layer.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed.
-#'
 #' @details will log2 transform the romics object
 #' @return This function returns the transformed romics_object with updated data layer
-#'
 #' @author Geremy Clair
 #' @export
 #'
@@ -20,17 +17,13 @@ log2transform<-function(romics_object){
   return(romics_object)
 }
 
-#' Log10transform
-#' log10 tranform the romics_object data layer.
-#'
+#' log10transform()
+#' @description log10-tranforms the romics_object data layer.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed.
-#'
 #' @details will log10 transform the romics object
 #' @return This function returns the transformed romics_object with updated data layer
-#'
 #' @author Geremy Clair
 #' @export
-#'
 log10transform<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -42,17 +35,13 @@ log10transform<-function(romics_object){
   return(romics_object)
 }
 
-#' unlog2data
-#' reverse the log2 tranformation of the romics_object data layer.
-#'
+#' unlog2data()
+#' @description Reverses the log2 tranformation of the romics_object data layer.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log2transform()
-#'
 #' @details will reverse the log2 transformation of the romics_object
 #' @return This function returns the transformed romics_object with updated data layer
-#'
 #' @author Geremy Clair
 #' @export
-#'
 unlog2data<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -69,17 +58,13 @@ unlog2data<-function(romics_object){
 
 }
 
-#' unlog10data
-#' reverse the log10 tranformation of the romics_object data layer.
-#'
+#' unlog10data()
+#' @description Reverses the log10 tranformation of the romics_object data layer.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log10transform()
-#'
 #' @details will reverse the log10 transformation of the romics_object
 #' @return This function returns the transformed romics_object with updated data layer
-#'
 #' @author Geremy Clair
 #' @export
-#
 unlog10data<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -95,17 +80,13 @@ unlog10data<-function(romics_object){
   return(romics_object)
   }
 
-#' MediaNormSample
-#' Median normalize within each sample the median of each sample median will be used as alignment point.
-#'
+#' MedianNormSample()
+#' @description Normalizes the samples by their median. The median of the medians of all the samples is used as the alignment point.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log10transform()
-#'
 #' @details Median normalize within each sample the median of each sample median will be used as alignment point. If you waht to center the median at 0 please use the function medianCenterSample().
 #' @return This function returns the transformed romics_object with updated data layer.
-#'
 #' @author Geremy Clair
 #' @export
-#
 medianNormSample<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -128,17 +109,13 @@ medianNormSample<-function(romics_object){
     return(romics_object)
 }
 
-#' MediaNormSample
-#' will zero-center the median of each sample
-#'
+#' medianCenterSample()
+#' @description Normalizes the samples by their median. Zero is used as the median alignment center.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log10transform()
-#'
 #' @details Median normalize within each sample the median will be zero centered
 #' @return This function returns the transformed romics_object with updated data layer.
-#'
 #' @author Geremy Clair
 #' @export
-#
 medianCenterSample<-function(romics_object){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -162,17 +139,13 @@ medianCenterSample<-function(romics_object){
   return(romics_object)
 }
 
-#' MediaNormFactor
-#' median normalize the samples within a given factor the median of the median of this factor will be used as new factor median.
-#'
+#' medianNormFactor()
+#' @description Normalizes the samples by their median within a given factor. The median of the median within this factor will be used as factor-specific median center.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log10transform()
-#'
 #' @details median normalize the samples within a given factor the median of the median of this factor will be used as new factor median.
 #' @return This function returns the transformed romics_object with updated data layer.
-#'
 #' @author Geremy Clair
 #' @export
-#
 medianNormFactor<-function(romics_object, main_factor= "factor"){
   if(missing(romics_object)){stop("romics_object is missing")}
   if(class(romics_object)!="romics_object"){stop("your romics_object was not created using the function romicsCreateObject")}
@@ -220,4 +193,3 @@ medianNormFactor<-function(romics_object, main_factor= "factor"){
     return(romics_object)
 
 }
-

@@ -2,8 +2,7 @@
 % Please edit documentation in R/07_Distribution_Plots.R
 \name{distribHistogramGlobal}
 \alias{distribHistogramGlobal}
-\title{distribHistogram
-This function will display a grid.arranged histogram plot showing the distribution of the data in each sample}
+\title{distribHistogramGlobal()}
 \usage{
 distribHistogramGlobal(romics_object, bin = 1)
 }
@@ -16,8 +15,7 @@ distribHistogramGlobal(romics_object, bin = 1)
 a plot generated using ggplot2 is generated with this function.
 }
 \description{
-distribHistogram
-This function will display a grid.arranged histogram plot showing the distribution of the data in each sample
+Plots the frequency plot showing the discribution of the data in the whole data layer using ggplots2. Please use the function distribHistogram() to plot the global distribution for each sample.
 }
 \details{
 plots a complex graphic output displaying the data distribution within each sample

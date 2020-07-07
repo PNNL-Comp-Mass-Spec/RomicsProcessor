@@ -2,8 +2,7 @@
 % Please edit documentation in R/04_Manage_Missing.R
 \name{imputeMinDiv2}
 \alias{imputeMinDiv2}
-\title{imputeMinDiv2
-This function enable to impute the data using the minimum value of the table divided by 2. only works with all positive data.}
+\title{imputeMinDiv2()}
 \usage{
 imputeMinDiv2(romics_object)
 }
@@ -14,8 +13,7 @@ imputeMinDiv2(romics_object)
 The function will return a modified romics_object that will have imputed data, however the missingdata layer will conserve the location of the missingness, the missingness can subsequently be restored using the function romicsRestoreMissing().
 }
 \description{
-imputeMinDiv2
-This function enable to impute the data using the minimum value of the table divided by 2. only works with all positive data.
+Imputes the data layer of the romics_object using the minimum value of the table divided by 2. this function will work if the data only contains positive values.
 }
 \details{
 This function will use the minimum value of the data table divided by 2 to impute the missing values of the data layer

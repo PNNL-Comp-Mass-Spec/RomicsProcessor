@@ -2,9 +2,7 @@
 % Please edit documentation in R/05_Transformation_normalization.R
 \name{log2transform}
 \alias{log2transform}
-\title{Log2transform
-log2 tranform the romics_object data layer.
-7++7+++}
+\title{log2transform()}
 \usage{
 log2transform(romics_object)
 }
@@ -15,9 +13,7 @@ log2transform(romics_object)
 This function returns the transformed romics_object with updated data layer
 }
 \description{
-Log2transform
-log2 tranform the romics_object data layer.
-7++7+++
+log2-tranforms the romics_object data layer.
 }
 \details{
 will log2 transform the romics object

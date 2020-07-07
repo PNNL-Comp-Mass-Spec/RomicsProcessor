@@ -2,13 +2,11 @@
 % Please edit documentation in R/00_Romics_theme_plots.R
 \name{theme_ROP}
 \alias{theme_ROP}
-\title{theme_ROP
-This function is a ggplot2 theme function}
+\title{theme_ROP}
 \usage{
 theme_ROP()
 }
 \description{
-theme_ROP
 This function is a ggplot2 theme function
 }
 \details{

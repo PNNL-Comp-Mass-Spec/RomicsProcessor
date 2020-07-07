@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsExtractFactor}
 \alias{romicsExtractFactor}
-\title{romicsExtractFactor()
-extract a factor from an romics_object}
+\title{romicsExtractFactor()}
 \usage{
 romicsExtractFactor(romics_object, factor = "factor")
 }
@@ -16,8 +15,7 @@ romicsExtractFactor(romics_object, factor = "factor")
 a factor contained in an romics_object the order is the same as the columns of the romics_object$data.
 }
 \description{
-romicsExtractFactor()
-extract a factor from an romics_object
+Extract a factor from the romics_object
 }
 \details{
 This function allows to quickly extract the content of a factor present in the romics_object.

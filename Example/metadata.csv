@@ -1,0 +1,3 @@
+proteinIDs,lb_1,lb_2,lb_3,maoac_1,maoac_2,maoac_3,soil_1,soil_2,soil_3,zucchinni_1,zucchinni_2,zucchinni_3
+media,LB,LB,LB,mAOAC,mAOAC,mAOAC,Soil_extract,Soil_extract,Soil_extract,Zuccini_puree,Zuccini_puree,Zuccini_puree
+replicate,1,2,3,1,2,3,1,2,3,1,2,3

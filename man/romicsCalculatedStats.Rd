@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsCalculatedStats}
 \alias{romicsCalculatedStats}
-\title{romicsCalculatedStats()
-This function indicates the stat columns calculated for an romics_object}
+\title{romicsCalculatedStats()}
 \usage{
 romicsCalculatedStats(romics_object)
 }
@@ -14,8 +13,7 @@ romicsCalculatedStats(romics_object)
 This function will return character vector containing the stat columns previously calculated for a romics_object, if no stats were previously calculated an error message will be displayed
 }
 \description{
-romicsCalculatedStats()
-This function indicates the stat columns calculated for an romics_object
+Indicates the stat columns calculated for the romics_object
 }
 \author{
 Geremy Clair

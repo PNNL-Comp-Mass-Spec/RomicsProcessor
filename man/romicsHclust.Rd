@@ -2,11 +2,13 @@
 % Please edit documentation in R/08_Grouping.R
 \name{romicsHclust}
 \alias{romicsHclust}
-\title{romicsHclust
-This function will plot hierarchical clustering calculated using the functions dist() and hclust() (see documentation).}
+\title{romicsHclust()}
 \usage{
-romicsHclust(romics_object, method_dist = "euclidean",
-  method_hclust = "ward.D")
+romicsHclust(
+  romics_object,
+  method_dist = "euclidean",
+  method_hclust = "ward.D"
+)
 }
 \arguments{
 \item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
@@ -19,8 +21,7 @@ romicsHclust(romics_object, method_dist = "euclidean",
 a hierarchical clustering tree plot with its branches colored by factor.
 }
 \description{
-romicsHclust
-This function will plot hierarchical clustering calculated using the functions dist() and hclust() (see documentation).
+Plots the hierarchical clustering of the samples contaned in the romics_object calculated using the functions dist() and hclust() (see documentation of those R functions for more details). The colors used for the plotting will correspond to the main_factor of the romics_object.
 }
 \details{
 This function uses the dist() and hclust() functions to calculate the hierachical clustering and then plots the hclust with colors based on the current main_factor of the romics_object.

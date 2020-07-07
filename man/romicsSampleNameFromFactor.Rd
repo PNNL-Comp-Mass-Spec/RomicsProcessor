@@ -2,11 +2,14 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsSampleNameFromFactor}
 \alias{romicsSampleNameFromFactor}
-\title{romicsSampleNameFromFactor()
-change the samples identifiers using values contained in the metadata file}
+\title{romicsSampleNameFromFactor()}
 \usage{
-romicsSampleNameFromFactor(romics_object, factor,
-  original_colnames = "keep", factor_name = "original_colnames")
+romicsSampleNameFromFactor(
+  romics_object,
+  factor,
+  original_colnames = "keep",
+  factor_name = "original_colnames"
+)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject()}
@@ -21,8 +24,7 @@ romicsSampleNameFromFactor(romics_object, factor,
 a romics_object with its columns of the layers data, metadata, and missingdata renamed.
 }
 \description{
-romicsSampleNameFromFactor()
-change the samples identifiers using values contained in the metadata file
+Changes the samples identifiers using values contained in one of the factors of the metadata of the romics_object
 }
 \details{
 enaables the quick renaming of the sample names from a factor contained in metadata, the factor has to contain only unique values.

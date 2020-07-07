@@ -2,11 +2,15 @@
 % Please edit documentation in R/07_Distribution_Plots.R
 \name{distribHistogram}
 \alias{distribHistogram}
-\title{distribHistogram
-This function will display a grid.arranged histogram plot showing the distribution of the data in each sample}
+\title{distribHistogram()}
 \usage{
-distribHistogram(romics_object, bin = 1, scale_y = c(0, 100),
-  scale_x = c(-10, 10), col = 3)
+distribHistogram(
+  romics_object,
+  bin = 1,
+  scale_y = c(0, 100),
+  scale_x = c(-10, 10),
+  col = 3
+)
 }
 \arguments{
 \item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
@@ -23,8 +27,7 @@ distribHistogram(romics_object, bin = 1, scale_y = c(0, 100),
 a plot generated using ggplot2 is generated with this function.
 }
 \description{
-distribHistogram
-This function will display a grid.arranged histogram plot showing the distribution of the data in each sample
+Plots individual frequency plots showing the discribution of the data in each sample using grid.Extra and ggplots2. Please use the function distribHistogramGlobal() to plot the global distribution of the whole dataset.
 }
 \details{
 plots a complex graphic output displaying the data distribution within each sample

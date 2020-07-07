@@ -2,8 +2,7 @@
 % Please edit documentation in R/04_Manage_Missing.R
 \name{romicsRestoreMissing}
 \alias{romicsRestoreMissing}
-\title{romicsRestoreMissing
-This function enable to restaure the missingness of the data layer based on the content of the missingdata layer.}
+\title{romicsRestoreMissing()}
 \usage{
 romicsRestoreMissing(romics_object)
 }
@@ -14,8 +13,7 @@ romicsRestoreMissing(romics_object)
 The function will return a modified romics_object that will have NA instead of the imputed data.
 }
 \description{
-romicsRestoreMissing
-This function enable to restaure the missingness of the data layer based on the content of the missingdata layer.
+Restores the missingness of the data layer of the romics_object based on the content of the missingdata layer.
 }
 \details{
 This function will renmove any imputed value based on the content of the missingdata layer.

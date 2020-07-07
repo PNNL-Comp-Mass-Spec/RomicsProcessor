@@ -2,8 +2,7 @@
 % Please edit documentation in R/10_Statistics.R
 \name{romicsZscores}
 \alias{romicsZscores}
-\title{romicsZscores()
-adds the Zscores columns to the statistics Layer of a romics_object}
+\title{romicsZscores()}
 \usage{
 romicsZscores(romics_object)
 }
@@ -14,8 +13,7 @@ romicsZscores(romics_object)
 an romics_object with the statistical layer containing the newly generated Zscores columns
 }
 \description{
-romicsZscores()
-adds the Zscores columns to the statistics Layer of a romics_object
+Calculates the Zscores for each cell of the data layer of the romics_object. the generated results are added to the statistics Layer as new columns.
 }
 \details{
 adds the Zscores columns to the statistics Layer of a romics_object

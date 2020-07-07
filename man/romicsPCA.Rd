@@ -2,12 +2,18 @@
 % Please edit documentation in R/08_Grouping.R
 \name{romicsPCA}
 \alias{romicsPCA}
-\title{romicsPCA
-This function will calculate the PCA results using the package FactoMineR on a given romics_object. If the data layer contains some missing values those will be imputed using the missMD::imputePCA() method.}
+\title{romicsPCA()}
 \usage{
-romicsPCA(romics_object, ncp = 5, scale = TRUE,
-  method = c("Regularized", "EM"), ncp.min = 0, ncp.max = 5,
-  method.cv = c("gcv", "loo", "Kfold"), ...)
+romicsPCA(
+  romics_object,
+  ncp = 5,
+  scale = TRUE,
+  method = c("Regularized", "EM"),
+  ncp.min = 0,
+  ncp.max = 5,
+  method.cv = c("gcv", "loo", "Kfold"),
+  ...
+)
 }
 \arguments{
 \item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
@@ -30,8 +36,7 @@ romicsPCA(romics_object, ncp = 5, scale = TRUE,
 Return the results of the PCA performed on the current version of the romics_object
 }
 \description{
-romicsPCA
-This function will calculate the PCA results using the package FactoMineR on a given romics_object. If the data layer contains some missing values those will be imputed using the missMD::imputePCA() method.
+Calculate the PCA of the data layer of the romics_object using the package FactoMineR. If the data layer contains some missing values those will be imputed using the missMDA::imputePCA() method (see the documentation of this function for more details). This function will return the PCA results and not a romics_object
 }
 \details{
 This function uses the dist() and hclust() functions to calculate the hierachical clustering and then plots the hclust with colors based on the current main_factor of the romics_object.

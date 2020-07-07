@@ -1,17 +1,12 @@
-#' romicsHclust
-#' This function will plot hierarchical clustering calculated using the functions dist() and hclust() (see documentation).
-#'
+#' romicsHclust()
+#' @description Plots the hierarchical clustering of the samples contaned in the romics_object calculated using the functions dist() and hclust() (see documentation of those R functions for more details). The colors used for the plotting will correspond to the main_factor of the romics_object.
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
 #' @param method_dist the distance measure to be used. This must be one of "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski". Any unambiguous substring can be given.
 #' @param method_hclust the agglomeration method to be used. This should be (an unambiguous abbreviation of) one of "ward.D", "ward.D2", "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC) or "centroid" (= UPGMC).
-#'
 #' @details This function uses the dist() and hclust() functions to calculate the hierachical clustering and then plots the hclust with colors based on the current main_factor of the romics_object.
-#'
 #' @return a hierarchical clustering tree plot with its branches colored by factor.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsHclust<-function(romics_object, method_dist="euclidean", method_hclust="ward.D" ){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if (missing(method_dist)){method_dist<-"euclidean"}
@@ -46,9 +41,8 @@ romicsHclust<-function(romics_object, method_dist="euclidean", method_hclust="wa
   plot(dd,main="Hierarchical clustering samples", sub="")
 }
 
-#' romicsPCA
-#' This function will calculate the PCA results using the package FactoMineR on a given romics_object. If the data layer contains some missing values those will be imputed using the missMD::imputePCA() method.
-#'
+#' romicsPCA()
+#' @description Calculate the PCA of the data layer of the romics_object using the package FactoMineR. If the data layer contains some missing values those will be imputed using the missMDA::imputePCA() method (see the documentation of this function for more details). This function will return the PCA results and not a romics_object
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
 #' @param ncp inherited from missmda::imputePCA().
 #' @param scale  inherited from missmda::imputePCA(). boolean. TRUE implies a same weight for each variable
@@ -57,14 +51,10 @@ romicsHclust<-function(romics_object, method_dist="euclidean", method_hclust="wa
 #' @param ncp.min used only if ncp is not set. inherited from missmda::estim_ncpPCA().integer corresponding to the minimum number of components to test
 #' @param ncp.max used only if ncp is not set. inherited from missmda::estim_ncpPCA().integer corresponding to the minimum number of components to test
 #' @param ... further arguments passed to or from other methods
-#'
 #' @details This function uses the dist() and hclust() functions to calculate the hierachical clustering and then plots the hclust with colors based on the current main_factor of the romics_object.
-#'
 #' @return Return the results of the PCA performed on the current version of the romics_object
-#'
 #' @author Geremy Clair
 #' @export
-#'
 romicsPCA<-function(romics_object, ncp=5, scale = TRUE, method=c("Regularized","EM"), ncp.min = 0, ncp.max = 5, method.cv = c("gcv","loo","Kfold"),...){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -95,23 +85,18 @@ romicsPCA<-function(romics_object, ncp=5, scale = TRUE, method=c("Regularized","
   return(pca_results)
 }
 
-#' indPCAplot
-#' This function will plot the percentage explained by the different component OR/AND the coordinate of the samples on a PCA plot
-#'
+#' indPCAplot()
+#' @description Plots the samples on the PCA sample plot, the percentage of explained variance, or both on demand using ggplots2. The colors used for the plotting will correspond to the main_factor of the romics_object. The axis to be plotted can be chosen. The PCA results are calculated using the function romicsPCA (see the documentation of this function for more details).
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
 #' @param Xcomp numerical/double. Indicate the cp to plot on the X axis
 #' @param Ycomp numerical/double. Indicate the cp to plot on the Y axis
 #' @param label boolean. Indicate if the sample name label should be plotted
 #' @param plotType should be one of the following options to indicate the type of plot to be returned : 'dual'(for both), 'individual', or 'percentage'
 #' @param ... further arguments passed to or from other methods
-#'
 #' @details This function will plot the results of a PCA calculated on the romics_object data layer using the function romicsPCA() (see documentation for more details). The function can plot different plots based on user input. The first type of plot is a classical sample PCA plot the principal components to be plotted on each axis depend on the user input. The second type of plot is the calculation of the percentage of variance explained by each component. By using dual both plot will be returned. the plots are generated using ggplot2 and are subsequently adjustable using ggplot2 commands.
-#'
 #' @return Returns either one ggplot2 or a combination plot generated with grid.arrange. On the sample PCA plot the colors plotted correspond to the main_factor utilized.
-#'
 #' @author Geremy Clair
 #' @export
-#'
 indPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, label=TRUE, plotType="dual", ... ){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(label)){label=TRUE}
@@ -169,21 +154,17 @@ indPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, label=TRUE, plotType="du
 
 }
 
-#' indPCA3D
-#' similarly to the function indPCAplot this function will create with the coordinate of the samples on a PCA plot in 3D.
-#'
+#' indPCA3D()
+#' @description Plots the coordinate of the samples on a PCA plot in 3D. The colors used for the plotting will correspond to the main_factor of the romics_object. The axis to be plotted can be chosen. The PCA results are calculated using the function romicsPCA (see the documentation of this function for more details).
 #' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
 #' @param Xcomp numerical/double. Indicate the cp to plot on the X axis
 #' @param Ycomp numerical/double. Indicate the cp to plot on the Y axis
 #' @param Zcomp numerical/double. Indicate the cp to plot on the Z axis
 #' @param ... further arguments passed to or from other methods
-#'
 #' @details This function will plot the results of a PCA calculated on the romics_object data layer using the function romicsPCA() (see documentation for more details).
-#'
 #' @return Returns a 3D plot generated with the plot3D::scatter3D() function.
 #' @author Geremy Clair
 #' @export
-#'
 indPCA3D <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=3, ... ){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
@@ -238,5 +219,3 @@ indPCA3D <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=3, ... ){
             ylab =paste0("PC",Ycomp,"(",pca_results_explained[Ycomp],"%)"),
             zlab = paste0("PC",Zcomp,"(",pca_results_explained[Zcomp],"%)"))
 }
-
-

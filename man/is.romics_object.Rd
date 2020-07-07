@@ -2,8 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{is.romics_object}
 \alias{is.romics_object}
-\title{is.romics_object()
-This function enable to check if the Romics object is in the appropriate format}
+\title{is.romics_object()}
 \usage{
 is.romics_object(romics_object)
 }
@@ -14,8 +13,7 @@ is.romics_object(romics_object)
 This function will return TRUE or FALSE indicating if the object is or not an romics_object
 }
 \description{
-is.romics_object()
-This function enable to check if the Romics object is in the appropriate format
+Enables to check if the romics_object is in the appropriate format
 }
 \author{
 Geremy Clair

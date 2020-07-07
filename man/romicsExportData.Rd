@@ -2,11 +2,9 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsExportData}
 \alias{romicsExportData}
-\title{romicsOutputData()
-Create an exportable data frame containing the processed data, the statistics and the missing status of the data on demand.}
+\title{romicsOutputData()}
 \usage{
-romicsExportData(romics_object, statistics = FALSE,
-  missing_data = FALSE)
+romicsExportData(romics_object, statistics = FALSE, missing_data = FALSE)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject()}
@@ -19,8 +17,7 @@ romicsExportData(romics_object, statistics = FALSE,
 This function will return an data frame containing the results of the processing, the statistics and the missingness status of the data as specified by the user.
 }
 \description{
-romicsOutputData()
-Create an exportable data frame containing the processed data, the statistics and the missing status of the data on demand.
+Creates an exportable data frame from the romics_object. The generated data.frame contains the processed data, the statistics and the missing status of the data on demand.
 }
 \author{
 Geremy Clair

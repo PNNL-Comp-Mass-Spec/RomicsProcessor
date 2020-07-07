@@ -1,17 +1,18 @@
-#' RomicsPmartR()
-#' Converts romics_object to pmartR object.
-#'
+#' romicsPmartR()
+#' @description Converts romics_object to pmartR object (requires the "pmartR' package to be installed).
 #' @param romics_object A romics_object created using the function romicsCreateObject()
 #' @param type Has to be "lipidData","proData","pepData","metabData" to indicate what data type to use for the pmartR object
-#'
 #' @details This function converts an romics_object to a pmartR object
 #' @return return the pmartR object
-#'
 #' @author Geremy Clair
 #' @export
-#'
-RomicsPmartR<- function(romics_object, type="proData"){
+romicsPmartR<- function(romics_object, type="proData"){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+  if(!"pmartR" %in% rownames(installed.packages()) & !"package:pmartR"  %in% search()){stop("to run this function the package 'pmartR' has to be installed and loaded")}
+  if(!"pmartR" %in% (.packages())){
+    library("pmartR")
+    print("pmartR was not loaded it was loaded to execute this function")
+  }
   if (missing(type)){type="proData"}
   if (!type %in% c("lipidData","proData","pepData","metabData")){stop("your data should be one of the following: 'lipidData','proData','pepData','metabData'")}
 

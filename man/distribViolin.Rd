@@ -2,8 +2,7 @@
 % Please edit documentation in R/07_Distribution_Plots.R
 \name{distribViolin}
 \alias{distribViolin}
-\title{distribViolin
-This function will plot the Violin plot of the sample distribution using ggplot2}
+\title{distribViolin()}
 \usage{
 distribViolin(romics_object)
 }
@@ -14,8 +13,7 @@ distribViolin(romics_object)
 a plot generated using ggplot2 is generated with this function.
 }
 \description{
-distribViolin
-This function will plot the Violin plot of the sample distribution using ggplot2
+Plots the violin plot of the sample distribution using ggplot2. The colors used for the plotting will correspond to the main_factor of the romics_object.
 }
 \details{
 create a ggplot2 graphic output displaying the normalized or not intensites (or logged intensities) within each sample. ggplot2 methods can be used to visually adjust the plot.
