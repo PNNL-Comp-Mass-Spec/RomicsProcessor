@@ -1,15 +1,15 @@
 Parameter	Value
-Version	1.6.6.0
+Version	1.6.0.16
 User name	Clai036
-Machine name	DESKTOP-P4HF2DS
-Date of writing	08/12/2019 11:54:44
-Include contaminants	True
+Machine name	PROTOAPPS
+Date of writing	8/13/19 12:32
+Fixed modifications	
+Include contaminants	TRUE
 PSM FDR	0.01
-PSM FDR Crosslink	0.01
 Protein FDR	0.01
 Site FDR	0.01
-Use Normalized Ratios For Occupancy	True
-Min. peptide Length	6
+Use Normalized Ratios For Occupancy	TRUE
+Min. peptide Length	7
 Min. score for unmodified peptides	0
 Min. score for modified peptides	40
 Min. delta score for unmodified peptides	0
@@ -17,93 +17,89 @@ Min. delta score for modified peptides	6
 Min. unique peptides	2
 Min. razor peptides	2
 Min. peptides	2
-Use only unmodified peptides and	True
-Modifications included in protein quantification	Oxidation (M);Acetyl (Protein N-term)
+Use only unmodified peptides and	TRUE
+Modifications included in protein quantification	Oxidation (M)
 Peptides used for protein quantification	Razor
-Discard unmodified counterpart peptides	True
+Discard unmodified counterpart peptides	TRUE
 Label min. ratio count	2
-Use delta score	False
-iBAQ	True
-iBAQ log fit	True
-Match between runs	True
+Use delta score	FALSE
+iBAQ	TRUE
+iBAQ log fit	TRUE
+Match between runs	TRUE
 Matching time window [min]	1.5
-Match ion mobility window [indices]	0.05
 Alignment time window [min]	20
-Alignment ion mobility window [indices]	1
-Find dependent peptides	False
-Fasta file	C:\Users\Clai036\Documents\Cereus\Uniprot_Bacillus_cereus_ATCC_14579_Unreviewed_201_08_07.fasta
+Find dependent peptides	FALSE
+Fasta file	E:\MaxQuant run\Geremy\cereus\Uniprot_Bacillus_cereus_ATCC_14579_Unreviewed_201_08_07.fasta
 Decoy mode	revert
-Include contaminants	True
-Advanced ratios	True
+Include contaminants	TRUE
+Advanced ratios	TRUE
 Fixed andromeda index folder	
 Temporary folder	
 Combined folder location	
-Second peptides	True
-Stabilize large LFQ ratios	True
-Separate LFQ in parameter groups	False
-Require MS/MS for LFQ comparisons	True
-Calculate peak properties	False
+Second peptides	TRUE
+Stabilize large LFQ ratios	TRUE
+Separate LFQ in parameter groups	FALSE
+Require MS/MS for LFQ comparisons	TRUE
+Calculate peak properties	FALSE
 Main search max. combinations	200
-Advanced site intensities	True
-Write msScans table	False
-Write msmsScans table	True
-Write ms3Scans table	True
-Write allPeptides table	True
-Write mzRange table	True
-Write pasefMsmsScans table	True
-Write accumulatedPasefMsmsScans table	True
+Advanced site intensities	TRUE
+LFQ norm for sites and peptides	FALSE
+Write msScans table	TRUE
+Write msmsScans table	TRUE
+Write ms3Scans table	TRUE
+Write allPeptides table	TRUE
+Write mzRange table	TRUE
+Write pasefMsmsScans table	TRUE
+Write accumulatedPasefMsmsScans table	TRUE
 Max. peptide mass [Da]	4600
 Min. peptide length for unspecific search	8
 Max. peptide length for unspecific search	25
-Razor protein FDR	True
-Disable MD5	False
+Razor protein FDR	TRUE
+Disable MD5	FALSE
 Max mods in site table	3
-Match unidentified features	False
-Epsilon score for mutations	
-Evaluate variant peptides separately	True
-Variation mode	None
+Match unidentified features	FALSE
 MS/MS tol. (FTMS)	20 ppm
 Top MS/MS peaks per Da interval. (FTMS)	12
 Da interval. (FTMS)	100
-MS/MS deisotoping (FTMS)	True
+MS/MS deisotoping (FTMS)	TRUE
 MS/MS deisotoping tolerance (FTMS)	7
 MS/MS deisotoping tolerance unit (FTMS)	ppm
-MS/MS higher charges (FTMS)	True
-MS/MS water loss (FTMS)	True
-MS/MS ammonia loss (FTMS)	True
-MS/MS dependent losses (FTMS)	True
-MS/MS recalibration (FTMS)	False
+MS/MS higher charges (FTMS)	TRUE
+MS/MS water loss (FTMS)	TRUE
+MS/MS ammonia loss (FTMS)	TRUE
+MS/MS dependent losses (FTMS)	TRUE
+MS/MS recalibration (FTMS)	FALSE
 MS/MS tol. (ITMS)	0.5 Da
 Top MS/MS peaks per Da interval. (ITMS)	8
 Da interval. (ITMS)	100
-MS/MS deisotoping (ITMS)	False
+MS/MS deisotoping (ITMS)	FALSE
 MS/MS deisotoping tolerance (ITMS)	0.15
 MS/MS deisotoping tolerance unit (ITMS)	Da
-MS/MS higher charges (ITMS)	True
-MS/MS water loss (ITMS)	True
-MS/MS ammonia loss (ITMS)	True
-MS/MS dependent losses (ITMS)	True
-MS/MS recalibration (ITMS)	False
+MS/MS higher charges (ITMS)	TRUE
+MS/MS water loss (ITMS)	TRUE
+MS/MS ammonia loss (ITMS)	TRUE
+MS/MS dependent losses (ITMS)	TRUE
+MS/MS recalibration (ITMS)	FALSE
 MS/MS tol. (TOF)	40 ppm
 Top MS/MS peaks per Da interval. (TOF)	10
 Da interval. (TOF)	100
-MS/MS deisotoping (TOF)	True
+MS/MS deisotoping (TOF)	TRUE
 MS/MS deisotoping tolerance (TOF)	0.01
 MS/MS deisotoping tolerance unit (TOF)	Da
-MS/MS higher charges (TOF)	True
-MS/MS water loss (TOF)	True
-MS/MS ammonia loss (TOF)	True
-MS/MS dependent losses (TOF)	True
-MS/MS recalibration (TOF)	False
+MS/MS higher charges (TOF)	TRUE
+MS/MS water loss (TOF)	TRUE
+MS/MS ammonia loss (TOF)	TRUE
+MS/MS dependent losses (TOF)	TRUE
+MS/MS recalibration (TOF)	FALSE
 MS/MS tol. (Unknown)	0.5 Da
 Top MS/MS peaks per Da interval. (Unknown)	8
 Da interval. (Unknown)	100
-MS/MS deisotoping (Unknown)	False
+MS/MS deisotoping (Unknown)	FALSE
 MS/MS deisotoping tolerance (Unknown)	0.15
 MS/MS deisotoping tolerance unit (Unknown)	Da
-MS/MS higher charges (Unknown)	True
-MS/MS water loss (Unknown)	True
-MS/MS ammonia loss (Unknown)	True
-MS/MS dependent losses (Unknown)	True
-MS/MS recalibration (Unknown)	False
+MS/MS higher charges (Unknown)	TRUE
+MS/MS water loss (Unknown)	TRUE
+MS/MS ammonia loss (Unknown)	TRUE
+MS/MS dependent losses (Unknown)	TRUE
+MS/MS recalibration (Unknown)	FALSE
 Site tables	Oxidation (M)Sites.txt
