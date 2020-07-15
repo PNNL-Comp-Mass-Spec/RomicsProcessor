@@ -32,14 +32,24 @@ We recommend the installation of the Bioconductor package 'sva' if batch correct
 ## Example of use
 
 The folder Example contain an 
-[R markdown file] (https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/Bacillus_cereus_media_experiment.Rmd).
+[R markdown file] (https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/Bacillus_cereus_media_experiment.Rmd)
+.
 
 This example consist in an analysis of the proteome of B. cereus grown in different media. 
-The Raw LC-MS/MS data is publicly available, on [MassIVE] (https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=6d0ca42ca79244a49d66a80fd741ba28), FTP link here -> [link](ftp://massive.ucsd.edu/MSV000085696/).
+The Raw LC-MS/MS data is publicly available, on [MassIVE] (https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=6d0ca42ca79244a49d66a80fd741ba28), FTP link here -> 
+[link](ftp://massive.ucsd.edu/MSV000085696/)
+.
 
-It was analyzed using MaxQuant set with the [attached parameters] (https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/parameters.txt). 
+It was analyzed using MaxQuant set with the 
+[attached parameters] (https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/parameters.txt)
+. 
 
-The MaxQuant output [proteinGroups.txt](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/proteinGroups.txt) is used as data and the metadata is also provided
+The MaxQuant output 
+[proteinGroups.txt](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/proteinGroups.txt) 
+Can be used as data and the 
+[metadata](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/metadata.csv) 
+is also provided.
+
 
 The different examples dataset are accessible directly inside the package [data folder] (https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/tree/master/data).
 
