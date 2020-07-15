@@ -25,14 +25,14 @@ devtools::install_github(“PNNL-Comp-Mass-Spec/RomicsProcessor”)
 
 Alternately, download the 
 [built package](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/RomicsProcessor_1.0.0.tar.gz)
-and install the package manually
+and install the package manually.
 
 We recommend the installation of the Bioconductor package 'sva' if batch corrections are needed and of 'pmartR'.
 
 ## Example of use
 
-The folder Example contain an 
-[R markdown file] (https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/Bacillus_cereus_media_experiment.Rmd)
+The folder /Example contain an 
+[R markdown file](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/Bacillus_cereus_media_experiment.Rmd)
 .
 
 This example consist in an analysis of the proteome of B. cereus grown in different media. 
@@ -41,7 +41,7 @@ The Raw LC-MS/MS data is publicly available, on [MassIVE] (https://massive.ucsd.
 .
 
 It was analyzed using MaxQuant set with the 
-[attached parameters] (https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/parameters.txt)
+[attached parameters](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/parameters.txt)
 . 
 
 The MaxQuant output 
