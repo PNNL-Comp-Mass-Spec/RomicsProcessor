@@ -19,12 +19,12 @@ install.packages("devtools")
 When devtools is installed, run the following command to install RomicsProcessor and its dependencies
 
 ```
-devtools::install_github(“https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/RomicsProcessor_1.0.0.tar.gz”)
+devtools::install_github(“PNNL-Comp-Mass-Spec/RomicsProcessor”)
 
 ```
 
 Alternately, download the file 
-[built package](docs/RomicsProcessor_1.0.0.tar.gz)
+[built package](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/RomicsProcessor_1.0.0.tar.gz)
 and install the package manually
 
 We recommend the installation of the Bioconductor package 'sva' if batch corrections are needed and of 'pmartR'.
