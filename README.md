@@ -6,6 +6,29 @@ data analysis. The package also supports creating analytical pipelines from
 previously processed objects and applying these pipeline to other objects.
 This allows for rapid development and reuse of bioinformatics methods.
 
+
+## Installation
+
+To install the package in R please first make sure devtools is installed
+
+```
+install.packages("devtools")
+
+```
+
+When devtools is installed, run the following command to install RomicsProcessor and its dependencies
+
+```
+devtools::install_github(“PNNL-Comp-Mass-Spec/RomicsProcessor”)
+
+```
+
+Alternately, download the file 
+[built package](docs/RomicsProcessor_1.0.0.tar.gz)
+and install the package manually
+
+We recommend the installation of the Bioconductor package 'sva' if batch corrections are needed and of 'pmartR'.
+
 [![DOI](https://zenodo.org/badge/206400976.svg)](https://zenodo.org/badge/latestdoi/206400976)
 
 ## Contacts
