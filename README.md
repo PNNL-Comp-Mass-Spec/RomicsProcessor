@@ -36,9 +36,9 @@ The folder /Example contain an
 .
 
 This example consist in an analysis of the proteome of B. cereus grown in different media. 
-The Raw LC-MS/MS data is publicly available, on [MassIVE] (https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=6d0ca42ca79244a49d66a80fd741ba28), FTP link here -> 
+The Raw LC-MS/MS data is publicly available, on [MassIVE](https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=6d0ca42ca79244a49d66a80fd741ba28), FTP link here (
 [link](ftp://massive.ucsd.edu/MSV000085696/)
-.
+).
 
 It was analyzed using MaxQuant set with the 
 [attached parameters](https://github.com/PNNL-Comp-Mass-Spec/RomicsProcessor/blob/master/Example/parameters.txt)
