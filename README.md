@@ -1,6 +1,6 @@
 # RomicsProcessor
 
-RomicsProcessor is an R package that can be used to store and analyze omics data.
+RomicsProcessor is an R package that can be used to analyze omics data.
 The package provides a structured R object to store the data, allowing for reproducible
 data analysis. The package also supports creating analytical pipelines from 
 previously processed objects and applying these pipeline to other objects.
