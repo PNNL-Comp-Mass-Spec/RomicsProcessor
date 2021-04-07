@@ -1,0 +1,8 @@
+"0",""
+"0","print(""Let's plot 10 umap with randomized initialization to verify the absence of chip/batch effect"")"
+"1","[1]"
+"1"," ""Let's plot 10 umap with randomized initialization to verify the absence of chip/batch effect"""
+"1","
+"
+"0","for(i in 1:10){romicsUmapPlot(Batch_romics,label=F, seed = sample(1:1000, 1))}"
+"0",""

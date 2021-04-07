@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1597594734395.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "44111636",
+    "lastKnownWriteTime" : 4475303891,
+    "last_content_update" : 1597594734395,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "151EAABC",
+        "caption" : "Clust1_E",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=Clust1_E&cache_key=151EAABC",
+        "displayedObservations" : 1395,
+        "environment" : "",
+        "expression" : "Clust1_E",
+        "object" : "Clust1_E",
+        "preview" : 0,
+        "totalObservations" : 1395,
+        "variables" : 11
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

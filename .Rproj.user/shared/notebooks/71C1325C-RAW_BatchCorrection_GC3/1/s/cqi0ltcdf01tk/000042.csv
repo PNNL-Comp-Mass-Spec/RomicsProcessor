@@ -1,0 +1,4 @@
+"0","romicsHeatmap(RAW_batch_romics,ANOVA_filter = ""padj"",p = 0.001,variable_hclust_number = 3,sample_hclust_method_dist = ""maximum"",sample_hclust_method_hclust = ""complete"", color_palette = bluered(13),color_boundaries = c(-2,2),sample_hclust = F)"
+"2","Discrepancy: Colv is FALSE, while dendrogram is `both'. Omitting column dendogram."
+"2","Error in plot.new() : figure margins too large
+"

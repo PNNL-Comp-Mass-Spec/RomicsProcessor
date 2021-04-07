@@ -1,0 +1,4 @@
+"0","export_stats<-romicsExportData(romics_proteins,statistics = T,missing_data = T)"
+"0","export_stats<-cbind(UniProt_Name=rownames(export_stats),export_stats)"
+"0","export_stats<-merge(export_stats,IDsdetails,by=""UniProt_Name"")"
+"0","write.csv(export_stats,file= ""all_results_with_stats.csv"")"

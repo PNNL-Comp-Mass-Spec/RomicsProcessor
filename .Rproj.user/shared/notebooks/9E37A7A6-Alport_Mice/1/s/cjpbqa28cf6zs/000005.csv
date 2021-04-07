@@ -1,0 +1,4 @@
+"0","romicsHeatmap(romics_proteins,variable_hclust_number = 5,ANOVA_filter = ""p"", p=0.05,sample_hclust = F)"
+"2","Discrepancy: Colv is FALSE, while dendrogram is `both'. Omitting column dendogram."
+"2","Error in plot.new() : figure margins too large
+"

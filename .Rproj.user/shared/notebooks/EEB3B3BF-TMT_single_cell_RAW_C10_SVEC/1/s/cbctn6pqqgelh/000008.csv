@@ -1,0 +1,4 @@
+"0","data <- ref_norm_2pep[,colnames(ref_norm_2pep) %in% reporter_colnames]"
+"0","data[data==0] <- NA"
+"0","#add the rownames"
+"0","rownames(data)<-paste(ref_norm_2pep$Dataset_ID,ref_norm_2pep$Scan,ref_norm_2pep$Peptide,ref_norm_2pep$Protein,sep=""@"")"

@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1597594990006.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "FDA5F399",
+    "lastKnownWriteTime" : 4475875706,
+    "last_content_update" : 1597594990006,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "39B7EB82",
+        "caption" : "Clust1_GO",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=Clust1_GO&cache_key=39B7EB82",
+        "displayedObservations" : "1395",
+        "environment" : "",
+        "expression" : "Clust1_GO",
+        "object" : "Clust1_GO",
+        "preview" : "0",
+        "totalObservations" : "1395",
+        "variables" : "12"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

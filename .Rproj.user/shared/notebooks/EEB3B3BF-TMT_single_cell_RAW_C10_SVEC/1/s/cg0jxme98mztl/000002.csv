@@ -1,0 +1,6 @@
+"0","#set folder"
+"0","setwd(""~/Documents/24 - Single_Cell_mouse_TMT/"")"
+"0","#MSGF_jobs numbers"
+"0","MSGF_jobs<-1820289"
+"0","#MASIC_jobs numbers"
+"0","MASIC_jobs<-1821265	"

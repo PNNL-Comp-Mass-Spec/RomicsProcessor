@@ -2,7 +2,7 @@
 % Please edit documentation in R/05_Transformation_normalization.R
 \name{medianNormSample}
 \alias{medianNormSample}
-\title{MedianNormSample()}
+\title{medianNormSample()}
 \usage{
 medianNormSample(romics_object)
 }

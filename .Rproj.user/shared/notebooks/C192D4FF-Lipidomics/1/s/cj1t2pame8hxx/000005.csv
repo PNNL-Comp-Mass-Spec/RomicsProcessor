@@ -1,0 +1,2 @@
+"0","PCA_results<-romicsPCA(NEG_romics)"
+"0","indPCAplot(NEG_romics,plotType = ""individual"",label = T)"

@@ -1,0 +1,2 @@
+"0","#PCA plot prior batch effect correction"
+"0","indPCAplot(romics_TMT,plotType = ""individual"",label = F)"

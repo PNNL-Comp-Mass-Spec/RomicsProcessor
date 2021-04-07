@@ -1,0 +1,2 @@
+"0","POS_romics<-unlog2data(POS_romics)"
+"0","POS_normalized_data<-cbind(rownames(POS_romics$data),POS_romics$data)"

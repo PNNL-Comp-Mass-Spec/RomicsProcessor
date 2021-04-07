@@ -1,0 +1,13 @@
+"0","data<-extractMaxQuant(""proteinGroups.txt"",quantification_type = ""LFQ"",cont.rm = T,site.rm = T,rev.rm = T)"
+"2","embedded nul(s) found in input"
+"1","[1]"
+"1"," ""97  Proteins were removed (protein(s) only identified by site,contaminant(s),reverse hit(s))"""
+"1","
+"
+"1","[1]"
+"1"," ""LFQ quantification was used"""
+"1","
+"
+"0","IDsdetails<-extractMaxQuantIDs(""proteinGroups.txt"",cont.rm = T,site.rm = T,rev.rm = T)"
+"2","Error in (function (srcref)  : unimplemented type (29) in 'eval'
+"

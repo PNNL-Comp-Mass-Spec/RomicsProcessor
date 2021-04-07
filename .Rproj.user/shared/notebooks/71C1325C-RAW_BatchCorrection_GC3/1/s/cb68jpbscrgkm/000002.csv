@@ -1,0 +1,34 @@
+"0","library(sva)"
+"0","RAW_batch_romics<-romicsBatchCorrection(RAW_Norm_romics, batch_factor = ""Batch"", method = ""ComBat"")"
+"1","[1]"
+"1"," ""A batch correction using the sva::ComBat method will be applied to the romics_object."""
+"1","
+"
+"1","
+"
+"1","To cite package ‘sva’ in publications use:
+
+  Jeffrey T. Leek, W. Evan Johnson, Hilary S. Parker, Elana J. Fertig, Andrew E. Jaffe, Yuqing Zhang,
+  John D. Storey and Leonardo Collado Torres (2020). sva: Surrogate Variable Analysis. R package
+  version 3.37.0.
+
+ATTENTION: This citation information has been auto-generated from the package DESCRIPTION file and may
+need manual editing, see ‘help(""citation"")’.
+"
+"1","
+"
+"1","Found 1 genes with uniform expression within a single batch (all zeros); these will not be adjusted for batch.
+"
+"2","Found4batches
+"
+"2","Adjusting for0covariate(s) or covariate level(s)
+"
+"2","Standardizing Data across genes
+"
+"2","Fitting L/S model and finding priors
+"
+"2","Finding parametric adjustments
+"
+"2","Adjusting the Data
+
+"

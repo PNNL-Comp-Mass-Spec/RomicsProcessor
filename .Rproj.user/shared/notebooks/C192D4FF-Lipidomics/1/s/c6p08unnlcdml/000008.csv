@@ -1,0 +1,4 @@
+"0","NEG_data<-read.csv(""NEG_raw_data.csv"")"
+"0","metadata<-read.csv(""metadata.csv"")"
+"0","NEG_romics<-romicsCreateObject(NEG_data,metadata,main_factor = ""Condition"")"
+"0","NEG_romics<-romicsSampleNameFromFactor(NEG_romics,factor = ""Sample_name"")"

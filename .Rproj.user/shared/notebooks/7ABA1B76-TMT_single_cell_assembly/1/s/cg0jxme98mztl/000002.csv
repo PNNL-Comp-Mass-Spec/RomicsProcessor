@@ -1,0 +1,7 @@
+"0","#set folder"
+"0","setwd(""~/Documents/24 - Single_Cell_mouse_TMT/"")"
+"2","The working directory was changed to /Users/clai036/OneDrive - PNNL/Documents/24 - Single_Cell_mouse_TMT inside a notebook chunk. The working directory will be reset when the chunk is finished running. Use the knitr root.dir option in the setup chunk to change the working directory for notebook chunks."
+"0","#MSGF_jobs numbers"
+"0","MSGF_jobs<-1820289"
+"0","#MASIC_jobs numbers"
+"0","MASIC_jobs<-1821265	"

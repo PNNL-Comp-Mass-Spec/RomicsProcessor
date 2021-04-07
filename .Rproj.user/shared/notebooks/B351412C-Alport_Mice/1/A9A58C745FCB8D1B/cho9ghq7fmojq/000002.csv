@@ -1,0 +1,3 @@
+"0","knitr::opts_chunk$set(fig.width=10, fig.height=6, echo = TRUE, results = TRUE, warning = FALSE, message=FALSE) "
+"0","options(repos=structure(c(CRAN=""https://mirror.ibcp.fr/pub/CRAN/"")))"
+"0","setwd(""~/Documents/06 - Fun-GCAT/02 - Tissue proteomics/01 - Perrin alport mice/"")"

@@ -1,0 +1,7 @@
+"0","set.seed(42)"
+"0","print(""Let's plot 10 umap with randomized initialization to verify the condition grouping"")"
+"1","[1]"
+"1"," ""Let's plot 10 umap with randomized initialization to verify the condition grouping"""
+"1","
+"
+"0","for(i in 1:10){romicsUmapPlot(RAW_batch_romics,label=F, seed = sample(1:1000, 1))}"

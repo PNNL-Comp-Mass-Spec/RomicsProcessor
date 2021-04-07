@@ -1,0 +1,3 @@
+"0","if(!file.exists(""Ecoli_proteome_up000000625_2020_08_16.fasta"")){"
+"0","  download_UniProtFasta(proteomeID = ""up000000625"", reviewed = F, export=T, file=""Ecoli_proteome_up000000625_2020_08_16.fasta"")"
+"0","  }"

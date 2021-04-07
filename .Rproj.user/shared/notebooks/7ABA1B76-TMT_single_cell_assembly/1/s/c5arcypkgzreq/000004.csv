@@ -1,0 +1,2 @@
+"0","#the MSGF and MASIC will be merged together in a global data frame"
+"0","MSGF_MASIC<-merge_MSGF_MASIC(ALL_MSGF,ALL_MASIC)"

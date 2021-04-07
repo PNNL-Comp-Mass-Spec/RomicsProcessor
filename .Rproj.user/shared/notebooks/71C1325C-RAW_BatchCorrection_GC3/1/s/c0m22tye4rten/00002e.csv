@@ -1,0 +1,6 @@
+"0","print(""First, we are plotting the PCA for the factor Conditions"")"
+"1","[1]"
+"1"," ""First, we are plotting the PCA for the factor Conditions"""
+"1","
+"
+"0","indPCAplot(RAW_Norm_romics, label = FALSE, plotType = ""individual"")"

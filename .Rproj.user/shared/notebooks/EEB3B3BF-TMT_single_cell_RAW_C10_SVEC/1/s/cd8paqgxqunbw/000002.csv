@@ -1,0 +1,3 @@
+"0","romics_TMT<-romicsSubset(romics_TMT,subset = c(""Boost"",""Blank""),type = ""drop"",by = ""level"",factor = ""Type"")"
+"0","distribBoxplot(romics_TMT)"
+"2","The melt generic in data.table has been passed a data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is deprecated, and this redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are attached, e.g. melt.list, you can prepend the namespace like reshape2::melt(romics_object$data). In the next version, this warning will become an error."

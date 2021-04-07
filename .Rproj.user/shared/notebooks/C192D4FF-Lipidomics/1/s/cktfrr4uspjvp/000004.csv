@@ -1,0 +1,4 @@
+"0","knitr::opts_chunk$set(fig.width=10, fig.height=6, echo = TRUE, results = TRUE, warning = FALSE, message=FALSE) "
+"0","options(repos=structure(c(CRAN=""https://mirror.ibcp.fr/pub/CRAN/"")))"
+"0","setwd(""~/Documents/05 - Lungmap/05 - Eniko/02 - Sorted murine cells/01 - Lipidomics/"")"
+"0","library(RomicsProcessor)"

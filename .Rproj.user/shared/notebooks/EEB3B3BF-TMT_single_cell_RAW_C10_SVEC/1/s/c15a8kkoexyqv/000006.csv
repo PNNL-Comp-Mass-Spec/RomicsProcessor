@@ -1,0 +1,5 @@
+"0","proteins<-proteins[,c(-2,-3)]"
+"0","romics_TMT<-romicsCreateObject(proteins, metadata, main_factor = ""DatasetID"")"
+"2","Error in romicsCreateObject(proteins, metadata, main_factor = ""DatasetID"") : 
+  Your main_factor is not present in your metadata
+"

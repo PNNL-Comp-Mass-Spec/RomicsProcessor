@@ -1,0 +1,1 @@
+"0","romics_proteins_noapc<-romicsSubset(romics_proteins,subset_vector = ""A_G1_APC"",type = ""drop"",by = ""level"",factor = ""Condition"")"

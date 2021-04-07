@@ -1,0 +1,6 @@
+"0","if(file.exists(""UniprotTable_Ecoli_proteome_up000000625_2020_08_16.csv"")){"
+"0","  UniProtTable<-read.csv(""UniprotTable_Ecoli_proteome_up000000625_2020_08_16.csv"")"
+"0","  }else{"
+"0","  download_UniProtTable(proteomeID = ""up000000625"", reviewed = F)"
+"0","  write.csv(UniProtTable,(""UniprotTable_Ecoli_proteome_up000000625_2020_08_16.csv""),row.names=FALSE)"
+"0","  }"

@@ -9,7 +9,10 @@ extractMaxQuant(
   quantification_type = "LFQ",
   cont.rm = TRUE,
   site.rm = TRUE,
-  rev.rm = TRUE
+  rev.rm = TRUE,
+  min_peptides = 1,
+  min_unique_peptides = 1,
+  min_razor_peptides = 1
 )
 }
 \arguments{
@@ -22,6 +25,8 @@ extractMaxQuant(
 \item{site.rm}{has to be TRUE or FALSE, indicates if the identification by site only have to be removed}
 
 \item{rev.rm}{has to be TRUE or FALSE, indicates if the False Positive entries have to be removed}
+
+\item{min_peptides}{has to be numerical, indicates the minimum number of peptides for protein imporation}
 }
 \value{
 it will return a data.frame with a first column containing the Protein IDs as first column, the other columns will be the Quantitative columns corresponding to the quantitation mode selected.

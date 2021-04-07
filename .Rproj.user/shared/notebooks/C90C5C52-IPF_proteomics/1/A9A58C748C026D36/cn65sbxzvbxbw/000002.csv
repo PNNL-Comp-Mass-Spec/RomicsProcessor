@@ -1,0 +1,15 @@
+"0","if(!file.exists(""Uniprot_Homo_sapiens_proteome_UP000005640_2020_07_29.fasta"")){
+  download_UniProtFasta(proteomeID = ""UP000005640"",reviewed = F,export = TRUE, file=""Uniprot_Homo_sapiens_proteome_UP000005640_2020_07_29.fasta"")
+}
+"
+"1","[1]"
+"1"," ""The UniProtFasta generated contains 75004 sequences"""
+"1","
+"
+"0","UniProtFasta_info<-UniprotFastaParser(file = ""Uniprot_Homo_sapiens_proteome_UP000005640_2020_07_29.fasta"")"
+"1","[1]"
+"1"," ""Uniprot_Homo_sapiens_proteome_UP000005640_2020_07_29.fasta"""
+"1","
+"
+"2","Error in (function (srcref)  : unimplemented type (29) in 'eval'
+"

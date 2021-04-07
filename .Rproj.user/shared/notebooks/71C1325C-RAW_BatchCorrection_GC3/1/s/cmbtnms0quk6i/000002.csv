@@ -1,0 +1,2 @@
+"0","RAW_romics<-romicsCreateObject(data = RAW_data, metadata = metadata)"
+"2","your main_factor was missing the first row of your metadata was used as factor"

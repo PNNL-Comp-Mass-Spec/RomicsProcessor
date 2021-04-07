@@ -22,6 +22,8 @@ romicsTtest(
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
+\item{pairing_factor}{name of a factor contained in an r_object, the list of the available factor can be obtained by using the function romics_factors()}
+
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
 \item{factor}{a character string indicating the factor to use for the test, the list of the available factor can be obtained by using the function romics_factors(), if missing the function will use the main factor of the object}
@@ -29,8 +31,6 @@ romicsTtest(
 \item{padj}{a logical variable indincating wheter to perform or not adjustment of pvalues}
 
 \item{padj_method}{correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}}
-
-\item{paired_factor}{name of a factor contained in an r_object, the list of the available factor can be obtained by using the function romics_factors()}
 }
 \value{
 an romics_object with the statistical layer containing the newly generated t.tests and fold-changes

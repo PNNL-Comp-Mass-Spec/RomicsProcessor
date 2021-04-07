@@ -8,7 +8,10 @@ extractMaxQuantIDs(
   file = "/filepath/proteinGroups.txt",
   cont.rm = TRUE,
   site.rm = TRUE,
-  rev.rm = TRUE
+  rev.rm = TRUE,
+  min_peptides = 1,
+  min_unique_peptides = 1,
+  min_razor_peptides = 1
 )
 }
 \arguments{

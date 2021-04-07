@@ -62,7 +62,7 @@ singleVariablePlot<-function(romics_object, variable="variable", type = "jb", fa
   }
 
   if(type %in% c("violin","jv")){
-    plot<-plot + geom_violin(aes(fill=group, alpha=0.5))
+    plot<-plot + geom_violin(aes(fill=group, alpha=0.25))+scale_fill_manual(values=unique(data$fill))
   }
 
   if(type %in% c("jitter","violin","jv")){

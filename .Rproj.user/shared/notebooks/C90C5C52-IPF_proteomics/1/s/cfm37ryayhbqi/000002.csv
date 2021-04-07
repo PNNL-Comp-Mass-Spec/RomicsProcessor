@@ -1,0 +1,3 @@
+"0","results<-romicsExportData(romics_proteins,statistics = T,missing_data = T)"
+"0","write.csv(results, ""IPF_35_donors_analysis.csv"")"
+"0","write.table(Enrichments,file = ""enrichmnent_clusters_IPF_35_donors_analysis.txt"",sep=""\t"")"

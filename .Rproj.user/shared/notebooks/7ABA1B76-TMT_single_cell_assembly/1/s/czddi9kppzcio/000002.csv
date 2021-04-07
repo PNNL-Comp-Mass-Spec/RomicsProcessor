@@ -1,0 +1,2 @@
+"0","#isotopic_distribution <- read.csv(""isotopic_distribution.csv"")"
+"0","#isotope_corrected_MSGF_MASIC<-correct_isotope_impurities(filtered_MSGF_MASIC_2pep,isotopic_distribution)"

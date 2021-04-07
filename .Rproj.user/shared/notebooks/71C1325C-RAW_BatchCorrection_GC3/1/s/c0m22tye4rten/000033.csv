@@ -1,0 +1,7 @@
+"0","print(""First, we are plotting the PCA for the factor Batch"")"
+"1","[1]"
+"1"," ""First, we are plotting the PCA for the factor Batch"""
+"1","
+"
+"0","Batch_romics<-romicsChangeFactor(RAW_Norm_romics,main_factor = ""Batch"")"
+"0","indPCAplot(Batch_romics, label = FALSE, plotType = ""individual"")"

@@ -1,0 +1,2 @@
+"0","indPCAplot(romics_proteins, ncp=5,plotType = ""individual"",Xcomp=1,Ycomp =2)"
+"2","Your romics_object data layer was containing some missing values. The missmda::imputePCA() method was used to impute these values"

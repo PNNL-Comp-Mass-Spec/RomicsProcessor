@@ -5,22 +5,52 @@
 #' @param cont.rm has to be TRUE or FALSE, indicates if the contaminant have to be removed
 #' @param site.rm has to be TRUE or FALSE, indicates if the identification by site only have to be removed
 #' @param rev.rm has to be TRUE or FALSE, indicates if the False Positive entries have to be removed
+#' @param min_peptides has to be numerical, indicates the minimum number of peptides for protein imporation
 #' @details This function will extracts the quantification information from one quantification time of a MaxQuant ProteinGroup.txt file.
 #' @return it will return a data.frame with a first column containing the Protein IDs as first column, the other columns will be the Quantitative columns corresponding to the quantitation mode selected.
 #' @author Geremy Clair
 #' @export
-extractMaxQuant<-function(file= "/filepath/proteinGroups.txt",quantification_type="LFQ", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE){
-#ensure that the file is named ProteinGroups.txt
+extractMaxQuant<-function(file= "/filepath/proteinGroups.txt",quantification_type="LFQ", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE, min_peptides=1, min_unique_peptides=1, min_razor_peptides=1){
+# ensure that the file is named ProteinGroups.txt
 if(substr(file,nchar(file)-16, nchar(file))!="proteinGroups.txt"){stop("The specified file is not a ProteinGroup file")}
 if(!quantification_type %in% c("LFQ","Intensity","iBAQ","MS.MS", "Identification.Type")){stop("The quantification_type is not appropriate")}
 if(missing(cont.rm)){cont.rm<-TRUE}
-if(missing(cont.rm)){site.rm<-TRUE}
+if(missing(site.rm)){site.rm<-TRUE}
 if(missing(rev.rm)){rev.rm<-TRUE}
+if(missing(min_peptides)){min_peptides=1}
+if(!is.numeric(min_peptides) & !is.numeric(min_peptides)){stop("'min_peptides' has to be numerical and of lenght 1 indicating the proteins with a given minimum of peptides.")}
+if(missing(min_unique_peptides)){min_unique_peptides=1}
+if(!is.numeric(min_unique_peptides) & !is.numeric(min_unique_peptides)){stop("'min_razor_peptides' has to be numerical and of lenght 1 indicating the proteins with a given minimum of peptides.")}
+if(missing(min_razor_peptides)){min_razor_peptides=1}
+if(!is.numeric(min_razor_peptides) & !is.numeric(min_razor_peptides)){stop("'min_razor_peptides' has to be numerical and of lenght 1 indicating the proteins with a given minimum of peptides.")}
 
 # read the protein group file
   prGR <- read.delim(file)
-#lower the case of the column names
+# lower the case of the column names
   colnames(prGR)<- tolower(colnames(prGR))
+
+# remove proteins with less than the min peptide count
+if (min_peptides>1){
+  pep_count<-prGR$peptide.counts..all.
+  pep_count<-sub("\\;.*","",pep_count)
+  print(paste0(sum(pep_count<=min_peptides)," protein had less than ",min_peptides," peptides and were removed."))
+  prGR<-prGR[pep_count<=min_peptides,]
+}
+
+if (min_unique_peptides>1){
+  pep_count<-prGR$peptide.counts..razor.unique.
+  pep_count<-sub("\\;.*","",pep_count)
+  print(paste0(sum(pep_count<=min_unique_peptides)," protein had less than ",min_unique_peptides," peptides and were removed."))
+  prGR<-prGR[pep_count<=min_unique_peptides,]
+}
+
+if (min_razor_peptides>1){
+  pep_count<-prGR$peptide.counts..razor.unique.
+  pep_count<-sub("\\;.*","",pep_count)
+  print(paste0(sum(pep_count<=min_razor_peptides)," protein had less than ",min_razor_peptides," peptides and were removed."))
+  prGR<-prGR[pep_count<=min_razor_peptides,]
+}
+
 #set the list of ids to keep
   listIDs <-c("protein.ids")
 
@@ -99,15 +129,44 @@ if(counts$reverse>0&&rev.rm==TRUE){prGR <- prGR[as.character(prGR$reverse)!="+",
 #' @return it will return a data.frame with a first column containing the Protein IDs the following columns will be the following : 'majority.protein.ids', 'fasta.headers', 'peptide.counts.all','peptide.counts.razor.unique','peptide.counts..unique.','fasta.headers','number.of.proteins','peptides','razor...unique.peptides', 'unique.peptides'
 #' @author Geremy Clair
 #' @export
-extractMaxQuantIDs<-function(file= "/filepath/proteinGroups.txt", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE){
+extractMaxQuantIDs<-function(file= "/filepath/proteinGroups.txt", cont.rm=TRUE,site.rm=TRUE, rev.rm=TRUE, min_peptides=1,min_unique_peptides=1, min_razor_peptides=1){
   #ensure that the file is named ProteinGroups.txt
   if(substr(file,nchar(file)-16, nchar(file))!="proteinGroups.txt"){stop("The specified file is not a ProteinGroup file")}
   if(missing(cont.rm)){cont.rm<-TRUE}
-  if(missing(cont.rm)){site.rm<-TRUE}
+  if(missing(site.rm)){site.rm<-TRUE}
   if(missing(rev.rm)){rev.rm<-TRUE}
+  if(missing(min_peptides)){min_peptides=1}
+  if(!is.numeric(min_peptides) & !is.numeric(min_peptides)){stop("'min_peptides' has to be numerical and of lenght 1 indicating the proteins with a given minimum of peptides.")}
+  if(missing(min_unique_peptides)){min_unique_peptides=1}
+  if(!is.numeric(min_unique_peptides) & !is.numeric(min_unique_peptides)){stop("'min_razor_peptides' has to be numerical and of lenght 1 indicating the proteins with a given minimum of peptides.")}
+  if(missing(min_razor_peptides)){min_razor_peptides=1}
+  if(!is.numeric(min_razor_peptides) & !is.numeric(min_razor_peptides)){stop("'min_razor_peptides' has to be numerical and of lenght 1 indicating the proteins with a given minimum of peptides.")}
 
   # read the protein group file
   prGR <- read.delim(file)
+
+  # remove proteins with less than the min peptide count
+  if (min_peptides>1){
+    pep_count<-prGR$peptide.counts..all.
+    pep_count<-sub("\\;.*","",pep_count)
+    print(paste0(sum(pep_count<=min_peptides)," protein had less than ",min_peptides," peptides and were removed."))
+    prGR<-prGR[pep_count<=min_peptides,]
+  }
+
+  if (min_unique_peptides>1){
+    pep_count<-prGR$peptide.counts..razor.unique.
+    pep_count<-sub("\\;.*","",pep_count)
+    print(paste0(sum(pep_count<=min_unique_peptides)," protein had less than ",min_unique_peptides," peptides and were removed."))
+    prGR<-prGR[pep_count<=min_unique_peptides,]
+  }
+
+  if (min_razor_peptides>1){
+    pep_count<-prGR$peptide.counts..razor.unique.
+    pep_count<-sub("\\;.*","",pep_count)
+    print(paste0(sum(pep_count<=min_razor_peptides)," protein had less than ",min_razor_peptides," peptides and were removed."))
+    prGR<-prGR[pep_count<=min_razor_peptides,]
+  }
+
   #lower the case of the column names
   colnames(prGR)<- tolower(colnames(prGR))
   #set the list of ids to keep

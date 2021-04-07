@@ -1,0 +1,1 @@
+"0","barplot(colSums(is.na(data_cell))/nrow(data_cell)*100, main=""Percentage_missing_per_channel (Cell)"",col =colors ,las=2,cex.names = 0.7,xlab=""TMT_Channel"",ylab=""Sum_Ion_Intensities"")"

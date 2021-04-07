@@ -1,0 +1,4 @@
+"0","#now we will calculate how ""ressembling the distribution parameters are between the different samples"
+"0","dist<-dist(skewKurt)"
+"0","clust<-hclust(dist)"
+"0","plot(clust)"

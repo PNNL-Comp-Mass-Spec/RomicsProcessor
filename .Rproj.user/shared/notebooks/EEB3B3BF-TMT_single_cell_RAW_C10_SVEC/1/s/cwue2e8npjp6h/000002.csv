@@ -1,0 +1,2 @@
+"0","export<-romicsExportData(romics_TMT,statistics = T,missing_data = F)"
+"0","write.csv(export,""data_after_analysis_with_stats.csv"")"

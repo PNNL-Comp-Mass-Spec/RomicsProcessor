@@ -1,0 +1,243 @@
+---
+title: 'DARPA_FF_Ecoli'
+author: Geremy Clair
+date: August 16, 2020
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    theme : cerulean
+    code_folding: hide
+---
+
+```{r knit_options, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=6, echo = TRUE, results = TRUE, warning = FALSE, message=FALSE) 
+options(repos=structure(c(CRAN="https://mirror.ibcp.fr/pub/CRAN/")))
+  setwd("~/Documents/08 - DARPA friends/DARPA_FF_Ecoli/")
+```
+
+# Required libraries
+
+The required libraries are loaded 
+- RomicsProcessor written by Geremy Clair (2020) is used to perform trackable transformation and statistics to the dataset 
+- proteinminion written by Geremy Clair (2020) is used to extract fasta information and to perform gene ontology and KEGG pathways enrichement analysis (2020)
+```{r load_packages}
+library("RomicsProcessor")
+library("proteinminion")
+library("DT") #for the rendering of the enrichment tables 
+```
+
+# Fasta and protein ontologies download using 'Protein Mini-On'
+
+Using the package 'Protein Mini-on' (Geremy Clair 2020, in prep.), The fasta file was downloaded from Uniprot.
+It was then uploaded by Matthew Monroe on the PNNL's Data Management System (PMID: 16470653) the 05/01/2020.
+```{r download_fasta}
+if(!file.exists("Ecoli_proteome_up000000625_2020_08_16.fasta")){
+  download_UniProtFasta(proteomeID = "up000000625", reviewed = F, export=T, file="Ecoli_proteome_up000000625_2020_08_16.fasta")
+  }
+```
+
+Then we've extracted and parsed the details contained in the fasta file header into a table containing a list of details for each protein.
+```{r UniProtFasta_info}
+UniProtFasta_info<-UniprotFastaParser(file = "Ecoli_proteome_up000000625_2020_08_16.fasta")
+```
+
+For each entry, 'Protein Mini-On' was use to download Gene Ontology (GO) terms and KEGG ids associated with the proteins. This upload was performed the exact same day as the download of the fasta file was done to ensure that the IDs will be identical as the ones present in the fasta file used).
+```{r UniProtTable_download}
+if(file.exists("UniprotTable_Ecoli_proteome_up000000625_2020_08_16.csv")){
+  UniProtTable<-read.csv("UniprotTable_Ecoli_proteome_up000000625_2020_08_16.csv")
+  }else{
+  download_UniProtTable(proteomeID = "up000000625", reviewed = F)
+  write.csv(UniProtTable,("UniprotTable_Ecoli_proteome_up000000625_2020_08_16.csv"),row.names=FALSE)
+  }
+```
+
+'Protein-Mini-on' was then used to generate a table (UniProtTable) containing the list of GOs and their associated protein IDs
+```{r UniProtTable_GO_generation}
+if(file.exists("UniProtTable_GO.csv")){
+  UniProtTable_GO<-read.csv(file="UniProtTable_GO.csv")
+}else{
+generate_UniProtTable_GO()
+write.csv(UniProtTable_GO,file="UniProtTable_GO.csv",row.names=FALSE)
+}
+```
+
+'Protein-Mini-on' was used to download similar information from KEGG for the Pathways associated with each protein
+```{r UniProtTable_KEGG_generation}
+if(file.exists("UniProtTable_KEGG.csv")){
+  UniProtTable_KEGG<-read.csv(file="UniProtTable_KEGG.csv")
+}else{
+generate_UniProtTable_KEGG()
+write.csv(UniProtTable_KEGG,file="UniProtTable_KEGG.csv",row.names=FALSE)
+}
+```
+
+# MaxQuant import
+
+```{r}
+data<-extractMaxQuant("proteinGroups.txt",quantification_type = "iBAQ",cont.rm = T,site.rm = T,rev.rm = T)
+IDsdetails<-extractMaxQuantIDs("proteinGroups.txt",cont.rm = T,site.rm = T,rev.rm = T)
+IDsdetails<-cbind(UniProt_Name=sub(".*\\|","",IDsdetails$protein.ids), IDsdetails)
+colnames(data)<- sub("iBAQ.","",colnames(data))
+data[,1]<- sub(".*\\|","",data[,1])
+metadata<- read.csv(file = "metadata.csv")
+colnames(metadata)<-tolower(colnames(metadata))
+```
+
+# Romics_object creation
+
+The data and metadata were placed in an romics_object, the sample names were retrieved from the metadata, the condition  will be use for the coloring of the Figures.
+```{r create_romics}
+romics_proteins<- romicsCreateObject(data, metadata,main_factor = "Condition")
+```
+
+
+# Full data analysis
+
+## Data cleaning and normalization
+
+The missingness was evaluated for each channel/sample
+```{r missingness_eval_full}
+romics_proteins<- romicsZeroToMissing(romics_proteins)
+romicsPlotMissing(romics_proteins)
+```
+
+The sample Presoil1 was an obvious outlier (based on missingness, we removed this replicate from both conditions)
+```{r remove_replicate_1}
+romics_proteins<- romicsSubset(romics_proteins,subset_vector = "1",type = "drop",by = "level", factor = "Replicate")
+romicsPlotMissing(romics_proteins)
+```
+
+
+The proteins to be conserved for quantification were selected to contain at least 60% of complete value for a given condition, the overall missingness was evaluated after filtering.
+```{r missing_filter_full}
+romics_proteins<-romicsFilterMissing(romics_proteins,percentage_completeness = 60)
+print(paste0(nrow(romics_proteins$data),"/", nrow(romics_proteins$original_data)," proteins remained after filtering", " (",round(nrow(romics_proteins$data)/nrow(romics_proteins$original_data)*100,2),"%)."))
+romicsPlotMissing(romics_proteins)
+```
+
+The data was log2 transformed, the distriution boxplot were then plotted
+```{r log2_full}
+romics_proteins<-log2transform(romics_proteins)
+distribBoxplot(romics_proteins)
+```
+
+As the same quantity of protein was labelled for each sample, the expectation is that the distribution of the protein abundance is centered, therefore a median centering was performed prior to plot again the distribution boxplots.
+```{r median_norm_full}
+romics_proteins<-medianCenterSample(romics_proteins)
+distribBoxplot(romics_proteins)
+```
+
+## Grouping evaluation
+
+
+A PCA was performed prior imputation of the missing data
+```{r PCA_no_imput_full}
+indPCAplot(romics_proteins, ncp=5,plotType = "percentage")
+indPCAplot(romics_proteins, ncp=5,plotType = "individual",Xcomp=1,Ycomp =2)
+indPCAplot(romics_proteins, ncp=5, plotType = "individual",Xcomp=2,Ycomp =3)
+```
+
+## Data imputation
+
+For some of the subsequent statistics imputations are required, we performed an imputation by assuming that the "non-detected" proteins were either low abundance or missing using the method developped by Tyranova et al. (PMID: 27348712). The gray distribution is the data distribution, the yellow distribution is the one for the random values used for imputation.
+```{r imput_missing_full}
+imputeMissingEval(romics_proteins,nb_stdev = 2,width_stdev = 0.5, bin=1)
+romics_proteins<-imputeMissing(romics_proteins,nb_stdev = 2,width_stdev = 0.5)
+```
+
+The hclust and PCA grouping were checked again after imputation
+```{r grouping_after_imputation_full}
+romicsHclust(romics_proteins)
+indPCAplot(romics_proteins, plotType = "percentage")
+indPCAplot(romics_proteins, plotType = "individual",Xcomp=1,Ycomp =2)
+indPCAplot(romics_proteins,  plotType = "individual",Xcomp=2,Ycomp =3)
+indPCA3D(romics_proteins)
+```
+
+## Statistics
+
+The means and stdev are calculated for each group
+```{r Means_stdevs_full}
+romics_proteins<-romicsMean(romics_proteins)
+romics_proteins<-romicsSd(romics_proteins)
+```
+
+Some general statistics are performed (ANOVA, paired T.tests).
+```{r statistics_full}
+romics_proteins<-romicsANOVA(romics_proteins)
+print(paste0(sum(romics_proteins$statistics$ANOVA_p<0.05), " proteins had an ANOVA p<0.05."))
+print(paste0(sum(romics_proteins$statistics$ANOVA_padj<0.05), " proteins had an ANOVA padjusted<0.05."))
+```
+
+A heatmap depicting the proteins passing an ANOVA p<0.05 is plotted, the clusters obtained were saved in the statistics.
+```{r Heatmap_full}
+romicsHeatmap(romics_proteins,variable_hclust_number = 2,ANOVA_filter = "p", p=0.05,sample_hclust = F)
+romics_proteins<-romicsVariableHclust(romics_proteins,clusters = 2,ANOVA_filter = "p",p= 0.05,plot = F)
+romics_proteins<-romicsZscores(romics_proteins)
+```
+
+Here the most interesting thing is the gree cluster which seem to be highly expressed in G1APC compared to the other conditions.
+
+T tests were then performed to compare specific conditions together.
+```{r T_test_all}
+romics_proteins<-romicsTtest(romics_proteins)
+romicsVolcano(romics_proteins)
+```
+
+## Enrichment Analysis
+
+Enrichment analysis wer done for the proteins significantly changing in abundance in Pre- vs Post- soil
+
+```{r}
+lower<-rownames(romics_proteins$statistics)[romics_proteins$statistics$ANOVA_p<0.05 & romics_proteins$statistics$`log(Pre_soil/Post_soil)` <  (-0.6)]
+higher<-rownames(romics_proteins$statistics)[romics_proteins$statistics$ANOVA_p<0.05 & romics_proteins$statistics$`log(Pre_soil/Post_soil)` >  (0.6)]
+changing<-rownames(romics_proteins$statistics)[romics_proteins$statistics$ANOVA_p<0.05 & (romics_proteins$statistics$`log(Pre_soil/Post_soil)` >  (0.6) |romics_proteins$statistics$`log(Pre_soil/Post_soil)` <  (-0.6)) ]
+
+universe<-rownames(romics_proteins$statistics)
+lower<-gsub("\\;.*","",lower)
+higher<-gsub("\\;.*","",higher)
+universe<-gsub("\\;.*","",universe)
+
+print("First, the enrichment was made for the proteins lower in Pre vs Post.")
+print(paste0(length(lower), " proteins were lower in abundance in Pre vs Post."))
+lower_GO<-UniProt_GO_Fisher(lower,universe)
+lower_KEGG<-UniProt_KEGG_Fisher(lower,universe)
+lower<-rbind(lower_GO,lower_KEGG)
+lower<-lower[lower$pval<0.1 & lower$fold_change>1,]
+datatable(lower)
+
+print("Then, the enrichment was made for the proteins higher in Pre vs Post")
+print(paste0(length(higher), " proteins were higher in abundance in Pre vs Post."))
+higher_GO<-UniProt_GO_Fisher(higher,universe)
+higher_KEGG<-UniProt_KEGG_Fisher(higher,universe)
+higher<-rbind(higher_GO,higher_KEGG)
+higher<-higher[higher$pval<0.1 & higher$fold_change>1,]
+datatable(higher)
+
+print("Finally for the proteins changing in abundance regardless of the direction")
+print(paste0(length(changing), " proteins were changing in abundance in Pre vs Post."))
+changing_GO<-UniProt_GO_Fisher(changing,universe)
+changing_KEGG<-UniProt_KEGG_Fisher(changing,universe)
+changing<-rbind(changing_GO,changing_KEGG)
+changing<-changing[changing$pval<0.1 & changing$fold_change>1,]
+datatable(changing)
+```
+
+## Data export
+The data generated abd the enrichment analysis are exported as a csv file
+```{r data_export_all}
+export_stats<-romicsExportData(romics_proteins,statistics = T,missing_data = T)
+export_stats<-cbind(UniProt_Name=rownames(export_stats),export_stats)
+export_stats<-merge(export_stats,IDsdetails,by="UniProt_Name")
+write.csv(export_stats,file= "all_results_with_stats.csv")
+write.table(lower,file= "enrichment_lower.txt",sep="\t")
+write.table(higher,file= "enrichment_higher.txt",sep="\t")
+write.table(changing,file= "enrichment_changing.txt",sep="\t")
+
+```
+
+
+
+

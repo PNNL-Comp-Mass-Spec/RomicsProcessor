@@ -192,30 +192,157 @@ indPCA3D <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=3, ... ){
   if(Ycomp>nrow(pca_results$eig)){stop("The Ycomp selected is too large for the data you are using")}
   if(Zcomp>nrow(pca_results$eig)){stop("The Zcomp selected is too large for the data you are using")}
 
-  #select the appropriate scale
-  pca_plot_scale<- max(c(ceiling(max(pca_results$ind$coord[,c(Xcomp,Ycomp, Zcomp)])/10)+1)*10,abs(min(floor(min(pca_results$ind$coord[,c(Xcomp,Ycomp, Zcomp)])/10)-1)*10))
+  pca_coord<-data.frame(pca_results$ind$coord[,c(Xcomp,Ycomp, Zcomp)])
+  colnames(pca_coord)<-c("PCA","PCB","PCC")
+  pca_coord<-cbind(pca_coord,factor=factor)
+  pca_coord$factor<-as.factor(pca_coord$factor)
 
-  #pca coordinate object
-  pca_coordinates<-as.data.frame(pca_results$ind$coord[,c(Xcomp,Ycomp)])
+  fig <- plot_ly(pca_coord, x = ~PCA, y = ~PCB, z = ~PCC, color = ~factor, colors = unique(colors))
+  fig <- fig %>% add_markers()
+  fig <- fig %>% layout(scene = list(xaxis = list(title = paste0("PC",Xcomp,"(",pca_results_explained[Xcomp],"%)")),
+                                     yaxis = list(title = paste0("PC",Ycomp,"(",pca_results_explained[Ycomp],"%)")),
+                                     zaxis = list(title = paste0("PC",Zcomp,"(",pca_results_explained[Zcomp],"%)"))))
 
-  #create the 3D plot
-  scatter3D(pca_results$ind$coord[,Xcomp],
-            pca_results$ind$coord[,Ycomp],
-            pca_results$ind$coord[,Zcomp],
-            colvar= as.integer(as.factor(factor)),col=colors,
-            pch = 16,
-            bty = "b2",
-            phi=60,
-            ticktype = "detailed",
-            main ="Principal component analysis",
-            col.panel ="gray",
-            col.grid = "gray95",
-            type = "h",
-            colkey = list(plot = FALSE),
-            xlim = c(-pca_plot_scale,pca_plot_scale),
-            ylim = c(-pca_plot_scale,pca_plot_scale),
-            zlim = c(-pca_plot_scale,pca_plot_scale),
-            xlab = paste0("PC",Xcomp,"(",pca_results_explained[Xcomp],"%)"),
-            ylab =paste0("PC",Ycomp,"(",pca_results_explained[Ycomp],"%)"),
-            zlab = paste0("PC",Zcomp,"(",pca_results_explained[Zcomp],"%)"))
+  fig
 }
+
+#' romicsUmap()
+#' @description Calculate the umap of the data layer of the romics_object using the package umap. This function require the data to be full in the layer data to be run.
+#' Plots the samples on the PCA sample plot, the percentage of explained variance, or both on demand using ggplots2. The colors used for the plotting will correspond to the main_factor of the romics_object. The axis to be plotted can be chosen. The PCA results are calculated using the function romicsPCA (see the documentation of this function for more details).
+#' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
+#' @param umap_config object of class umap.config (see umap() function documentation)
+#' @param method character, implementation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn')
+#' @param lock_seed has to be TRUE or FALSE to indicate if the seed is locked to enable reproducing plotting
+#' @param seed numeric value indicating what seed to use when random seed are used
+#' @param ... Arguments passed to umap function.
+#' @details This function will
+#' @return Returns a umap result
+#' @author Geremy Clair
+#' @export
+romicsUmap<- function(romics_object, umap_config=umap.defaults, method = c("naive", "umap-learn"), lock_seed=TRUE, seed = 42){
+  if(missing(romics_object)){stop("romics_object is missing")}
+  if(class(romics_object)!="romics_object"){stop("your romics_object was not created using the function romicsCreateObject")}
+  if(romics_object$steps[1]!="romics_object"){stop("romics_object is not in the appropriate format")}
+  if(missing(umap_config)){umap_config=umap.defaults}
+  if(missing(method)){method="naive"}
+  if(missing(lock_seed)){lock_seed=TRUE}
+  if(!is.logical(lock_seed)){stop("lock_seed has to be either TRUE or FALSE")}
+  if(missing(seed)){seed<-42}
+
+  #set seed so the plot will always look the sameif lock seed was TRUE else use a random seed.
+  if (lock_seed==TRUE){
+    set.seed(seed)}else{
+      set.seed(Sys.time())}
+
+  #load data
+  data<-t(romics_object$data)
+
+  #run the umap
+  umap <- umap(data, umap_config, method=method)
+
+  #return result
+  return(umap)
+}
+
+#' romicsUmapPlot()
+#' @description Plots the samples on the umap. Can be colored either by a factor or by the values of a given variable present in the dataset. This function require the data to be full in the layer data to be run. Calculate the umap of the data layer of the romics_object using the package umap.
+#' @param romics_object has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()
+#' @param umap_config object of class umap.config (see umap() function documentation)
+#' @param method character, implementation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn')
+#' @param lock_seed has to be TRUE or FALSE to indicate if the seed is locked to enable reproducing plotting
+#' @param color_by has to be either 'factor' or 'variable to indicate if the coloring of the sample points is done using the factor set with the parameter 'factor' or with the numerical values of a variable feature set with the factor 'variable'
+#' @param factor has to be a factor of the romics_object, the existing factors names can be found using the function romicsFactorNames()
+#' @param color_palette has to be a R gradient color palette (viridis(n=20) by default) this gradient color palette will be used to color the points when the 'color_by' parameter is set to 'variable'
+#' @param scale has to be TRUE or FALSE to indicate if the palette defined in color_palette has to be displayed or not.
+#' @param seed numeric value indicating what seed to use when random seed are used
+#' @param ... further arguments passed to or from other methods
+#' @return Returns either a ggplot2 showing the sample umap plot
+#' @author Geremy Clair
+#' @export
+
+romicsUmapPlot<-function(romics_object, umap_config=umap.defaults, label=TRUE, method = c("naive", "umap-learn"), lock_seed=TRUE, seed = 42, color_by=c("factor","variable"), factor = "main", variable="variable_name",color_palette=viridis(n=20) , scale=TRUE){
+  if(missing(romics_object)){stop("romics_object is missing")}
+  if(class(romics_object)!="romics_object"){stop("your romics_object was not created using the function romicsCreateObject")}
+  if(romics_object$steps[1]!="romics_object"){stop("romics_object is not in the appropriate format")}
+  if(missing(umap_config)){umap_config=umap.defaults}
+  if(missing(method)){method="naive"}
+  if(missing(lock_seed)){lock_seed=TRUE}
+  if(!is.logical(lock_seed)){stop("lock_seed as to be either TRUE or FALSE")}
+  if(missing(seed)){seed<-42}
+  if(missing(color_by)){color_by="factor"}
+  if(!color_by %in% c("factor","variable")){stop("'color_by' has to be either 'variable' or 'factor'.")}
+  if(missing(factor)){factor="main"}
+  if(!factor %in% c("main",romicsFactorNames(romics_object))){stop("factor has to be a either 'main' or a factor_name of the romics_object, please use the function romicsFactorNames() to identify the usable factors.")}
+  if(missing(variable)){variable=rownames(romics_object$data)[1]}
+  if(!is.character(variable)&length(variable!=1)){stop("<variable> should be a character vector of lenght 1")}
+  if(lock_seed==TRUE){
+    set.seed(seed)}else{
+      set.seed(Sys.time())}
+  if(missing(color_palette)){color_palette =viridis::viridis(20)}
+  if(missing(scale)){scale=T}
+  #load data
+  data<-t(romics_object$data)
+
+  #run the umap
+  umap <- umap(data, umap_config, method=method)
+
+  #coordinates object creation
+  umap_coordinates<-data.frame(umap$layout)
+
+  if(color_by=="factor"){
+    if(factor=="main"){
+      labels<-romics_object$metadata[rownames(romics_object$metadata)==romics_object$main_factor,]
+      colors<-romics_object$metadata[rownames(romics_object$metadata)=="colors_romics",]
+    }else{
+      changed_factor<-romicsChangeFactor(romics_object,main_factor = factor)
+      labels<-changed_factor$metadata[rownames(changed_factor$metadata)==factor,]
+      colors<-changed_factor$metadata[rownames(changed_factor$metadata)=="colors_romics",]
+    }
+
+    umap_coordinates<-merge(umap_coordinates,t(labels),by=0)
+
+    rownames(umap_coordinates)<-umap_coordinates$Row.names
+    umap_coordinates<-umap_coordinates[-1]
+    umap_coordinates<-merge(umap_coordinates,t(colors),by=0)
+    rownames(umap_coordinates)<-umap_coordinates$Row.names
+    umap_coordinates<-umap_coordinates[-1]
+    colnames(umap_coordinates)<-c("umap1", "umap2","labels","colors")
+
+    umap_plot<- ggplot(umap_coordinates, aes(x=umap1, y=umap2, color=labels)) +
+      geom_point(size=4, alpha=I(.8))+
+      theme_ROP()+
+      ggtitle("umap plot")+
+      scale_color_manual(values = unique(umap_coordinates$colors)) +labs(color = romics_object$main_factor)
+
+  }else{
+    variable<-colnames(data)[grepl(variable,colnames(data))]
+
+    if(length(variable)>1){
+      warning("More than one variable contained the variable choosen:")
+      warning(variable)
+      stop()
+    }
+    if(length(variable)==0){stop("your variable was not present in the romics_object")}
+    variable_val<-data[,colnames(data)==variable]
+
+    if(scale==T){
+      scaled_variable <-as.numeric(scale(variable_val))
+      names(scaled_variable)<-names(variable_val)
+      variable_val<-scaled_variable
+    }
+
+    umap_coordinates<-cbind(umap_coordinates,variable_val)
+    colnames(umap_coordinates)<-c("umap1", "umap2","variable_val")
+
+    umap_plot<- ggplot(umap_coordinates, aes(x=umap1, y=umap2, color=variable_val)) +
+      geom_point(size=4, alpha=I(.8))+ theme_ROP()+ ggtitle(paste0("umap plot colored by ",variable))+
+      scale_color_gradientn(colours = color_palette)
+  }
+
+  if(label==TRUE){
+    umap_plot<-umap_plot+geom_text(colour=umap_coordinates$colors, size = 3,label=rownames(data))
+  }
+
+  plot(umap_plot)
+}
+

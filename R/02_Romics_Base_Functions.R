@@ -257,7 +257,7 @@ romicsChangeFactor<- function(romics_object , main_factor = "none" ) {
 #' @export
 romicsSubset<-function(romics_object, subset_vector,type= "keep", by= "colnames", factor="main"){
   arguments<-as.list(match.call())
-  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+ # if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(subset_vector)){stop("Your subseting vector is missing")}
   if(!is.character(subset_vector)){stop("Your subset vector has to be a character vector")}
   if(missing(type)){type="keep"}

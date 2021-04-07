@@ -1,0 +1,2 @@
+"0","metadata<-read.csv(""Metadata_RAW_SC.csv"")"
+"0","colnames(metadata)<-tolower(colnames(metadata))"

@@ -1,0 +1,4 @@
+"0","POS_data<-read.csv(""POS_raw_data.csv"")"
+"0","metadata<-read.csv(""metadata.csv"")"
+"0","POS_romics<-romicsCreateObject(POS_data,metadata,main_factor = ""Condition"")"
+"0","POS_romics<-romicsSampleNameFromFactor(POS_romics,factor = ""Sample_name"")"

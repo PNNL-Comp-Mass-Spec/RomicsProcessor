@@ -1,0 +1,4 @@
+"0","#all MSGF files will be loaded and placed in a data frame"
+"0","ALL_MSGF<-MageR_MSGF(MSGF_jobs, mode= ""first_hit"",minSpecEValue = 1e-7)"
+"2","Error in (function (srcref)  : unimplemented type (29) in 'eval'
+"

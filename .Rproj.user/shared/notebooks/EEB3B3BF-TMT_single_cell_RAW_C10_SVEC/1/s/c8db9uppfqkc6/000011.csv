@@ -1,0 +1,2 @@
+"0","colors<- c(""gray10"",""gray50"",rep(""orangered3"",3), rep(""dodgerblue3"",11))"
+"0","barplot(colSums(data,na.rm = T), main=""Sum_of_reporters_intensities_per_channel"",col =colors ,las=2,cex.names = 0.7,xlab=""TMT_Channel"",ylab=""Sum_Ion_Intensities"")"

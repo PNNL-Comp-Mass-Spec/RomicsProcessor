@@ -1,0 +1,3 @@
+"0","data_cell <- data[,-5:-1]"
+"0","colors<- ROP_colors[1:11]"
+"0","barplot(colSums(data_cell,na.rm=T), main=""Sum_of_reporters_intensities_per_channel (Cell)"",col =colors ,las=2,cex.names = 0.7,xlab=""TMT_Channel"",ylab=""Sum_Ion_Intensities"")"

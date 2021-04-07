@@ -1,0 +1,2 @@
+"0","NEG_romics<-unlog2data(NEG_romics)"
+"0","NEG_normalized_data<-NEG_romics$data"

@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1597632252889.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "274841866",
+    "id" : "CF1D0D38",
+    "lastKnownWriteTime" : 1597690491,
+    "last_content_update" : 1597690491944,
+    "path" : "~/OneDrive - PNNL/Documents/08 - DARPA friends/DARPA_FF_Ecoli/DARPA_FF_Ecoli.Rmd",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "237,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

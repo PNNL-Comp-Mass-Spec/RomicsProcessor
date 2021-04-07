@@ -1,0 +1,1 @@
+"0","romics_proteins<- romicsCreateObject(data, metadata,main_factor = ""Condition"")"

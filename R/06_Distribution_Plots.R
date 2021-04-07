@@ -8,7 +8,7 @@
 distribBoxplot <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
-  data_graph<-melt(romics_object$data,id.vars=0)
+  data_graph<-reshape2::melt(romics_object$data,id.vars=0)
   fill_graph<-romics_object$colors
   fill_graph<-fill_graph[!is.na(data_graph[,2])]
   data_graph<-data_graph[!is.na(data_graph[,2]),]
@@ -43,7 +43,7 @@ return(p)
 distribViolin <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
-  data_graph<-melt(romics_object$data,id.vars=0)
+  data_graph<-reshape2::melt(romics_object$data,id.vars=0)
   fill_graph<-romics_object$colors
   fill_graph<-fill_graph[!is.na(data_graph[,2])]
   data_graph<-data_graph[!is.na(data_graph[,2]),]
@@ -78,7 +78,7 @@ distribViolin <- function(romics_object){
 distribJitter <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
-  data_graph<-melt(romics_object$data,id.vars=0)
+  data_graph<-reshape2::melt(romics_object$data,id.vars=0)
   fill_graph<-romics_object$colors
   fill_graph<-fill_graph[!is.na(data_graph[,2])]
   data_graph<-data_graph[!is.na(data_graph[,2]),]
@@ -113,7 +113,7 @@ distribJitter <- function(romics_object){
 distribSina <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
-  data_graph<-melt(romics_object$data,id.vars=0)
+  data_graph<-reshape2::melt(romics_object$data,id.vars=0)
   fill_graph<-romics_object$colors
   fill_graph<-fill_graph[!is.na(data_graph[,2])]
   data_graph<-data_graph[!is.na(data_graph[,2]),]
@@ -149,7 +149,7 @@ distribSina <- function(romics_object){
 distribRidges <- function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
-  data_graph<-melt(romics_object$data,id.vars=0)
+  data_graph<-reshape2::melt(romics_object$data,id.vars=0)
   fill_graph<-romics_object$colors
   fill_graph<-fill_graph[!is.na(data_graph[,2])]
   data_graph<-data_graph[!is.na(data_graph[,2]),]
@@ -278,7 +278,7 @@ distribHistogramGlobal<-function(romics_object,bin=1){
   if(romics_object$steps[1]!="romics_object"){stop("romics_object is not in the appropriate format")}
   if(missing(bin)){bin=1}
 
-  melted_data<-melt(romics_object$data)
+  melted_data<-reshape2::melt(romics_object$data)
   info_data<-summary(melted_data$value)
 
   p<- ggplot(melted_data, aes(x = value),fill="gray") +

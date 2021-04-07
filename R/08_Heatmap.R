@@ -27,7 +27,6 @@ romicsFilterVariable<-function(romics_object,
   if(!ANOVA_filter %in% c("p", "padj","none")){stop("ANOVA should be either 'p', 'padj' or 'none'")}
   if(missing(p)){p<-0.05}
   if(!is.numeric(p)||p>1||p<0){stop("p should be numeric and comprised between 0 and 1")}
-
   #ANOVA Filter
   if(ANOVA_filter=="none"){ANOVA_filter <- rep(TRUE,nrow(romics_object$data))}else{
     if(ANOVA_filter=="p"){
@@ -37,7 +36,7 @@ romicsFilterVariable<-function(romics_object,
         }else{ANOVA_filter <- romics_object$statistics$ANOVA_padj<p}}}
 
   #variable_names filter checkings
-  if(missing(variable_names)){variable_name<-"none"}
+  if(missing(variable_names)){variable_names<-"none"}
   if(!is.character(variable_names)||length(variable_names)<1){stop("'variable_names' has to be a character vector of lenght >= 1")}
 
   #create variable_names filter
@@ -56,7 +55,7 @@ romicsFilterVariable<-function(romics_object,
   if(!is.character(statCol2)&&length(statCol2)!=1){stop("statCol should be a character vector of lenght 1")}
 
   #Filter based on statCol
-  if(statCol=="none"){statCol_filter <- rep(TRUE,nrow(romics_object$data))}else{
+  if(statCol=="none"){statCol_filter_result <- rep(TRUE,nrow(romics_object$data))}else{
     #check if the statCol exists
      if(!statCol %in% colnames(romics_object$statistics)){
       print(paste0("'",statCol,"' is not a column of the statistics layer, below are the usable columns:"))
@@ -66,11 +65,11 @@ romicsFilterVariable<-function(romics_object,
     if(missing(statCol_filter)){stop("The stat 'statCol_filter' was missing the stat column was not filtered")
       }else{text<- paste0("romics_object$statistics$`",statCol,"`",statCol_filter)}
     # create the filter
-    statCol_filter<- eval(parse(text=text))
+    statCol_filter_result<- eval(parse(text=text))
     }
 
   #Filter based on statCol2
-  if(statCol2=="none"){statCol2_filter <- rep(TRUE,nrow(romics_object$data))}else{
+  if(statCol2=="none"){statCol2_filter_result <- rep(TRUE,nrow(romics_object$data))}else{
     #check if the statCol2 exists
     if(!statCol2 %in% colnames(romics_object$statistics)){
       print(paste0("'",statCol2,"' is not a column of the statistics layer, below are the usable columns:"))
@@ -80,11 +79,12 @@ romicsFilterVariable<-function(romics_object,
     if(missing(statCol2_filter)){stop("The stat 'statCol2_filter' was missing the stat column was not filtered")
     }else{text<- paste0("romics_object$statistics$`",statCol2,"`",statCol2_filter)}
     # create the filter
-    statCol2_filter<- eval(parse(text=text))
+    statCol2_filter_result<- eval(parse(text=text))
     }
 
- #global filter (any false will become false)
-  filter<- variable_name_filter*ANOVA_filter*statCol_filter*statCol2_filter>0
+
+  #global filter (any false will become false)
+  filter<- variable_name_filter*ANOVA_filter*statCol_filter_result*statCol2_filter_result>0
 
  #cheking mode
   if(missing(mode)){mode<-"keep"}
@@ -184,7 +184,7 @@ romicsHeatmap<-function(romics_object,
   if(missing(statCol2_filter)){statCol2_filter="none"}
 
   #extract the data
-  data<- romicsFilterVariable(romics_object,ANOVA_filter=ANOVA_filter, p=p,statCol=statCol,statCol_filter=statCol_filter,statCol2_filter=statCol2_filter)$data
+  data<- romicsFilterVariable(romics_object,ANOVA_filter=ANOVA_filter,p=p,variable_names="none",statCol=statCol,statCol_filter=statCol_filter,statCol2=statCol2,statCol2_filter=statCol2_filter)$data
 
   #the variable_hclust_number as to be a round number
   variable_hclust_number<-as.integer(variable_hclust_number)

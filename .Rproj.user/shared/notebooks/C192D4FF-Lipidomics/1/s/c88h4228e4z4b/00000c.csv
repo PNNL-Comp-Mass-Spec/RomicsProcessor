@@ -1,0 +1,2 @@
+"0","PCA_results<-romicsPCA(POS_romics)"
+"0","indPCAplot(POS_romics,plotType = ""individual"",label = T)"

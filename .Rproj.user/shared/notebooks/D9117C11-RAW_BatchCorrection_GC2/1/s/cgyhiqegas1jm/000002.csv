@@ -1,0 +1,3 @@
+"0","romicsHeatmap(RAW_batch_romics,ANOVA_filter = ""padj"",p = 0.0001,variable_hclust_number = 7,sample_hclust_method_dist = ""maximum"",sample_hclust_method_hclust = ""complete"", color_palette = magma(25),color_boundaries = c(-1.5,1.5))"
+"2","Error in plot.new() : figure margins too large
+"

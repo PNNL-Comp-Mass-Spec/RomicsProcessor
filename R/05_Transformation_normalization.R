@@ -80,7 +80,7 @@ unlog10data<-function(romics_object){
   return(romics_object)
   }
 
-#' MedianNormSample()
+#' medianNormSample()
 #' @description Normalizes the samples by their median. The median of the medians of all the samples is used as the alignment point.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log10transform()
 #' @details Median normalize within each sample the median of each sample median will be used as alignment point. If you waht to center the median at 0 please use the function medianCenterSample().
@@ -193,3 +193,5 @@ medianNormFactor<-function(romics_object, main_factor= "factor"){
     return(romics_object)
 
 }
+
+

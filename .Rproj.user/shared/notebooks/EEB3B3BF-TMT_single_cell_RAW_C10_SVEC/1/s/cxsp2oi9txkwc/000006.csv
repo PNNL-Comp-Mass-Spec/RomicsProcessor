@@ -1,0 +1,8 @@
+"0","print(paste0(sum(romics_TMT$statistics$ANOVA_p<0.05),"" proteins had an ANOVA padj<0.05""))"
+"1","[1]"
+"1"," ""695 proteins had an ANOVA padj<0.05"""
+"1","
+"
+"0","romicsHeatmap(romics_TMT,ANOVA_filter = ""padj"",p = 0.05, variable_hclust_number = 6)"
+"2","Error in plot.new() : figure margins too large
+"

@@ -1,0 +1,6 @@
+"0","#first name the columns to keep"
+"0","reporter_colnames<-c(""Ion_126.128"" ,""Ion_127.125"",""Ion_127.131"", ""Ion_128.128"", ""Ion_128.134"", ""Ion_129.131"", ""Ion_129.138"", ""Ion_130.135"", ""Ion_130.141"",""Ion_131.138"", ""Ion_131.144"")"
+"0","#keep those columns"
+"0","data <- ref_norm_isotope_corr[,colnames(ref_norm_isotope_corr) %in% reporter_colnames]"
+"2","Error: object 'ref_norm_isotope_corr' not found
+"

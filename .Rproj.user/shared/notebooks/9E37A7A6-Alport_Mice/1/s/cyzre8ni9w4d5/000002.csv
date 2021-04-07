@@ -1,0 +1,3 @@
+"0","if(!file.exists(""Mus_musculus_proteome_up000000589_2020_07_13.fasta"")){"
+"0","  download_UniProtFasta(proteomeID = ""up000000589"", reviewed = F, export=T, file=""Mus_musculus_proteome_up000000589_2020_07_13.fasta"")"
+"0","  }"

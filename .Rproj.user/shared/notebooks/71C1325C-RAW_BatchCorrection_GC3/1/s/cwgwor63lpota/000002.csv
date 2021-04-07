@@ -1,0 +1,2 @@
+"0","metadata<-read.csv(""metadata.csv"")"
+"2","incomplete final line found by readTableHeader on 'metadata.csv'"

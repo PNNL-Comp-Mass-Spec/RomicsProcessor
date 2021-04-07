@@ -1,0 +1,5 @@
+"0","write.csv(combined_romics,file=""combined_romics_with_statistics.csv"")
+"
+"2","Error in as.data.frame.default(x[[i]], optional = TRUE, stringsAsFactors = stringsAsFactors) : 
+  cannot coerce class ‘""romics_object""’ to a data.frame
+"

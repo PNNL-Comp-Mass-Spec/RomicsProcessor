@@ -1,0 +1,3 @@
+"0",""
+"0","for (i in 1:length(Dataset_IDs)){"
+"0","plotDensities(log2(l[[i]]), col= colors, main=paste0(""plotDensities_intensities_per_channel ("",Dataset_IDs[i],"")""))}"

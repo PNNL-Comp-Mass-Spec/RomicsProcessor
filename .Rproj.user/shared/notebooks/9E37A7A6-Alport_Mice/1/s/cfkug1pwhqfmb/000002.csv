@@ -1,0 +1,6 @@
+"0","if(file.exists(""UniprotTable_Mus_musculus_proteome_up000000589_2020_07_13.csv"")){"
+"0","  UniProtTable<-read.csv(""UniprotTable_Mus_musculus_proteome_up000000589_2020_07_13.csv"")"
+"0","  }else{"
+"0","  download_UniProtTable(proteomeID = ""up000000589"", reviewed = F)"
+"0","  write.csv(UniProtTable,(""UniprotTable_Mus_musculus_proteome_up000000589_2020_07_13.csv""),row.names=FALSE)"
+"0","  }"
