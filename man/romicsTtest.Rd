@@ -12,7 +12,9 @@ romicsTtest(
   var.equal = FALSE,
   factor = "main",
   padj = TRUE,
-  padj_method = "BH"
+  padj_method = "BH",
+  mode = "vs",
+  ...
 )
 }
 \arguments{

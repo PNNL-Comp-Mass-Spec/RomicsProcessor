@@ -1,2 +1,0 @@
-"0","romics_proteins<- romicsCreateObject(data, metadata,main_factor = ""Condition"")"
-"0","romics_proteins<- romicsSampleNameFromFactor(romics_proteins,factor = ""Sample_name"")"

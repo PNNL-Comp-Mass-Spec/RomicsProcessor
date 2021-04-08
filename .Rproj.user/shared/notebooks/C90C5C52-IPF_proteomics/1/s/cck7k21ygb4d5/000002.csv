@@ -1,6 +1,0 @@
-"0","if(file.exists(""UniProtTable_KEGG.csv"")){"
-"0","  UniProtTable_KEGG<-read.csv(file=""UniProtTable_KEGG.csv"")"
-"0","}else{"
-"0","generate_UniProtTable_KEGG()"
-"0","write.csv(UniProtTable_KEGG,file=""UniProtTable_KEGG.csv"",row.names=FALSE)"
-"0","}"

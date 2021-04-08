@@ -1,6 +1,0 @@
-"0","if(file.exists(""UniprotTable_Homo_sapiens_proteome_UP000005640_2020_07_29.csv"")){"
-"0","  UniProtTable<-read.csv(""UniprotTable_Homo_sapiens_proteome_UP000005640_2020_07_29.csv"")"
-"0","  }else{"
-"0","  download_UniProtTable(proteomeID = ""UP000005640"",reviewed = F)"
-"0","  write.csv(UniProtTable,(""UniprotTable_Homo_sapiens_proteome_UP000005640_2020_07_29.csv""),row.names=FALSE)"
-"0","  }"

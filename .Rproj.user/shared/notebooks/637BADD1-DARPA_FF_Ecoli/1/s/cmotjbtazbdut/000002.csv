@@ -1,6 +1,0 @@
-"0","if(file.exists(""UniProtTable_GO.csv"")){"
-"0","  UniProtTable_GO<-read.csv(file=""UniProtTable_GO.csv"")"
-"0","}else{"
-"0","generate_UniProtTable_GO()"
-"0","write.csv(UniProtTable_GO,file=""UniProtTable_GO.csv"",row.names=FALSE)"
-"0","}"
