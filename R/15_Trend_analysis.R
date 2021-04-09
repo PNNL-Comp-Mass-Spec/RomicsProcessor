@@ -38,7 +38,7 @@ getTrend <- function(sData, m = NULL, p=0.05, type = "both" ) {
     } else {
         modelT <- m
     }
-   
+
     if(type %in% c("both", "linear")){
         liModel <- lm(sData ~ m)
         linear_p <- lmp(liModel)
@@ -53,21 +53,21 @@ getTrend <- function(sData, m = NULL, p=0.05, type = "both" ) {
         quadratic_direction <- qModel$coefficients[3]
         if(quadratic_p<0.05){
             if(qModel$coefficients[3]>0){quadratic_type = "quadratic_convex"}else{quadratic_type = "quadratic_concave"}
-        }else{quadratic_type="other_trend"} 
+        }else{quadratic_type="other_trend"}
     }
-        
+
     if(type == "both"){
         if(linear_p < 0.05 || quadratic_p < 0.05){
             if (quadratic_p > linear_p){best_fitted_trend = linear_direction}else{best_fitted_trend = quadratic_type}
             }else{best_fitted_trend="other_trend"}
         results <- list(linear_p=linear_p,quadratic_p=quadratic_p,best_fitted_trend=best_fitted_trend)
         }
-        
+
     if(type == "linear"){results <- list(linear_p=linear_p,best_fitted_trend=linear_direction)}
-    
+
     if(type == "quadratic"){results <- list(quadratic_p=linear_p,best_fitted_trend=quadratic_type)}
-    
-    return(results)     
+
+    return(results)
     }
 
 #' romicsTrend()
@@ -90,21 +90,21 @@ romicsTrend <- function(romics_object, factor="main",  log_factor = FALSE, type 
     }
     #extract_data
     data <- romics_object$data
-    
+
     #check if the $statistic object already is a part of the Romics_object (if not create it)
     if(is.null(romics_object$statistics)){
         print("The Statistics layer was added to your object")
         romics_object$statistics<-data.frame(matrix(nrow=nrow(data),ncol=0))
         rownames(romics_object$statistics)<-rownames(data)
     }
-    
+
     #if the statistics object does not have the same number of rows as the data replace it by a null statistics object
     if(!is.null(romics_object$statistics)&&nrow(romics_object$statistics)!=nrow(data)){
         warning("The Statistics layer was not containing the same number of rows as your data, it was replaced by an empty statistics layer")
         romics_object$statistics<-data.frame(matrix(nrow=nrow(data),ncol=0))
         rownames(romics_object$statistics)<-rownames(data)
     }
-    
+
     #if factor is main extract the factor from the romics_object$main_factor
     if(factor=="main"){factor<-romics_object$main_factor}
     #extract the factor from the metadata
@@ -113,21 +113,21 @@ romicsTrend <- function(romics_object, factor="main",  log_factor = FALSE, type 
     f<-as.numeric(f)
     if(length(f)==1){if(is.na(f)){stop("The factor selected could not be converted to a list of numbers.")}}
     options(warn=0)
-    
-   
+
+
     #order the data and f
     data <- data[, order(f)]
-    
+
     if (log_factor == TRUE) {
         f <- log(sort(f))
     } else {
         f <- sort(f)
     }
-    
+
     for(i in 1:nrow(data)){
         if(i==1){r=t(getTrend(as.numeric(data[i,]),f,p,type))}else{r=rbind(r,t(getTrend(as.numeric(data[i,]),f,p,type)))}
         }
-    
+
     r<-data.frame(r)
     r[,1]<-as.numeric(r[,1])
     if(ncol(r)==2){
@@ -136,16 +136,16 @@ romicsTrend <- function(romics_object, factor="main",  log_factor = FALSE, type 
     r[,2]<-as.numeric(r[,2])
     r[,3]<-as.character(r[,3])
     }
-    
+
     r<-data.frame(r)
     romics_object$statistics <- cbind(romics_object$statistics, r)
 
     #print info
     print("The trend analysis columns were added to the statistics")
-    
+
     #update steps
     romics_object<-romicsUpdateSteps(romics_object,arguments)
-    
+
     return(romics_object)
 }
 
@@ -175,20 +175,20 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
         warning("The selected factor is not in the list of factors of the romics_object")
         warning(romicsFactorNames(romics_object))
     }
-    
+
     #if factor is main extract the factor from the romics_object$main_factor
     if(factor=="main"){factor<-romics_object$main_factor}
     #extract the factor from the metadata
     f<-romics_object$metadata[romicsFactorNames(romics_object)==factor,]
-    
+
     options(warn=-1)
     f<-as.numeric(f)
     if(length(f)==1){if(is.na(f)){stop("The factor selected could not be converted to a list of numbers.")}}
     options(warn=0)
-    
+
     if(!is.character(variable)&&length(variable!=1)){stop("<variable> should be a character vector of lenght 1")}
     if(missing(title)){title="auto"}
-    
+
     #find the variable indicated using a grepl function
     variable<-rownames(romics_object$data)[grepl(variable,rownames(romics_object$data))]
     if(length(variable)>1){
@@ -197,18 +197,18 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
         stop()
     }
     if(length(variable)==0){stop("your variable was not present in the romics_object")}
-    
+
     #gather the data and the groups and place this in a data.frame named data
     data<- t(as.character(romics_object$data[rownames(romics_object$data)==variable,]))
     #order the data and f
     data <- data[, order(f)]
-    
+
     if (log_factor==TRUE) {
         f <- log(sort(f))
     } else {
         f <- sort(f)
-    }  
-    
+    }
+
     trendType <- romics_object$statistics[[variable, "best_fitted_trend"]]
 
     if (trendType == "linear_increasing" || trendType == "linear_decreasing") {
@@ -226,35 +226,35 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
         tm <- f
         ym <- ma(data)
     }
-    
+
     data<-rbind(t=f, y=data)
     data<-data.frame(t(data))
     colnames(data)<-c("t","y")
     data$y<-as.numeric(data$y)
     data$t<-as.numeric(data$t)
-    
+
     ms<-rbind(t=tm, y=ym)
     ms<-data.frame(t(ms))
     colnames(ms)<-c("t","y")
     ms$y<-as.numeric(ms$y)
     ms$t<-as.numeric(ms$t)
-    
+
     #create the plots
-    plot <- ggplot() + theme_ROP() + geom_point(aes(x = t, y = y), data) + 
+    plot <- ggplot() + theme_ROP() + geom_point(aes(x = t, y = y), data) +
         geom_line(aes(x = t, y = y), ms) +
         xlab(paste0(factor, " (", factorscale, "-scale)")) +
         ylab("data")
-    
+
     if(is.na(trendPvalue)){
-        plot<- plot + 
+        plot<- plot +
             annotate("text", x=(max(data$t) - min(data$t))/2, y=max(data$y), label= trendType)
     } else {
-        plot<- plot + 
+        plot<- plot +
             annotate("text", x=(max(data$t) - min(data$t))/2, y=max(data$y), label= paste0(trendType, ", p=", trendPvalue))
     }
-    
+
     if(title=="auto"){plot<-plot+ggtitle(variable)}else{plot<-plot+ggtitle(title)}
-    
+
     return(plot)
 }
 
@@ -269,8 +269,9 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
 #' @author Geremy Clair and Feng Song
 #' @export
 romicsTrendHeatmap<-function(romics_object,factor="main", log_factor = FALSE, ...){
+    trendArgs <- romics_object$steps[max(which(grepl("fun\\|romicsTrend",romics_object$steps)))]
     if(!is.romics_object(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
-    if(is.null(romics_EPI$statistics$best_fitted_trend)){print("The trend analysis was not perform on the romics_object selected, please run the trend analysis using the function romicsTrend()")} 
+    if(is.null(romics_object$statistics$best_fitted_trend)){print("The trend analysis was not perform on the romics_object selected, please run the trend analysis using the function romicsTrend()")}
     if (grepl("factor=", trendArgs)) {
         factor <- regmatches(trendArgs, regexec("factor='(.*?)'", trendArgs))[[1]][2]
     }
@@ -283,47 +284,47 @@ romicsTrendHeatmap<-function(romics_object,factor="main", log_factor = FALSE, ..
         warning(romicsFactorNames(romics_object))
     }
     if(factor=="main"){factor<-romics_object$main_factor}
-    
+
     data<-romics_object$data
     trend<-romics_object$statistics$best_fitted_trend
-    
+
     #extract the factor from the metadata
     f<-romics_object$metadata[romicsFactorNames(romics_object)==factor,]
     options(warn=-1)
     f<-as.numeric(f)
     if(length(f)==1){if(is.na(f)){stop("The factor selected could not be converted to a list of numbers.")}}
     options(warn=0)
-    
+
     data<-data[trend!="other_trend",]
     trend<-trend[trend!="other_trend"]
-    
+
     data<-data[order(trend),order(f)]
     trend<-trend[order(trend)]
-    
+
     rowCols <- trend
-    rowCols[rowCols=="linear_decreasing"]<-"#ff0066"  
+    rowCols[rowCols=="linear_decreasing"]<-"#ff0066"
     rowCols[rowCols=="linear_increasing"]<-"#0099ff"
     rowCols[rowCols=="quadratic_concave"]<-"#ffcc00"
     rowCols[rowCols=="quadratic_convex"]<-"#9900ff"
-    
+
     if (log_factor == TRUE) {
-        f <- log(sort(f))
+        f <- log(f)
+        f <- sort(f)
     } else {
         f <- sort(f)
     }
-    
-    colnames(data)<-paste0(colnames(data),"(",round(f,3),")")
-    
+
+    colnames(data)<-paste0(colnames(data),"(",round(f,6),")")
+
     heatmap.2(as.matrix(data),
-              dendrogram='none',          
-              Rowv = FALSE, 
-              Colv = FALSE, 
+              dendrogram='none',
+              Rowv = FALSE,
+              Colv = FALSE,
               scale = "row",
               trace = "none",
               col=viridis(100),
               breaks=seq(-2, 2, length.out=101),
               RowSideColors=rowCols,
-              cexRow = NULL,
               ...
     )
 }
