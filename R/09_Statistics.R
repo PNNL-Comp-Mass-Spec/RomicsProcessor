@@ -693,7 +693,7 @@ pFrequencyPlot<-function(romics_object,p_columns="all",p=0.05,bin_width=0.01){
   print(ggplot(pval, aes(p)) +
     geom_histogram(binwidth = bin_width)+
     ggtitle(paste0("Frequency plot: ",colnames(pcol[i])))+geom_vline(xintercept=p,linetype="dashed", color = "red")+
-    geom_text(aes(x=p1,y=max(hist(pval$p, seq(0,1,by=bin_width), plot = FALSE)$counts)/2), label=paste0("\n",colnames(pcol)[i],"<",p),colour="red",angle=90)+
+    geom_text(aes(x=p1,y=max(hist(pval$p, seq(0,1,by=bin_width), plot = FALSE)$counts)/2), label=paste0("p=",p),colour="red",angle=90)+
     theme_ROP())
   }
 }
