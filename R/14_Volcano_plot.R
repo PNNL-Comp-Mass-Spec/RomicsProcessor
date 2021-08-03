@@ -67,6 +67,7 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
 
   #transform the test columns to calculate the -log10(p(test))
     test_col<- log10(test_col)*-1
+    fc_col <- stats[grepl("\\/", colnames(stats))] #collected earlier in function (following creation of 'stats' object)
 
   #identify the fold_change columns
   if(sum(grepl("log\\(",colnames(fc_col)))==ncol(fc_col)){fc_log=TRUE}else{

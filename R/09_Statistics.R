@@ -689,7 +689,7 @@ pFrequencyPlot<-function(romics_object,p_columns="all",p=0.05,bin_width=0.01){
   for (i in 1:ncol(pcol)){
   p1<-p
   pval<-data.frame(ids=rownames(pcol), p=as.numeric(t(pcol[i])))
-  print(paste0(sum(pval<p)," with ",colnames(pcol)[i],"<",p))
+  print(paste0(sum(pval<p,na.rm = T)," with ",colnames(pcol)[i],"<",p))
   print(ggplot(pval, aes(p)) +
     geom_histogram(binwidth = bin_width)+
     ggtitle(paste0("Frequency plot: ",colnames(pcol[i])))+geom_vline(xintercept=p,linetype="dashed", color = "red")+
