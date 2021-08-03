@@ -47,11 +47,12 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
   if(!stat_type %in% c("t.test","wilcox.test")){stop("'stat_type' has to be either 't.test' or 'wilcox.test'.")}
 
   #remove columns with p or padj (depending on the p_type)
-  if(p_type == "p"){
-    stats<-stats[,!grepl("_padj",colnames(stats))]
-  } else {
-    stats<-stats[,grepl("_p",colnames(stats))*!grepl("_padj",colnames(stats))]
-    }
+  if (p_type == "p") {
+    stats <- stats[, !grepl("_padj", colnames(stats))]
+  }
+  if (p_type == "padj") {
+    stats <- stats[, grepl("_Ttest_padj", colnames(stats)), drop = FALSE]
+  }
 
   #identify Ttest or WilcoxTests columns
   if(stat_type=="t.test"){
@@ -68,7 +69,6 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
     test_col<- log10(test_col)*-1
 
   #identify the fold_change columns
-  fc_col<-stats[grepl("\\/",colnames(stats))]
   if(sum(grepl("log\\(",colnames(fc_col)))==ncol(fc_col)){fc_log=TRUE}else{
   if(sum(grepl("log\\(",colnames(fc_col)))==0){fc_log=FALSE}else{
     warning("some of the fold-changes in the statistics layer of the 'romics_object' were calculated both prior and after log_transform.")

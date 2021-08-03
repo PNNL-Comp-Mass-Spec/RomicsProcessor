@@ -22,11 +22,12 @@ romicsZeroToMissing<-function(romics_object){
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param percentage_completeness Numerical vector indicating the minimum percentage of data to be considered
 #' @param main_factor has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames() on the romics_object
+#' @param all_groups if this parameter is TRUE the completeness requirement is for each and every group, if not, the completeness requirement is for at least one group.
 #' @details  This function will use the completeness of the protein in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default main_factor is the main factor of the object, the percentage_completeness is set at 50%
 #' @return  The function will return a filtered romics_object with the rows of the data and missing data object removed when appropriate.
-#' @author Geremy Clair
+#' @author Geremy Clair, Nicholas Day
 #' @export
-romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_factor = "main"){
+romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_factor = "main",all_groups=FALSE){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(main_factor)){
@@ -37,7 +38,7 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
     percentage_completeness<-50}
   if(percentage_completeness<0 & percentage_completeness>100){stop("the completeness has to be comprised between 0 and 100 %")}
   if(sum(is.na(romics_object$data))==0){warning("There is no missing values in this dataset data to be removed")}
-
+  if(missing(all_groups)){all_groups=FALSE}
   #extract main factor
   if(main_factor=="none"){
     selected_factor<-rep("overal_sample_number",ncol(romics_object$metadata))}
@@ -84,11 +85,17 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
     vec<-rowSums(!is.na(usable.df))>=min_full[[i]]
     list_usable[,i] <- vec
   }
-
   colnames(list_usable)<-level_factor
 
-  #concatenate for the factors and keep if TRUE in at least one level
-  usable <- rowSums(list_usable)>0
+  if (all_groups == "TRUE") {
+    usable_groups <- (length_factor - 1) #if TRUE, then apply filter to all groups
+  }
+  else {
+    if (all_groups == "FALSE") {
+      usable_groups <- 0 #if FALSE, filter applies to at least one group at a minimum
+    }
+  }
+  usable <- rowSums(list_usable) > usable_groups
 
   #remove the rows based on this usable vector
   romics_object$data<-romics_object$data[usable,]

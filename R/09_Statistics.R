@@ -152,12 +152,15 @@ romicsSd<-function(romics_object, factor="main"){
 #' @param var.equal a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
 #' @param padj a logical variable indincating wheter to perform or not adjustment of pvalues
 #' @param padj_method correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}
+#' @param mode must be in {"vs", "enrichments"} indicates if the groups should be compaired by pair or against all other groups
 #' @param factor a character string indicating the factor to use for the test, the list of the available factor can be obtained by using the function romics_factors(), if missing the function will use the main factor of the object
+#' @param percentage_completeness a numerical value comprised between 0 and 100 to indicate the minimum completeness required in at least one group calculate the T.test (if set completeness is not met, p and fold change will be NA)
+#' @param reverse_order a boolean to indicate if the order of the factors needs to be reversed (this will make the calculated fold changes values A/B become B/A or log2(A/B) become log2(B/A))
 #' @details When paired T.test are performed it is possible to include a second factor to generate the pairs. This function will also calculate the fold-changes or log2(fold-change). Please, note that the test will automatically determine if a log tranformation was performed to the object, subsequently we recommend to import not pre-logged data.frames when creating the object. For paired T.tests, it is possible to set a second factor containing the pairs, if missing the function will consider the pairs based on the column order in the romics_object.
 #' @return an romics_object with the statistical layer containing the newly generated t.tests and fold-changes
 #' @author Geremy Clair
 #' @export
-romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pairing_factor="none", var.equal=FALSE, factor = "main", padj=TRUE, padj_method="BH",mode="vs",...){
+romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pairing_factor="none", var.equal=FALSE, factor = "main", padj=TRUE, padj_method="BH",mode="vs",percentage_completeness=0,reverse_order=FALSE, ...){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(factor)){factor="main"}
@@ -166,6 +169,7 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
     warning(romicsFactorNames(romics_object))
   }
   if(missing(paired)){paired<-FALSE}
+  if(missing(reverse_order)){reverse_order<-FALSE}
   if(missing(var.equal)){var.equal<-FALSE}
   if(missing(padj)){padj<-TRUE}
   if(missing(padj_method)){padj_method<-"BH"}
@@ -173,9 +177,14 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
   if(missing(pairing_factor)){pairing_factor ="none"}
   if(missing(mode)){mode="vs"}
   if(!mode %in% c("vs", "enrichment")){stop("'mode' has to be either 'vs' or 'enrichment' to indicate if the comparison should be done between all possible groups or if the features within a given group should be compared to all the other groups (enrichment).")}
+  if(missing(percentage_completeness)){percentage_completeness<-0}
+  if(percentage_completeness<0 & percentage_completeness>100){stop("the completeness has to be comprised between 0 and 100 %")}
 
   #load data
   data<-romics_object$data
+
+  #load missing
+  missingdata<-romics_object$missingdata
 
   #check if the $statistic object already is a part of the Romics_object (if not create it)
   if(is.null(romics_object$statistics)){
@@ -208,6 +217,7 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
 
   #order the data, the factor AND the paired_factor based on the factor and the paired_factor
   data<-data[,order(factor,pairing_factor)]
+  missingdata<-missingdata[,order(factor,pairing_factor)]
 
   #create an object containing both factor to sort the two at the time
   both_factor<-paste0(factor,"@",pairing_factor)
@@ -234,15 +244,15 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
   if(mode=="vs"){
     #determine the list of combinations to consider
     by2combinations<- t(combn(levels_factor,2))
+    if(reverse_order==TRUE){by2combinations<-by2combinations[,2:1]}
 
     #loop calculating pval,  fold changes
     for(i in 1:nrow(by2combinations)){
       for(j in 1:nrow(data)){
-        #calculate fold change (or log2(foldchange)) column
         if(log_transformed==TRUE){
-          fold_change[j] <- mean(as.numeric(data[j,factor==by2combinations[i,2]]))-mean(as.numeric(data[j,factor==by2combinations[i,1]]))
+          fold_change[j] <- mean(as.numeric(data[j,factor==by2combinations[i,2]]),na.rm = T)-mean(as.numeric(data[j,factor==by2combinations[i,1]]),na.rm = T)
         }else{
-          fold_change[j] <- mean(as.numeric(data[j,factor==by2combinations[i,2]]))/mean(as.numeric(data[j,factor==by2combinations[i,1]]))
+          fold_change[j] <- mean(as.numeric(data[j,factor==by2combinations[i,2]]),na.rm = T)/mean(as.numeric(data[j,factor==by2combinations[i,1]]),na.rm = T)
         }
         #calculate pvalues column
         if(log_transformed==TRUE & fold_change[j]==0 || log_transformed==FALSE && fold_change[j]==1){
@@ -252,6 +262,17 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
           t_result[j] <- t.test(as.numeric(data[j,factor==by2combinations[i,1]]),as.numeric(data[j,factor==by2combinations[i,2]]),alternative=alternative, paired = paired, var.equal=var.equal)$p.value
         }
       }
+
+      if(percentage_completeness>0){
+        replicates_factor <- as.double(table(factor))
+        names(replicates_factor) <- levels_factor
+        replicates_factor <- replicates_factor[names(replicates_factor)%in%by2combinations[i,]]
+        max_empty <- floor((replicates_factor)*(1-percentage_completeness/100))
+        m1<-rowSums(missingdata[,factor==by2combinations[i,1]])>max_empty[names(max_empty)==by2combinations[i,1]]
+        m2<-rowSums(missingdata[,factor==by2combinations[i,2]])>max_empty[names(max_empty)==by2combinations[i,2]]
+        fold_change[m1*m2==1]<-NA
+        t_result[m1*m2==1]<-NA
+        }
 
       #add T.test p to T_table
       T_table[,paste(by2combinations[i,2],"_vs_",by2combinations[i,1],"_Ttest_p",sep="")]<- t_result
@@ -276,9 +297,9 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
       for(j in 1:nrow(data)){
         #calculate fold change (or log2(foldchange)) column
         if(log_transformed==TRUE){
-          fold_change[j] <- mean(as.numeric(data[j,factor==levels_factor[i]]))-mean(as.numeric(data[j,factor!=levels_factor[i]]))
+          fold_change[j] <- mean(as.numeric(data[j,factor==levels_factor[i]]),na.rm = T)-mean(as.numeric(data[j,factor!=levels_factor[i]]),na.rm = T)
         }else{
-          fold_change[j] <- mean(as.numeric(data[j,factor==levels_factor[i]]))/mean(as.numeric(data[j,factor!=levels_factor[i]]))
+          fold_change[j] <- mean(as.numeric(data[j,factor==levels_factor[i]]),na.rm = T)/mean(as.numeric(data[j,factor!=levels_factor[i]]),na.rm = T)
         }
         #calculate pvalues column
         if(log_transformed==TRUE & fold_change[j]==0 || log_transformed==FALSE && fold_change[j]==1){
@@ -287,6 +308,19 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
         }else{
           t_result[j] <- t.test(x = as.numeric(data[j,factor==levels_factor[i]]),y=as.numeric(data[j,factor!=levels_factor[i]]),alternative=alternative, paired = paired,...)$p.value
         }
+      }
+
+      if(percentage_completeness>0){
+        replicates_factor <- as.double(table(factor))
+        names(replicates_factor) <- levels_factor
+        replicates_factor <- replicates_factor[names(replicates_factor)]
+        other_factors <- sum(replicates_factor[names(replicates_factor)!=levels_factor[i]])
+        replicates_factor<-c(replicates_factor[names(replicates_factor)==levels_factor[i]],other_factors=other_factors)
+        max_empty <- floor((replicates_factor)*(1-percentage_completeness/100))
+        m1<-rowSums(missingdata[,factor==levels_factor[i]])>max_empty[1]
+        m2<-rowSums(missingdata[,factor!=levels_factor[i]])>max_empty[2]
+        fold_change[m1*m2==1]<-NA
+        t_result[m1*m2==1]<-NA
       }
 
       #add t.test p to T_table
@@ -587,7 +621,7 @@ romicsZscores<-function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
 
   data<-romics_object$data
-  Means<-rowMeans(data)
+  Means<-rowMeans(data,na.rm = T)
   Stdev<- apply(data,1, sd, na.rm = TRUE)
 
 
@@ -629,3 +663,37 @@ romicsZscores<-function(romics_object){
 
   return(romics_object)
   }
+
+#' pFrequencyPlot()
+#' @description makes a frequency plot of the pvalues and adjustedpvalues (columns of the statistics layer ending by '_p' and '_padj')
+#' @param romics_object A romics_object created with the function romicsCreateObject()
+#' @param p_columns 'all' by default, otherwise it can be a text vector containing the columns to be plotted.
+#' @param p indicate the target pvalue to be plotted with a red dotted bar.
+#' @param bin_width numeric vector, by default 0.01 indicate the width of the frequency bins
+#' @details plot all or a specified list of pvalue and adjusted pvalues frequency plots
+#' @return returns one or multiple plots
+#' @author Geremy Clair
+#' @export
+
+pFrequencyPlot<-function(romics_object,p_columns="all",p=0.05,bin_width=0.01){
+  arguments<-as.list(match.call())
+  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+  if(missing(p_columns)){p_columns="all"}
+  if(!is.character(p_columns)){stop("p_columns has to be a character vector.")}
+  if(missing(p)|!is.numeric(p)){p=0.05}
+
+  pcol<-romics_object$statistics[, grepl(".*_p$",colnames(romics_object$statistics))|grepl(".*_padj$",colnames(romics_object$statistics))]
+
+  if(p_columns!="all"){pcol<-pcol[,colnames(pcol) %in% p_columns]}
+
+  for (i in 1:ncol(pcol)){
+  p1<-p
+  pval<-data.frame(ids=rownames(pcol), p=as.numeric(t(pcol[i])))
+  print(paste0(sum(pval<p)," with ",colnames(pcol)[i],"<",p))
+  print(ggplot(pval, aes(p)) +
+    geom_histogram(binwidth = bin_width)+
+    ggtitle(paste0("Frequency plot: ",colnames(pcol[i])))+geom_vline(xintercept=p,linetype="dashed", color = "red")+
+    geom_text(aes(x=p1,y=max(hist(pval$p, seq(0,1,by=bin_width), plot = FALSE)$counts)/2), label=paste0("\n",colnames(pcol)[i],"<",p),colour="red",angle=90)+
+    theme_ROP())
+  }
+}

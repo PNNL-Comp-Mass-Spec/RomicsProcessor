@@ -14,6 +14,8 @@ romicsTtest(
   padj = TRUE,
   padj_method = "BH",
   mode = "vs",
+  percentage_completeness = 0,
+  reverse_order = FALSE,
   ...
 )
 }
@@ -33,6 +35,12 @@ romicsTtest(
 \item{padj}{a logical variable indincating wheter to perform or not adjustment of pvalues}
 
 \item{padj_method}{correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}}
+
+\item{mode}{must be in {"vs", "enrichments"} indicates if the groups should be compaired by pair or against all other groups}
+
+\item{percentage_completeness}{a numerical value comprised between 0 and 100 to indicate the minimum completeness required in at least one group calculate the T.test (if set completeness is not met, p and fold change will be NA)}
+
+\item{reverse_order}{a boolean to indicate if the order of the factors needs to be reversed (this will make the calculated fold changes values A/B become B/A or log2(A/B) become log2(B/A))}
 }
 \value{
 an romics_object with the statistical layer containing the newly generated t.tests and fold-changes
