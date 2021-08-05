@@ -74,3 +74,4 @@ singleVariablePlot<-function(romics_object, variable="variable", type = "jb", fa
 
   return(plot)
   }
+
