@@ -50,7 +50,6 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
   }else{
     if(main_factor!="none"){
     stop("The selected <main_factor> was not present in the list of factor of this romics_object use the function romicsFactorNames() to identify the usable factors.")}}
-
   #transform in character
   selected_factor<-as.character(t(selected_factor))
   #create a table counting each factor level
@@ -94,7 +93,7 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
     if (all_groups == "FALSE") {
       usable_groups <- 0 #if FALSE, filter applies to at least one group at a minimum
     }
-  }
+}
   usable <- rowSums(list_usable) > usable_groups
 
   #remove the rows based on this usable vector
@@ -111,6 +110,9 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
 
   romics_object<- romicsUpdateColor(romics_object)
   romics_object<-romicsUpdateSteps(romics_object,arguments)
+
+  #message with the number of proteins removed
+  print(paste0(nrow(romics_object$data),"/", nrow(romics_object$original_data)," proteins remained after filtering", " (",round(nrow(romics_object$data)/nrow(romics_object$original_data)*100,2),"%)."))
 
   #return object
   return(romics_object)
