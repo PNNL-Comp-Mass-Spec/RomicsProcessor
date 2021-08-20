@@ -424,7 +424,7 @@ romicsUpdateSteps<-function(romics_object, arguments){
   funName<-arguments[[1]]
   argumentsNames<-names(arguments)[2:length(arguments)]
 
-  if(!exists(romics_object$steps)){stop(paste0("The function ",funName," was run on an object that was not an romics_object"))}
+  if(!is.romics_object(romics_object)){stop(paste0("The function ",funName," was run on an object that was not an romics_object"))}
 
   steps<- c(paste0("date|",gsub(" ","_",format(Sys.time(),"%b_%d_%Y_%X")),"|",funName))
   fun<-paste0(funName,"(")
