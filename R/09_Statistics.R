@@ -243,7 +243,7 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
 
   if(mode=="vs"){
     #determine the list of combinations to consider
-    by2combinations<- t(combn(levels_factor,2))
+    by2combinations<- data.frame(t(combn(levels_factor,2)))
     if(reverse_order==TRUE){by2combinations<-by2combinations[,2:1]}
 
     #loop calculating pval,  fold changes

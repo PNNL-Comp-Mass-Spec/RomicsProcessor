@@ -48,10 +48,10 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
 
   #remove columns with p or padj (depending on the p_type)
   if (p_type == "p") {
-    stats <- stats[, !grepl("_padj", colnames(stats))]
+    stats <- stats[, !grepl("_padj$", colnames(stats))]
   }
   if (p_type == "padj") {
-    stats <- stats[, grepl("_Ttest_padj", colnames(stats)), drop = FALSE]
+    stats <- stats[, !grepl("_p$", colnames(stats))]
   }
 
   #identify Ttest or WilcoxTests columns
@@ -88,9 +88,8 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
     }
 
   #format the colnames so they are identical to the pvalues ones
-  colnames(fc_col)<-sub("log","",colnames(fc_col))
-  colnames(fc_col)<-sub("\\(","",colnames(fc_col))
-  colnames(fc_col)<-sub("\\)","",colnames(fc_col))
+  colnames(fc_col)<-sub("log\\(","",colnames(fc_col))
+  colnames(fc_col)<-sub("\\)$","",colnames(fc_col))
 
   minus_log_p<-log10(p)*-1
 
