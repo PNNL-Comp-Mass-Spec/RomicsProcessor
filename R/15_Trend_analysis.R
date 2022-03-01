@@ -65,7 +65,7 @@ getTrend <- function(sData, m = NULL, p=0.05, type = "both" ) {
 
     if(type == "linear"){results <- list(linear_p=linear_p,best_fitted_trend=linear_direction)}
 
-    if(type == "quadratic"){results <- list(quadratic_p=linear_p,best_fitted_trend=quadratic_type)}
+    if(type == "quadratic"){results <- list(quadratic_p=quadratic_p,best_fitted_trend=quadratic_type)}
 
     return(results)
     }
