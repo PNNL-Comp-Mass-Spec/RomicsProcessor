@@ -27,7 +27,7 @@ The function will return a filtered romics_object with the rows of the data and 
 Filters out the variables of the romics_object below the choosen percentage of completeness. The percentage of completeness can either be global or by factor of a given factor (in this later case if the percentage of completeness is achieved for at least one level of the factor it the variable will be kept).
 }
 \details{
-This function will use the completeness of the protein in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default main_factor is the main factor of the object, the percentage_completeness is set at 50%
+This function will use the completeness of the features in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default main_factor is the main factor of the object, the percentage_completeness is set at 50%
 }
 \author{
 Geremy Clair, Nicholas Day

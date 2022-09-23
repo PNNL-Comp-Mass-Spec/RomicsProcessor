@@ -19,7 +19,7 @@ romicsTrendHeatmap(romics_object, factor = "main", log_factor = FALSE, ...)
 This function returns a list
 }
 \description{
-This function plots a heatmap of all the proteins by trend type??
+This function plots a heatmap of all the featuress by trend type
 }
 \details{
 this function enables to calculate and extract the linear or quardratic trend p values and the best fitted trend (e.g. linear_increasing, linear_decreasing, quadratic_concave,quadratic_convex)

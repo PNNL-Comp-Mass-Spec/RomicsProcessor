@@ -32,7 +32,7 @@ romicsVariableHclust(
 
 \item{scale_data}{Boolean indicating wether the data should be scaled or not.}
 
-\item{ANOVA_filter}{Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the proteins below the filter will be displayed on the heatmap)}
+\item{ANOVA_filter}{Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the features below the filter will be displayed on the heatmap)}
 
 \item{p}{Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).}
 

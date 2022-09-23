@@ -1,6 +1,6 @@
 #' romicsFilterVariable()
 #' @description Filters Romics_objects based on their variable names or statistics note that ALL the filters will be taken in consideration simultaneously
-#' @param ANOVA_filter Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the proteins below the filter will be displayed on the heatmap)
+#' @param ANOVA_filter Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the features below the filter will be displayed on the heatmap)
 #' @param p Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).
 #' @param variable_names A character vector that enable to filter based on the names of the variables, if variable_name set to 'none' the filter won't be applied.
 #' @param statCol A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().
@@ -113,7 +113,7 @@ romicsFilterVariable<-function(romics_object,
 #' @param variable_hclust_method_dist Variable dist method to be used. This must be one of "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski", "pearson", "spearman" or "kendall".
 #' @param variable_hclust_method_hclust Variable agglomeration method to be used. This should be (an unambiguous abbreviation of) one of "ward", "single", "complete", "average", "mcquitty", "median" or "centroid".
 #' @param variable_hclust_number Numerical of length 1. Indicates the number of clusters to be used for the coloring of the variable hclust
-#' @param ANOVA_filter Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the proteins below the filter will be displayed on the heatmap)
+#' @param ANOVA_filter Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the features below the filter will be displayed on the heatmap)
 #' @param p Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).
 #' @param statCol A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().
 #' @param statCol_filter Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')
@@ -127,7 +127,7 @@ romicsFilterVariable<-function(romics_object,
 #' @param margin numeric vector of length 2 containing the margins (see par(mar= *)) for column and row names, respectively.
 #' @param key.title main title of the color key. If set to NA no title will be plotted.
 #' @param key.xlab x axis label of the color key. If set to NA no label will be plotted.
-#' @param ...
+#' @param ... parameters to send to heatmap.2
 #' @details Create a customizable and filterable heatmap based on the romics_object statistics Layer. the ANOVA filter enables to restrict the variable displayed to be only the ones passing an ANOVA
 #' @details 2 stat column filters (StatCol) can be set simultaneously to restrict the variable displayed. Each filter enable to sort based on a given column of the statistics layer (statCol_filter) of an romics_object (the list of columns can be obtained by using the function romicsCalculatedStats()) using a specific text (statCol_text) this text indicate what parameter should be used to filter this column (example: column has to be positive -> statCol_text= '>0'). Note that the ANOVA filter is applied first (if any) and then the filters are applied sequencially (first, then second, then third).
 #' @return A heatmap generated using the gplots::heatmap.2() function. Subsequently any adjustment of the heatmap.2 can be performed as described in gplots::heatmap.2() documentation.
@@ -261,7 +261,7 @@ romicsHeatmap<-function(romics_object,
 #' @param clusters Numerical of length 1. Indicates the number of clusters to be used for the coloring of the variable hclust. 8 by default.
 #' @param method_dist Dist method to be used. This must be one of "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski", "pearson", "spearman" or "kendall".
 #' @param method_hclust Agglomeration method to be used. This should be (an unambiguous abbreviation of) one of "ward", "single", "complete", "average", "mcquitty", "median" or "centroid".
-#' @param ANOVA_filter Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the proteins below the filter will be displayed on the heatmap)
+#' @param ANOVA_filter Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the features below the filter will be displayed on the heatmap)
 #' @param p Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).
 #' @param statCol A column contained in the statistical layer of the romics_object, the list of columns can be obtained by using the function romicsCalculatedStats().
 #' @param statCol_filter Character to indicate how this column should be filtered (e.g. '<=0.05','>0.05','==1', '==TRUE', '>2')

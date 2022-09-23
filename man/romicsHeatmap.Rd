@@ -53,7 +53,7 @@ romicsHeatmap(
 
 \item{variable_hclust_number}{Numerical of length 1. Indicates the number of clusters to be used for the coloring of the variable hclust}
 
-\item{ANOVA_filter}{Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the proteins below the filter will be displayed on the heatmap)}
+\item{ANOVA_filter}{Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to plot the Heatmap (only the features below the filter will be displayed on the heatmap)}
 
 \item{p}{Numerical of length 1 indicating the value of the ANOVA_filter cutoff (anything below this value will be conserved).}
 
@@ -76,6 +76,8 @@ romicsHeatmap(
 \item{key.title}{main title of the color key. If set to NA no title will be plotted.}
 
 \item{key.xlab}{x axis label of the color key. If set to NA no label will be plotted.}
+
+\item{...}{parameters to send to heatmap.2}
 
 \item{LabRow}{character vectors with row labels to use; these default to rownames(x)}
 

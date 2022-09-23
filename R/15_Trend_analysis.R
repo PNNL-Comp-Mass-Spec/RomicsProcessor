@@ -259,7 +259,7 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
 }
 
 #' romicsTrendHeatmap()
-#' @description This function plots a heatmap of all the proteins by trend type??
+#' @description This function plots a heatmap of all the featuress by trend type
 #' @param romics_object has to be a romics_object created using the function romicsCreateObject() (see dedicated documentation) and has to be numeric.
 #' @param factor has to be a factor contained in the romics_object created, the list of factor can be extracted using the function romicsFactorNames() (see dedicated documentation)
 #' @param log_factor Boolean, indicate if the factor needs to be log transformed (TRUE), or not (FALSE). By default the factor is not transformed

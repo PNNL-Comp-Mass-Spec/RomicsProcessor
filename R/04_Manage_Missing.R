@@ -23,7 +23,7 @@ romicsZeroToMissing<-function(romics_object){
 #' @param percentage_completeness Numerical vector indicating the minimum percentage of data to be considered
 #' @param main_factor has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames() on the romics_object
 #' @param all_groups if this parameter is TRUE the completeness requirement is for each and every group, if not, the completeness requirement is for at least one group.
-#' @details  This function will use the completeness of the protein in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default main_factor is the main factor of the object, the percentage_completeness is set at 50%
+#' @details  This function will use the completeness of the features in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default main_factor is the main factor of the object, the percentage_completeness is set at 50%
 #' @return  The function will return a filtered romics_object with the rows of the data and missing data object removed when appropriate.
 #' @author Geremy Clair, Nicholas Day
 #' @export
@@ -111,8 +111,8 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
   romics_object<- romicsUpdateColor(romics_object)
   romics_object<-romicsUpdateSteps(romics_object,arguments)
 
-  #message with the number of proteins removed
-  print(paste0(nrow(romics_object$data),"/", nrow(romics_object$original_data)," proteins remained after filtering", " (",round(nrow(romics_object$data)/nrow(romics_object$original_data)*100,2),"%)."))
+  #message with the number of features removed
+  print(paste0(nrow(romics_object$data),"/", nrow(romics_object$original_data)," features remained after filtering", " (",round(nrow(romics_object$data)/nrow(romics_object$original_data)*100,2),"%)."))
 
   #return object
   return(romics_object)
