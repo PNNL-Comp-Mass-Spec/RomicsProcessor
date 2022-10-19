@@ -127,6 +127,7 @@ romicsFilterVariable<-function(romics_object,
 #' @param margin numeric vector of length 2 containing the margins (see par(mar= *)) for column and row names, respectively.
 #' @param key.title main title of the color key. If set to NA no title will be plotted.
 #' @param key.xlab x axis label of the color key. If set to NA no label will be plotted.
+#' @param RowSideColor character vector has to be either 'none' or a calculated statistics (ending by _p or _padj) from the romics_object
 #' @param ... parameters to send to heatmap.2
 #' @details Create a customizable and filterable heatmap based on the romics_object statistics Layer. the ANOVA filter enables to restrict the variable displayed to be only the ones passing an ANOVA
 #' @details 2 stat column filters (StatCol) can be set simultaneously to restrict the variable displayed. Each filter enable to sort based on a given column of the statistics layer (statCol_filter) of an romics_object (the list of columns can be obtained by using the function romicsCalculatedStats()) using a specific text (statCol_text) this text indicate what parameter should be used to filter this column (example: column has to be positive -> statCol_text= '>0'). Note that the ANOVA filter is applied first (if any) and then the filters are applied sequencially (first, then second, then third).
@@ -157,6 +158,7 @@ romicsHeatmap<-function(romics_object,
                         margins = c(15, 5),
                         key.title = "Scaled Heatmap",
                         key.xlab = "Z-scores",
+                        RowSideColor = "ANOVA_p",
                         ...){
 
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -182,10 +184,14 @@ romicsHeatmap<-function(romics_object,
   if(missing(statCol2)){statCol2="none"}
   if(missing(statCol_filter)){statCol_filter="none"}
   if(missing(statCol2_filter)){statCol2_filter="none"}
+  if(missing(RowSideColor)){RowSideColor<-"none"}
+  if(!RowSideColor %in% c("none",romicsCalculatedStats(romics_object))){stop("<RowSideColor> has to be 'none' or a calculated statistics of the Romics_object (use the function romicsCalculatedStats()).")}
+  if(!(grepl("_p",RowSideColor)|grepl("_padj",RowSideColor)|RowSideColor=="none")){stop("<RowSideColor> has to finish by '_p' or '_padj'.")}
 
   #extract the data
-  data<- romicsFilterVariable(romics_object,ANOVA_filter=ANOVA_filter,p=p,variable_names="none",statCol=statCol,statCol_filter=statCol_filter,statCol2=statCol2,statCol2_filter=statCol2_filter)$data
-
+  ro<- romicsFilterVariable(romics_object,ANOVA_filter=ANOVA_filter,p=p,variable_names="none",statCol=statCol,statCol_filter=statCol_filter,statCol2=statCol2,statCol2_filter=statCol2_filter)
+  data<-ro$data
+  stat<-ro$stat
   #the variable_hclust_number as to be a round number
   variable_hclust_number<-as.integer(variable_hclust_number)
 
@@ -237,6 +243,7 @@ romicsHeatmap<-function(romics_object,
   if(missing(key.xlab)){key.xlab = "Z-scores"} #change title
 
   #make heatmap
+  if(RowSideColor=="none"){
   heatmap.2(scaled_data,
             notecol=notecol,
             density.info=density.info,
@@ -252,8 +259,31 @@ romicsHeatmap<-function(romics_object,
             key.title = key.title,
             key.xlab = key.xlab,
             ...)
-}
+  }else{
+  RSC<-romics_object$statistics[,colnames(romics_object$statistics)==RowSideColor]
+  RSC<- RSC<p
+  RSC[RSC==TRUE]<-"red"
+  RSC[RSC==FALSE]<-"gray50"
+  heatmap.2(scaled_data,
+            notecol=notecol,
+            density.info=density.info,
+            trace=trace,
+            col=palette,
+            breaks=col_breaks,
+            Rowv = variable_dd,
+            Colv = sample_dd,
+            labRow = labRow,
+            margins=margins,
+            cexCol=cexCol,
+            keysize = 1,
+            key.title = key.title,
+            key.xlab = key.xlab,
+            RowSideColors = RSC,
+            ...)
 
+  }
+
+}
 
 #' romicsVariableHclust()
 #' @description  Plots a hierarchical clustering for the variables and adds two columns in the statistical layer of the romics_object indicating the order of the clustering and the clusters identifier of each variable.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsUpdateSteps}
 \alias{romicsUpdateSteps}
-\title{stepUpdater()}
+\title{romicsUpdateSteps()}
 \usage{
 romicsUpdateSteps(romics_object, arguments)
 }

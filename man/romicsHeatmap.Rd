@@ -29,6 +29,7 @@ romicsHeatmap(
   margins = c(15, 5),
   key.title = "Scaled Heatmap",
   key.xlab = "Z-scores",
+  RowSideColor = "ANOVA_p",
   ...
 )
 }
@@ -76,6 +77,8 @@ romicsHeatmap(
 \item{key.title}{main title of the color key. If set to NA no title will be plotted.}
 
 \item{key.xlab}{x axis label of the color key. If set to NA no label will be plotted.}
+
+\item{RowSideColor}{character vector has to be either 'none' or a calculated statistics (ending by _p or _padj) from the romics_object}
 
 \item{...}{parameters to send to heatmap.2}
 

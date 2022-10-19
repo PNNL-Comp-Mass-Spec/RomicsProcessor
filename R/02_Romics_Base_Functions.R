@@ -406,7 +406,7 @@ romicsUpdateColor<- function(romics_object) {
 
 }
 
-#' stepUpdater()
+#' romicsUpdateSteps()
 #' @description Updates the steps of the romics_object, require to have recorded the argument in earlier steps of the function
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param arguments the arguments of a function are required to read the user input of a function, this user input will be used to generate the steps, the arguments are obtained by running the following code <arguments<-as.list(match.call())> in the first line of a function
@@ -475,7 +475,19 @@ is.romics_object<-function(romics_object){
 #' @export
 romicsLogCheck<-function(romics_object){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
-  if(sum(grepl("log2transform\\(",romics_object$steps))>0 | sum(grepl("log10transform\\(",romics_object$steps))>0){return(TRUE)}else{return(FALSE)}
+
+  log<-0
+  r<-FALSE
+  if((sum(romicsSteps(romics_object,show_dates = F,show_details = F)=="log2transform")-
+      sum(romicsSteps(romics_object,show_dates = F,show_details = F)=="unlog2data")) %% 2 == 1 ){log<-log+2}
+
+  if((sum(romicsSteps(romics_object,show_dates = F,show_details = F)=="log10transform")-
+      sum(romicsSteps(romics_object,show_dates = F,show_details = F)=="unlog10data")) %% 2 == 1 ){log<-log+10}
+
+  if(log==2|log==10){r<-TRUE}
+  if(log>10){stop("The data was logged more than once")}
+
+  return(r)
 }
 
 #' romicsCreateDependencies()

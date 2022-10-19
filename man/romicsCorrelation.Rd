@@ -10,6 +10,7 @@ romicsCorrelation(
   factor = "main",
   imputed = FALSE,
   corr_type = "pearson",
+  mode = "scatter",
   ...
 )
 }
@@ -20,7 +21,11 @@ romicsCorrelation(
 
 \item{factor}{Indicates what factor to use for the <by_level> plotting, by default ("main")}
 
-\item{imputed}{has to be either 'pearson', 'kendall',or 'spearman', indicates the type of correlation calculated.}
+\item{imputed}{Indicates if the imputed values should be used for the correlation (FALSE by default) if TRUE, the data employed will utilize both imputed and non imputed values.}
+
+\item{corr_type}{has to be either 'pearson', 'kendall',or 'spearman', indicates the type of correlation calculated.}
+
+\item{mode}{has to be either 'scatter' or 'colors' to indicate the type of plot to display}
 
 \item{...}{passes argument to the function ggpairs from the package GGally, type ?ggpairs() for documentation}
 }
@@ -31,7 +36,10 @@ This function will print different plot requested
 generate one or multiple volcano plots from t.test or wilcox.test run using the functions romicsTtest() or romicsWilcoxTest() respectively
 }
 \details{
-generate one or multiple correlation plots using the function ggpairs from the package GGally
+generate one or multiple correlation plots using the function ggpairs from the package GGally (scatter mode) or a simple color heatmap (color mode).
+}
+\examples{
+romicsCorrelation(Example_processed_romics_object,by_level=FALSE,factor="main",imputed=T,corr_type="pearson",mode="color")
 }
 \author{
 Geremy Clair
