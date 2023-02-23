@@ -1,0 +1,7 @@
+INFO [2022-12-19 13:58:32] [[1]]
+INFO [2022-12-19 13:58:32] list_venn_adult
+INFO [2022-12-19 13:58:32] 
+INFO [2022-12-19 13:58:32] $filename
+INFO [2022-12-19 13:58:32] [1] "test"
+INFO [2022-12-19 13:58:32] 
+ERROR [2022-12-19 13:58:32] Incorrect number of elements.
