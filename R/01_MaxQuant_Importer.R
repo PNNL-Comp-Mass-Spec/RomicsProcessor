@@ -33,22 +33,25 @@ if(!is.numeric(min_razor_peptides) & !is.numeric(min_razor_peptides)){stop("'min
 if (min_peptides>1){
   pep_count<-prGR$peptide.counts..all.
   pep_count<-sub("\\;.*","",pep_count)
+  pep_count<-as.numeric(pep_count)
   print(paste0(sum(pep_count<=min_peptides)," protein had less than ",min_peptides," peptides and were removed."))
-  prGR<-prGR[pep_count<=min_peptides,]
+  prGR<-prGR[pep_count>=min_peptides,]
 }
 
 if (min_unique_peptides>1){
   pep_count<-prGR$peptide.counts..razor.unique.
   pep_count<-sub("\\;.*","",pep_count)
+  pep_count<-as.numeric(pep_count)
   print(paste0(sum(pep_count<=min_unique_peptides)," protein had less than ",min_unique_peptides," peptides and were removed."))
-  prGR<-prGR[pep_count<=min_unique_peptides,]
+  prGR<-prGR[pep_count>=min_unique_peptides,]
 }
 
 if (min_razor_peptides>1){
   pep_count<-prGR$peptide.counts..razor.unique.
   pep_count<-sub("\\;.*","",pep_count)
+  pep_count<-as.numeric(pep_count)
   print(paste0(sum(pep_count<=min_razor_peptides)," protein had less than ",min_razor_peptides," peptides and were removed."))
-  prGR<-prGR[pep_count<=min_razor_peptides,]
+  prGR<-prGR[pep_count>=min_razor_peptides,]
 }
 
 #set the list of ids to keep

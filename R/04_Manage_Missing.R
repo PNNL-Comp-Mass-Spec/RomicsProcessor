@@ -27,6 +27,7 @@ romicsZeroToMissing<-function(romics_object){
 #' @return  The function will return a filtered romics_object with the rows of the data and missing data object removed when appropriate.
 #' @author Geremy Clair, Nicholas Day
 #' @export
+
 romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_factor = "main",all_groups=FALSE){
   arguments<-as.list(match.call())
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
@@ -80,16 +81,15 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
   rownames(list_usable)<-rownames(romics_object$data)
   for (i in 1:length_factor) {
     usable.df <- data.frame()
-    usable.df <- romics_object$data[,grepl(level_factor[i],selected_factor)]
-    vec<-rowSums(!is.na(usable.df))>=min_full[[i]]
+    usable.df <- romics_object$missingdata[,selected_factor %in% level_factor[i]]
+    vec<-rowSums(usable.df!=TRUE)>=min_full[[i]]
     list_usable[,i] <- vec
   }
   colnames(list_usable)<-level_factor
 
   if (all_groups == "TRUE") {
     usable_groups <- (length_factor - 1) #if TRUE, then apply filter to all groups
-  }
-  else {
+  } else {
     if (all_groups == "FALSE") {
       usable_groups <- 0 #if FALSE, filter applies to at least one group at a minimum
     }
@@ -100,19 +100,18 @@ romicsFilterMissing<-function(romics_object, percentage_completeness=50, main_fa
   romics_object$data<-romics_object$data[usable,]
 
   #update the missingness
-  romics_object$missingdata<-data.frame(is.na(romics_object$data))
+  romics_object$missingdata<-romics_object$missingdata[usable,]
 
   #print the number info
   print(paste(sum(usable==FALSE),"rows were removed for the data"))
   print(paste0("Based on the minimum completeness set at ",percentage_completeness,"%"))
   print("at least the following number of sample(s) containing data was required:")
   print(min_full)
+  #message with the number of features removed
+  print(paste0(nrow(romics_object$data),"/", nrow(romics_object$original_data)," features remained after filtering", " (",round(nrow(romics_object$data)/nrow(romics_object$original_data)*100,2),"%)."))
 
   romics_object<- romicsUpdateColor(romics_object)
   romics_object<-romicsUpdateSteps(romics_object,arguments)
-
-  #message with the number of features removed
-  print(paste0(nrow(romics_object$data),"/", nrow(romics_object$original_data)," features remained after filtering", " (",round(nrow(romics_object$data)/nrow(romics_object$original_data)*100,2),"%)."))
 
   #return object
   return(romics_object)
