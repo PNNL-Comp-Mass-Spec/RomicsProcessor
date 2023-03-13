@@ -4,7 +4,12 @@
 \alias{romicsExportData}
 \title{romicsOutputData()}
 \usage{
-romicsExportData(romics_object, statistics = FALSE, missing_data = FALSE)
+romicsExportData(
+  romics_object,
+  statistics = FALSE,
+  missing_data = FALSE,
+  IDs = FALSE
+)
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject()}
@@ -12,6 +17,8 @@ romicsExportData(romics_object, statistics = FALSE, missing_data = FALSE)
 \item{statistics}{boolean, has to be TRUE or FALSE. Indicates if the statistics should be exported along with the data (FALSE by default).}
 
 \item{missing_data}{boolean, has to be TRUE or FALSE. Indicates if the missing status of the data should be exported along with the data (FALSE by default).}
+
+\item{IDs}{boolean, has to be TRUE or FALSE. Indicates if the IDs of the data should be exported along with the data (FALSE by default).}
 }
 \value{
 This function will return an data frame containing the results of the processing, the statistics and the missingness status of the data as specified by the user.

@@ -10,7 +10,9 @@ singleVariablePlot(
   type = "jb",
   factor = "main",
   limits = c(-10, 10),
-  title = "auto"
+  title = "auto",
+  pval = "p",
+  y_bracket_pos = 0.5
 )
 }
 \arguments{
@@ -22,9 +24,13 @@ singleVariablePlot(
 
 \item{factor}{has to be either 'main" or a factor of the romics_object, the list of factor can be retrieved using the function romicsFactorNames()}
 
-\item{limits}{is corresponding to the y_limits of the plot, by default ggplot will automatically define these, has to be a numeric vector of length 2 c(limit_min, limit_max)}
+\item{limits}{has to be a numerical vector of length 2 corresponding to the lower and higher y_limits of the plot, by default ggplot will automatically define these, has to be a numeric vector of length 2 c(limit_min, limit_max)}
 
 \item{title}{String. Indicate the title of the plot. automatically it will use the full feature name found for the chosen variable (in the case of partial match).}
+
+\item{pval}{character vector of length one. Has to be either "none", "p", or "padj". "none" by default , "p" or "padj" is employed it indicates that pairwise ttest pvalues should be displayed above the groups of the the main factor (these have to be calculated prior running this function).}
+
+\item{y_bracket_pos}{has to be a numerical vector of length one indicating the position and position increments for the pval bracket (only necessary when pval in c('p', 'padj')).}
 }
 \value{
 a ggplot figure
@@ -33,7 +39,7 @@ a ggplot figure
 Plots the abundances for a given variable based on a given factor contained in the metadata of the romics_object. This function will use the factor selected to group the samples and will color the plots based on the level of this factor. This function will function with partial matches.
 }
 \details{
-This function allows to quickly plot a the values for a given variable accross multiple levels of a given factor
+This function allows to quickly plot a the values for a given variable across multiple levels of a given factor
 }
 \author{
 Geremy Clair

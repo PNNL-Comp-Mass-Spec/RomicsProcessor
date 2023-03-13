@@ -249,6 +249,12 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
     #loop calculating pval,  fold changes
     for(i in 1:nrow(by2combinations)){
       for(j in 1:nrow(data)){
+        #check if at least 2 values are found for each group
+        if(sum(!is.na(as.numeric(data[j,factor==by2combinations[i,2]])))<2 |sum(!is.na(as.numeric(data[j,factor==by2combinations[i,1]])))<2){
+        fold_change[j]<-NA
+        t_result[j] <- NA
+        t_padj[j]<-NA
+        }else{
         if(log_transformed==TRUE){
           fold_change[j] <- mean(as.numeric(data[j,factor==by2combinations[i,2]]),na.rm = T)-mean(as.numeric(data[j,factor==by2combinations[i,1]]),na.rm = T)
         }else{
@@ -292,9 +298,16 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
         T_table[,paste("(",by2combinations[i,2],"/",by2combinations[i,1],")",sep="")]<- fold_change
       }
     }
-  }else{
+  }
+    }else{
     for(i in 1:length(levels_factor)){
       for(j in 1:nrow(data)){
+        #check if at least 2 values are found for each group
+        if(sum(!is.na(as.numeric(data[j,factor==levels_factor[i]])))<2 |sum(!is.na(as.numeric(data[j,factor!=levels_factor[i]])))<2){
+          fold_change[j]<-NA
+          t_result[j] <- NA
+          t_padj[j]<-NA
+        }else{
         #calculate fold change (or log2(foldchange)) column
         if(log_transformed==TRUE){
           fold_change[j] <- mean(as.numeric(data[j,factor==levels_factor[i]]),na.rm = T)-mean(as.numeric(data[j,factor!=levels_factor[i]]),na.rm = T)
@@ -306,7 +319,7 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
           t_result[j] <- NA
           t_padj[j]<-NA
         }else{
-          t_result[j] <- t.test(x = as.numeric(data[j,factor==levels_factor[i]]),y=as.numeric(data[j,factor!=levels_factor[i]]),alternative=alternative, paired = paired,...)$p.value
+          t_result[j] <- t.test(x = as.numeric(data[j,factor==levels_factor[i]]),y=as.numeric(data[j,factor!=levels_factor[i]]),alternative=alternative, paired = paired,var.equal = var.equal,...)$p.value
         }
       }
 
@@ -340,7 +353,7 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
       if(log_transformed==FALSE){
         T_table[,paste0("(",levels_factor[i],"/others)")]<- fold_change
       }
-    }}
+    }}}
 
   romics_object$statistics <- cbind(romics_object$statistics,T_table)
 
@@ -556,7 +569,7 @@ romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main")
 
   #extract data from the romics_object
   data<-romics_object$data
-  t_data<-t(data)
+  #t_data<-t(data)
 
   #check if the $statistic object already is a part of the Romics_object (if not create it)
   if(is.null(romics_object$statistics)){
@@ -582,14 +595,20 @@ romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main")
   #extrapolate the levels
   levels_factor<-levels(factor)
 
-  #run the ANOVA
-  ANOVA_results <- lapply(1:length(colnames(t_data)), function(i) summary(aov(t_data[,i] ~ factor)))
+  ANOVA_results<-numeric()
+  # to be able to perform an anova at least two level of the have to have >2 values
+  for(i in 1:nrow(data)){
+    t<-data.frame(v=as.numeric(data[i,]),f=factor)
+    t<-t[!is.na(t[,1]),]
+    if(sum(table(t$f)>2)==length(table(t$f))){
+      a<-unlist(summary(aov(t[,1] ~ t[,2])))
+      ANOVA_results[i]<-a[names(a)=="Pr(>F)1"]
+    }else{
+      ANOVA_results[i]<-NA
+    }
+    names(ANOVA_results)[i]=rownames(data)[i]
+  }
 
-  # Put the names to the variables
-  ANOVA_results <- setNames(ANOVA_results,rownames(data))
-  ANOVA_results <- unlist(ANOVA_results)
-  ANOVA_results <- ANOVA_results[grep(".Pr(>F)1",names(ANOVA_results), fixed = TRUE)]
-  names(ANOVA_results) <- gsub(".Pr(>F)1","",names(ANOVA_results), fixed =TRUE)
   ANOVA_results<- data.frame(ANOVA_p=ANOVA_results)
 
   # if padj demanded calculate padj
@@ -697,3 +716,109 @@ pFrequencyPlot<-function(romics_object,p_columns="all",p=0.05,bin_width=0.01){
     theme_ROP())
   }
 }
+
+#' romicsGlmBinomial()
+#' @description uses the function glm() to perform a glm binomial test to identify if the missingness of the values in the different groups is at random or not (performs all the paired tests between the groups of the selected factor). Results are recorded in the statistics layer of the outputted romics_object.
+#' @param romics_object has to be an romics_object created with the function romicsCreateObject(),
+#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
+#' @param paired a logical indicating whether you want a paired t-test.
+#' @param pairing_factor name of a factor contained in an r_object, the list of the available factor can be obtained by using the function romics_factors()
+#' @param var.equal a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
+#' @param padj a logical variable indincating wheter to perform or not adjustment of pvalues
+#' @param padj_method correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}
+#' @param mode must be in {"vs", "enrichments"} indicates if the groups should be compaired by pair or against all other groups
+#' @param factor a character string indicating the factor to use for the test, the list of the available factor can be obtained by using the function romics_factors(), if missing the function will use the main factor of the object
+#' @param percentage_completeness a numerical value comprised between 0 and 100 to indicate the minimum completeness required in at least one group calculate the T.test (if set completeness is not met, p and fold change will be NA)
+#' @param reverse_order a boolean to indicate if the order of the factors needs to be reversed (this will make the calculated fold changes values A/B become B/A or log2(A/B) become log2(B/A))
+#' @details When paired T.test are performed it is possible to include a second factor to generate the pairs. This function will also calculate the fold-changes or log2(fold-change). Please, note that the test will automatically determine if a log tranformation was performed to the object, subsequently we recommend to import not pre-logged data.frames when creating the object. For paired T.tests, it is possible to set a second factor containing the pairs, if missing the function will consider the pairs based on the column order in the romics_object.
+#' @return an romics_object with the statistical layer containing the newly generated t.tests and fold-changes
+#' @author Geremy Clair
+#' @export
+#'
+romicsGlmBinomial<-function(romics_object, factor = "main", padj=TRUE, padj_method="BH",reverse_order=FALSE){
+  arguments<-as.list(match.call())
+  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+  if(missing(factor)){factor="main"}
+  if(!factor %in% c("main",romicsFactorNames(romics_object))){
+    warning("The selected factor is not in the list of factors of the romics_object")
+    warning(romicsFactorNames(romics_object))
+  }
+  if(missing(reverse_order)){reverse_order<-FALSE}
+  if(missing(padj)){padj<-TRUE}
+  if(missing(padj_method)){padj_method<-"BH"}
+  if(!padj_method %in% c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY","fdr", "none")){stop("padj_method has to be in the following list: holm, hochberg, hommel, bonferroni, BH, BY,fdr, none")}
+
+  #load missingdata
+  data<-romics_object$missingdata
+
+  #check if the $statistic object already is a part of the Romics_object (if not create it)
+  if(is.null(romics_object$statistics)){
+    print("The Statistics layer was added to your object")
+    romics_object$statistics<-data.frame(matrix(nrow=nrow(data),ncol=0))
+    rownames(romics_object$statistics)<-rownames(data)
+  }
+
+  #if the statistics object does not have the same number of rows as the data replace it by a null statistics object
+  if(!is.null(romics_object$statistics)&&nrow(romics_object$statistics)!=nrow(data)){
+    warning("The Statistics layer was not containing the same number of rows as your data, it was replaced by an empty statistics layer")
+    romics_object$statistics<-data.frame(matrix(nrow=nrow(data),ncol=0))
+    rownames(romics_object$statistics)<-rownames(data)
+  }
+
+  #if factor is main extract the factor from the romics_object$main_factor
+  if(factor=="main"){factor<-romics_object$main_factor}
+  #extract the factor from the metadata
+  factor<-as.factor(as.character(t(romics_object$metadata[romicsFactorNames(romics_object)==factor,])))
+  factor<-as.factor(t(factor))
+
+  #extract the levels to be considered
+  levels_factor<-levels(factor)
+
+  #create t_results and direction
+  t_result <- vector(mode="numeric",length=nrow(data))
+  direction <- vector(mode="numeric",length=nrow(data))
+  t_padj<- vector(mode="numeric",length=nrow(data))
+
+  #Create a t_table
+  t_table<- data.frame(matrix(nrow=nrow(data),ncol=0))
+
+  #determine the list of combinations to consider
+  by2combinations<- data.frame(t(combn(levels_factor,2)))
+  if(reverse_order==TRUE){by2combinations<-by2combinations[,2:1]}
+
+    #loop calculating pval, directionality
+    for(i in 1:nrow(by2combinations)){
+      for(j in 1:nrow(data)){
+        g2<-data.frame(pop="f1",missing=as.numeric(data[j,factor==by2combinations[i,2]]))
+        g1<-data.frame(pop="f2",missing=as.numeric(data[j,factor==by2combinations[i,1]]))
+        g<-rbind(g1,g2)
+        t<-anova(glm(missing~pop,family = "binomial",data = g),test = "Chisq")
+        t_result[j] <- t$`Pr(>Chi)`[2]
+        if(sum(data[j,factor==by2combinations[i,2]])/length(data[j,factor==by2combinations[i,2]])>sum(data[j,factor==by2combinations[i,1]])/length(data[j,factor==by2combinations[i,1]])){
+          direction[j] <- -1 }else{direction[j] <- 1 }
+      }
+      #add glmBionmial.test p to t_table
+      t_table[,paste(by2combinations[i,2],"_vs_",by2combinations[i,1],"_glmBionomialTest_p",sep="")]<- t_result
+
+      ##add the adjusted p if padj=TRUE
+      if(padj==TRUE){
+        t_padj<-p.adjust(t_result, method=padj_method)
+        t_table[,paste(by2combinations[i,2],"_vs_",by2combinations[i,1],"_glmBionomialTest_padj",sep="")]<- t_padj
+      }
+      ##add the directional
+      t_table[,paste(by2combinations[i,2],"_vs_",by2combinations[i,1],"_directionality",sep="")]<- direction
+    }
+
+  romics_object$statistics <- cbind(romics_object$statistics,t_table)
+
+  #print info
+  print("glmBionomialTest columns were added to the statistics")
+
+  #update steps
+  romics_object<-romicsUpdateSteps(romics_object,arguments)
+
+  #return romics_object
+  return(romics_object)
+
+}
+

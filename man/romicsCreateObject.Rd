@@ -7,6 +7,7 @@
 romicsCreateObject(
   data,
   metadata,
+  IDs,
   main_factor = "none",
   custom_colors = ROP_colors,
   omics_type = "unknown",
@@ -17,6 +18,8 @@ romicsCreateObject(
 \item{data}{A data frame corresponding to the data.}
 
 \item{metadata}{A data frame corresponding to the metadata, the columns must be the same as the data ones.}
+
+\item{IDs}{A data frame corresponding to the list of alternative IDs for the romics_object, this enables to use human readable ids for certain plots. The first column contains the same type of IDs as the imported data.}
 
 \item{main_factor}{The rowname of a metadata factor, by default the first row will be used as main factor.}
 

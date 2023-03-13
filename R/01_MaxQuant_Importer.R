@@ -135,7 +135,7 @@ if(counts$reverse>0&&rev.rm==TRUE){prGR <- prGR[as.character(prGR$reverse)!="+",
 
 }
 
-#' extractMaxQuant()
+#' extractMaxQuantIDs()
 #' @description Extracts the IDs information from a MaxQuant ProteinGroup.txt file
 #' @param file This has to be the file path and file name of the maxQuant proteinGroup.txt file from which the information has to be extracted
 #' @param cont.rm has to be TRUE or FALSE, indicates if the contaminant have to be removed

@@ -2,6 +2,7 @@
 #' @description Create a romics_object by combining a data and a metadata data frames
 #' @param data A data frame corresponding to the data.
 #' @param metadata A data frame corresponding to the metadata, the columns must be the same as the data ones.
+#' @param IDs A data frame corresponding to the list of alternative IDs for the romics_object, this enables to use human readable ids for certain plots. The first column contains the same type of IDs as the imported data.
 #' @param main_factor The rowname of a metadata factor, by default the first row will be used as main factor.
 #' @param custom_colors A character vector containing the colors you want to use for your figures generated from an romics_object.
 #' @param omics_type A character vector of length 1 indicating the type of omics data used.
@@ -10,7 +11,7 @@
 #' @examples ROP_romics_object <- romicsCreateObject(ROP_data,ROP_metadata,main_factor="condition")
 #' @author Geremy Clair
 #' @export
-romicsCreateObject<-function(data, metadata, main_factor="none", custom_colors=ROP_colors, omics_type="unknown", quantif_type="unknown"){
+romicsCreateObject<-function(data, metadata, IDs, main_factor="none", custom_colors=ROP_colors, omics_type="unknown", quantif_type="unknown"){
   arguments<-as.list(match.call())
   funName<-arguments[[1]]
   if(missing(data)){stop("<data> is missing")}
@@ -57,6 +58,16 @@ romicsCreateObject<-function(data, metadata, main_factor="none", custom_colors=R
   missingdata<- data
   missingdata<-data.frame(is.na(data))
 
+#adds and ID layer if a table was supplied
+  if(!missing(IDs)){
+    #verify if the first columns contains all the ids from the data layer
+    if(!is.data.frame(IDs) & sum(rownames(data) %in% IDs[,1])!=nrow(data)){stop("'IDs'has to be a data.frame with all the ids of the data included in the first column")}
+    #the rownames will be matched with the one of the data
+    IDs<-merge(data.frame(original=rownames(data)),IDs,by.x=1,by.y=1)
+    rownames(IDs)<-IDs$original
+    IDs<-IDs[,-1]
+  }else{IDs<-"unknown"}
+
 # select the main_factor to use based in the user input this factor will be used as default if not indicated by user in a variety of functions
   if(main_factor=="none"){
     warning("your main_factor was missing the first row of your metadata was used as factor")
@@ -82,8 +93,7 @@ romicsCreateObject<-function(data, metadata, main_factor="none", custom_colors=R
   tp_main_factor<-character()
 
   #reorder data, metadata and missingdata based on the factors which will make visualization more pretty
-  for(i in 1:nrow(main_factor_lvl))
-  {
+  for(i in 1:nrow(main_factor_lvl)){
     tp_data<-cbind(tp_data,data[,main_factor==as.character(main_factor_lvl[i,])])
     tp_metadata<- cbind(tp_metadata,metadata[,main_factor==as.character(main_factor_lvl[i,])])
     tp_missingdata<-cbind(tp_missingdata,missingdata[,main_factor==as.character(main_factor_lvl[i,])])
@@ -141,9 +151,12 @@ romicsCreateObject<-function(data, metadata, main_factor="none", custom_colors=R
   dependencies<-romicsCreateDependencies()
 
   #create the final list
-  l<-list(data, metadata, missingdata, original_data, factor, colors, steps, dependencies, custom_colors, omics_type, quantif_type)
-  names(l)<-c("data","metadata","missingdata","original_data", "main_factor","colors","steps","dependencies","custom_colors","omics_type","quantif_type")
+  l<-list(data, metadata, missingdata, original_data, IDs, factor, colors, steps, dependencies, custom_colors, omics_type, quantif_type)
+  names(l)<-c("data","metadata","missingdata","original_data", "IDs", "main_factor","colors","steps","dependencies","custom_colors","omics_type","quantif_type")
   class(l)<-"romics_object"
+
+
+
   return(l)
 }
 
@@ -242,6 +255,67 @@ romicsChangeFactor<- function(romics_object , main_factor = "none" ) {
   #return the romics_object
   return(romics_object)
 }
+
+#' romicsChangeIDs()
+#' @description Change the main IDs of the romics_object
+#' @param romics_object A object created using the function romicsCreateObject() and containing a list of IDs in the 'IDs' layer
+#' @param newIDs has to be a character vector maching exactly one of the column name of the 'IDs' layer
+#' @details changes the IDs of an romics_object.
+#' @return This function returns a modified romics object, please see the create_romics_object() documentation.
+#' @author Geremy Clair
+#' @export
+romicsChangeIDs<- function(romics_object , newIDs = "newIDs" ) {
+  arguments<-as.list(match.call())
+  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+
+  if(missing(newIDs) | length(newIDs)!=1 | !newIDs %in% colnames(romics_object$IDs)){
+    stop("newIDs has to be a character vector of lenght 1 and has to be a colname(romics_object$Ids)")
+  }
+  #the IDs correspondance table is saved in the table t
+  t<- data.frame(original_IDs=rownames(romics_object$IDs),new_IDs=IDs[,colnames(IDs)==newIDs])
+
+  #we need to identify if this ID column contain missing values OR duplicated values, if those exist the problems need to be fixed
+  #first the missing ids
+  j<-1
+  for (i in 1:nrow(t)){
+  if(t$new_IDs[i]==""){t$new_IDs[i]=paste0("undefined_",j)
+  j<-j+1}
+  }
+
+  #second the duplicated IDs
+  j<-1
+  for (i in 1:nrow(t)){
+    if(duplicated(t$new_IDs)[i]){t$new_IDs[i]=paste0(t$new_IDs[i],"_duplicated_",j)
+    j<-j+1}
+  }
+
+  #the rownames of the IDs table are updated
+  rownames(romics_object$IDs)<- t$newIDs
+
+  #update the data layer
+  old_IDs<-data.frame(old_IDs=rownames(romics_object$data))
+  u<-merge(old_IDs,t,by.x=1,by.y=1)
+  rownames(romics_object$data)<- u[,2]
+
+  #update the missingdata layer
+  old_IDs<-data.frame(old_IDs=rownames(romics_object$missingdata))
+  u<-merge(old_IDs,t,by.x=1,by.y=1)
+  rownames(romics_object$missingdata)<- u[,2]
+
+  #update the statistics layer
+  if("statistics" %in% names(romics_object)){
+    old_IDs<-data.frame(old_IDs=rownames(romics_object$statistics))
+    u<-merge(old_IDs,t,by.x=1,by.y=1)
+    rownames(romics_object$statistics)<- u[,2]
+  }
+
+  #Update the steps
+  romics_object<-romicsUpdateSteps(romics_object,arguments)
+
+  #return the romics_object
+  return(romics_object)
+}
+
 
 #' romicsSubset()
 #' @description Keeps or drop a subset of specific elements/columns from the romics_object
@@ -507,7 +581,7 @@ romicsCreateDependencies<-function(){
   }
 
 #' romicsAddDependency()
-#' @description Adds a package to the list of dependencies of the romics_object. Enables developpers to add automatically a dependency when their function has been applied by the user on their romics_object.
+#' @description Adds a package to the list of dependencies of the romics_object. Enables developers to add automatically a dependency when their function has been applied by the user on their romics_object.
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param new_dependency The name of one or more R package
 #' @return This function will return an romics_object updated with the new dependency.
@@ -626,15 +700,17 @@ romicsApplyPipeline<- function(romics_object, romics_pipeline){
 #' @param romics_object A romics_object created using romicsCreateObject()
 #' @param statistics boolean, has to be TRUE or FALSE. Indicates if the statistics should be exported along with the data (FALSE by default).
 #' @param missing_data boolean, has to be TRUE or FALSE. Indicates if the missing status of the data should be exported along with the data (FALSE by default).
+#' @param IDs boolean, has to be TRUE or FALSE. Indicates if the IDs of the data should be exported along with the data (FALSE by default).
 #' @return This function will return an data frame containing the results of the processing, the statistics and the missingness status of the data as specified by the user.
 #' @author Geremy Clair
 #' @export
-romicsExportData<-function(romics_object, statistics = FALSE, missing_data = FALSE){
+romicsExportData<-function(romics_object, statistics = FALSE, missing_data = FALSE, IDs=FALSE){
   if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(statistics)){statistics = FALSE}
   if(missing(missing_data)){missing_data = FALSE}
   if(!is.logical(statistics)){stop("<statistics> should be either TRUE or FALSE")}
-  if(!is.logical(missing_data)){stop("<statistics> should be either TRUE or FALSE")}
+  if(!is.logical(missing_data)){stop("<missing_data> should be either TRUE or FALSE")}
+  if(!is.logical(IDs)){stop("<IDs> should be either TRUE or FALSE")}
 
   df<-romics_object$data
 
@@ -647,6 +723,18 @@ romicsExportData<-function(romics_object, statistics = FALSE, missing_data = FAL
     colnames(md)<-paste0("missing_data_",colnames(md))
     df<-cbind(df,md)
     }
+
+  if(IDs==TRUE){
+    if("IDs" %in% names(romics_proteins)){
+      ids <- romics_object$IDs
+      ids <- cbind(original_ids=rownames(ids),ids)
+      df<-cbind(original_ids=rownames(df),df)
+      df<- merge(df,ids,by="original_ids")
+      rownames(df)<-df[,colnames(df)=="original_ids"]
+      df<-df[,colnames(df)!="original_ids"]
+    }
+  }
+
 
   return(df)
 }

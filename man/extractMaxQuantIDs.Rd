@@ -2,7 +2,7 @@
 % Please edit documentation in R/01_MaxQuant_Importer.R
 \name{extractMaxQuantIDs}
 \alias{extractMaxQuantIDs}
-\title{extractMaxQuant()}
+\title{extractMaxQuantIDs()}
 \usage{
 extractMaxQuantIDs(
   file = "/filepath/proteinGroups.txt",

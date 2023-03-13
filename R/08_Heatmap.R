@@ -216,7 +216,11 @@ romicsHeatmap<-function(romics_object,
 
 
 #variable hclust
+
   if(variable_hclust==TRUE){
+    s<-scaled_data
+    #if missing values replace by -20
+    scaled_data[is.na(scaled_data)]<- -20
     #define the clustering method
     dist_variable<-dist(scaled_data, method=variable_hclust_method_dist)
     #define the hclust agglomeration method
@@ -226,6 +230,7 @@ romicsHeatmap<-function(romics_object,
     #colors sample_dd
     variable_dd <- color_branches(variable_dd, k=variable_hclust_number )
     variable_dd <- color_labels(variable_dd, k=variable_hclust_number )
+    scaled_data<-s
   }else{variable_dd=FALSE}
 
   #make the color palette
@@ -342,7 +347,8 @@ romicsVariableHclust<-function(romics_object,
 
   #if data_scale == TRUE then Z score the data if not then keep the data as is.
   if (scale_data==TRUE){data<- t(scale(t(data), center = TRUE, scale = TRUE))}
-
+  d<-data
+  data[is.na(data)]<--20
   #define the clustering method
   dist_variable<-dist(data, method=method_dist)
   #define the hclust agglomeration method
@@ -360,7 +366,7 @@ romicsVariableHclust<-function(romics_object,
   rownames(columns_hc)<- rownames(romics_object$data)
   columns_hc<-data.frame(cbind(results_hc[match(rownames(columns_hc),rownames(results_hc)),]))
   colnames(columns_hc)<-"hclust_clusters"
-
+  data<-d
 
 
   #if already exist replace if not create

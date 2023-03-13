@@ -18,7 +18,7 @@ romicsAddDependency(
 This function will return an romics_object updated with the new dependency.
 }
 \description{
-Adds a package to the list of dependencies of the romics_object. Enables developpers to add automatically a dependency when their function has been applied by the user on their romics_object.
+Adds a package to the list of dependencies of the romics_object. Enables developers to add automatically a dependency when their function has been applied by the user on their romics_object.
 }
 \author{
 Geremy Clair
