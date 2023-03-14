@@ -48,7 +48,7 @@ romicsMean<-function(romics_object, factor="main"){
   for(i in 1:length(levels_factor)){
     means_names[i] <- paste(levels_factor[i],"_mean",sep="")
     for (j in 1:nrow(romics_object$statistics)){
-      means[j,i]<-mean(as.numeric(data[j,factor==levels_factor[i]]))}}
+      means[j,i]<-mean(as.numeric(data[j,factor==levels_factor[i]]),na.rm = T)}}
 
   colnames(means) <- means_names
 
@@ -121,7 +121,7 @@ romicsSd<-function(romics_object, factor="main"){
   for(i in 1:length(levels_factor)){
     sd_names[i] <- paste(levels_factor[i],"_sd",sep="")
     for (j in 1:nrow(romics_object$statistics)){
-      sd[j,i] <- sd(as.numeric(data[j,factor==levels_factor[i]]))}}
+      sd[j,i] <- sd(as.numeric(data[j,factor==levels_factor[i]]),na.rm=T)}}
   colnames(sd) <- sd_names
 
   #remove old columns if sd were previously existing
