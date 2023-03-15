@@ -19,7 +19,7 @@ install.packages("devtools")
 When devtools is installed, run the following command to install RomicsProcessor and its dependencies
 
 ```
-devtools::install_github(“PNNL-Comp-Mass-Spec/RomicsProcessor”)
+devtools::install_github("PNNL-Comp-Mass-Spec/RomicsProcessor")
 
 ```
 
