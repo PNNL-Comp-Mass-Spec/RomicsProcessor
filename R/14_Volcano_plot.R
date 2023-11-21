@@ -88,8 +88,9 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
     }
 
   #format the colnames so they are identical to the pvalues ones
-  colnames(fc_col)<-sub("log\\(","",colnames(fc_col))
-  colnames(fc_col)<-sub("\\)$","",colnames(fc_col))
+  colnames(fc_col)<-sub("log","",colnames(fc_col))
+  colnames(fc_col)<-sub("\\(","",colnames(fc_col))
+    colnames(fc_col)<-sub("\\)$","",colnames(fc_col))
 
   minus_log_p<-log10(p)*-1
 
@@ -114,17 +115,20 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
       xlab(paste0("log",log_type,"(",colnames(fc_col[i]),")"))+
       ylab(paste0("-log10(",p_type,"_",stat_type,"_",colnames(fc_col[i]),")"))+
       scale_colour_manual(values=colors)
-      plot(fig)}else{
+      plot(fig)
+      }else{
         title=paste0("Volcano plot for ",colnames(fc_col[i]))
-      print(plot_ly(x = df$fc,
+      fig<-plot_ly(x = df$fc,
                    y = df$p,
                    color =df$class,
                    colors=colors,
                    type = "scatter",mode="markers",
                    text=paste("ID=",df$ID)) %>% layout(title=paste0("Volcano plot for ",colnames(fc_col[i])),
                             xaxis=list(title=paste0("log",log_type,"(",colnames(fc_col[i]),")")),
-                            yaxis=list(title=paste0("-log10(",p_type,"_",stat_type,"_",colnames(fc_col[i]),")"))))
+                            yaxis=list(title=paste0("-log10(",p_type,"_",stat_type,"_",colnames(fc_col[i]),")")))
+      print(fig)
       }
-    }}
+    }
+    }
   }
 

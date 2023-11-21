@@ -95,7 +95,7 @@ singleVariablePlot<-function(romics_object, variable="variable", type = "jb", fa
                                  xmax = by2combinations[i,2],
                                  y.position = y_bracket_pos,
                                  label =formatC(romics_object$statistics[variable==rownames(romics_object$statistics),
-                                                                         colnames(Figs$statistics)==paste0(by2combinations[1,1],"_vs_",by2combinations[1,2],"_Ttest_",pval)],
+                                                                         colnames(romics_object$statistics)==paste0(by2combinations[i,1],"_vs_",by2combinations[i,2],"_Ttest_",pval)],
                                                 format = "f"))
     y_bracket_pos<-y_increment+y_bracket_pos
 

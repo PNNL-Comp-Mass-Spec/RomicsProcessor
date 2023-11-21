@@ -161,101 +161,102 @@ romicsTrend <- function(romics_object, factor="main",  log_factor = FALSE, type 
 #' @author Geremy Clair and Feng Song
 #' @export
 singleVariableTrend<-function(romics_object, variable="variable", factor="main", log_factor = FALSE, title="auto"){
-    #general checkings
-    trendArgs <- romics_object$steps[max(which(grepl("fun\\|romicsTrend",romics_object$steps)))]
-    if (grepl("factor=", trendArgs)) {
-        factor <- regmatches(trendArgs, regexec("factor='(.*?)'", trendArgs))[[1]][2]
-    }
-    if (grepl("log_factor=", trendArgs)) {
-        factorscale <- regmatches(trendArgs, regexec("log_factor='(.*?)'", trendArgs))[[1]][2]
-    }
-    if(!is.romics_object(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
-    if(missing(factor)){factor="main"}
-    if(!factor %in% c("main",romicsFactorNames(romics_object))){
-        warning("The selected factor is not in the list of factors of the romics_object")
-        warning(romicsFactorNames(romics_object))
-    }
+  #general checkings
+  trendArgs <- romics_object$steps[max(which(grepl("fun\\|romicsTrend",romics_object$steps)))]
+  if (grepl("factor=", trendArgs)) {
+    factor <- regmatches(trendArgs, regexec("factor='(.*?)'", trendArgs))[[1]][2]
+  }
+  if (grepl("log_factor=", trendArgs)) {
+    factorscale <- regmatches(trendArgs, regexec("log_factor='(.*?)'", trendArgs))[[1]][2]
+  }
+  if(!is.romics_object(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+  if(missing(factor)){factor="main"}
+  if(!factor %in% c("main",romicsFactorNames(romics_object))){
+    warning("The selected factor is not in the list of factors of the romics_object")
+    warning(romicsFactorNames(romics_object))
+  }
 
-    #if factor is main extract the factor from the romics_object$main_factor
-    if(factor=="main"){factor<-romics_object$main_factor}
-    #extract the factor from the metadata
-    f<-romics_object$metadata[romicsFactorNames(romics_object)==factor,]
+  #if factor is main extract the factor from the romics_object$main_factor
+  if(factor=="main"){factor<-romics_object$main_factor}
+  #extract the factor from the metadata
+  f<-romics_object$metadata[romicsFactorNames(romics_object)==factor,]
 
-    options(warn=-1)
-    f<-as.numeric(f)
-    if(length(f)==1){if(is.na(f)){stop("The factor selected could not be converted to a list of numbers.")}}
-    options(warn=0)
+  options(warn=-1)
+  f<-as.numeric(f)
+  if(length(f)==1){if(is.na(f)){stop("The factor selected could not be converted to a list of numbers.")}}
+  options(warn=0)
 
-    if(!is.character(variable)&&length(variable!=1)){stop("<variable> should be a character vector of lenght 1")}
-    if(missing(title)){title="auto"}
+  if(!is.character(variable)&&length(variable!=1)){stop("<variable> should be a character vector of lenght 1")}
+  if(missing(title)){title="auto"}
 
-    #find the variable indicated using a grepl function
-    variable<-rownames(romics_object$data)[grepl(variable,rownames(romics_object$data))]
-    if(length(variable)>1){
-        warning("More than one variable contained the variable choosen:")
-        warning(variable)
-        stop()
-    }
-    if(length(variable)==0){stop("your variable was not present in the romics_object")}
+  #find the variable indicated using a grepl function
+  variable<-rownames(romics_object$data)[grepl(variable,rownames(romics_object$data))]
+  if(length(variable)>1){
+    warning("More than one variable contained the variable choosen:")
+    warning(variable)
+    stop()
+  }
+  if(length(variable)==0){stop("your variable was not present in the romics_object")}
 
-    #gather the data and the groups and place this in a data.frame named data
-    data<- t(as.character(romics_object$data[rownames(romics_object$data)==variable,]))
-    #order the data and f
-    data <- data[, order(f)]
+  #gather the data and the groups and place this in a data.frame named data
+  data<- t(as.character(romics_object$data[rownames(romics_object$data)==variable,]))
+  #order the data and f
+  data <- data[, order(f)]
 
-    if (log_factor==TRUE) {
-        f <- log(sort(f))
-    } else {
-        f <- sort(f)
-    }
+  if (log_factor==TRUE) {
+    f <- log(sort(f))
+  } else {
+    f <- sort(f)
+  }
 
-    trendType <- romics_object$statistics[[variable, "best_fitted_trend"]]
+  trendType <- romics_object$statistics[[variable, "best_fitted_trend"]]
 
-    if (trendType == "linear_increasing" || trendType == "linear_decreasing") {
-        model <- lm(data ~ f)
-        tm <- seq(min(f), max(f), (max(f) - min(f))/100)
-        ym <- predict(model, list(f=tm))
-        trendPvalue<-romics_object$statistics[[variable, "linear_p"]]
-    } else if (trendType == "quadratic_concave" || trendType == "quadratic_convex") {
-        model <- lm(data ~ poly(f,2))
-        tm <- seq(min(f), max(f), (max(f) - min(f))/100)
-        ym <- predict(model, list(f=tm))
-        trendPvalue<-romics_object$statistics[[variable, "quadratic_p"]]
-    } else {
-        ma <- function(x, n = 3){as.vector(filter(x, rep(1 / n, n), sides = 2))}
-        tm <- f
-        ym <- ma(data)
-    }
+  if (trendType == "linear_increasing" || trendType == "linear_decreasing") {
+    model <- lm(data ~ f)
+    tm <- seq(min(f), max(f), (max(f) - min(f))/100)
+    ym <- predict(model, list(f=tm))
+    trendPvalue<-romics_object$statistics[[variable, "linear_p"]]
+  } else if (trendType == "quadratic_concave" || trendType == "quadratic_convex") {
+    model <- lm(data ~ poly(f,2))
+    tm <- seq(min(f), max(f), (max(f) - min(f))/100)
+    ym <- predict(model, list(f=tm))
+    trendPvalue<-romics_object$statistics[[variable, "quadratic_p"]]
+  } else {
+    model <- lm(data ~ f)
+    tm <- seq(min(f), max(f), (max(f) - min(f))/100)
+    ym <- predict(model, list(f=tm))
+    trendPvalue<-romics_object$statistics[[variable, "linear_p"]]
+  }
 
-    data<-rbind(t=f, y=data)
-    data<-data.frame(t(data))
-    colnames(data)<-c("t","y")
-    data$y<-as.numeric(data$y)
-    data$t<-as.numeric(data$t)
+  data<-rbind(t=f, y=data)
+  data<-data.frame(t(data))
+  colnames(data)<-c("t","y")
+  data$y<-as.numeric(data$y)
+  data$t<-as.numeric(data$t)
 
-    ms<-rbind(t=tm, y=ym)
-    ms<-data.frame(t(ms))
-    colnames(ms)<-c("t","y")
-    ms$y<-as.numeric(ms$y)
-    ms$t<-as.numeric(ms$t)
+  ms<-rbind(t=tm, y=ym)
+  ms<-data.frame(t(ms))
+  colnames(ms)<-c("t","y")
+  ms$y<-as.numeric(ms$y)
+  ms$t<-as.numeric(ms$t)
 
-    #create the plots
-    plot <- ggplot() + theme_ROP() + geom_point(aes(x = t, y = y), data) +
-        geom_line(aes(x = t, y = y), ms) +
-        xlab(paste0(factor, " (", factorscale, "-scale)")) +
-        ylab("data")
+  #create the plots
+  plot <- ggplot() + theme_ROP() + geom_point(aes(x = t, y = y), data) +
+    geom_line(aes(x = t, y = y), ms) +
+    xlab(paste0(factor, " (", factorscale, "-scale)")) +
+    ylab("data")
 
-    if(is.na(trendPvalue)){
-        plot<- plot +
-            annotate("text", x=(max(data$t) - min(data$t))/2, y=max(data$y), label= trendType)
-    } else {
-        plot<- plot +
-            annotate("text", x=(max(data$t) - min(data$t))/2, y=max(data$y), label= paste0(trendType, ", p=", trendPvalue))
-    }
+  if(is.na(trendPvalue)){
+    plot<- plot +
+      annotate("text", x=(max(data$t) - min(data$t))/2, y=max(data$y), label= trendType)
+  } else {
+    plot<- plot +
+      annotate("text", x=(max(data$t) - min(data$t))/2, y=max(data$y), label= paste0(trendType, ", p=", trendPvalue))
+  }
 
-    if(title=="auto"){plot<-plot+ggtitle(variable)}else{plot<-plot+ggtitle(title)}
+  if(title=="auto"){plot<-plot+ggtitle(variable)}else{plot<-plot+ggtitle(title)}
 
-    return(plot)
+  return(plot)
 }
 
 #' romicsTrendHeatmap()

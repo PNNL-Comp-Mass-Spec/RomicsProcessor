@@ -35,6 +35,48 @@ log10transform<-function(romics_object){
   return(romics_object)
 }
 
+#' quantileNormSample()
+#' @description Quantile-normalizes the samples.
+#' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log10transform()
+#' @details Quantile-normalizes within each sample.
+#' @return This function returns the transformed romics_object with updated data layer.
+#' @author Geremy Clair
+#' @export
+quartileNormSample<-function(romics_object){
+  arguments<-as.list(match.call())
+  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+
+  d<-romics_object$data
+
+  o<-data.frame(matrix(nrow=nrow(d),ncol=ncol(d)))
+  colnames(o)<-colnames(d)
+  rownames(o)<-rownames(d)
+  r<-data.frame(matrix(nrow=nrow(d),ncol=ncol(d)))
+  colnames(r)<-colnames(d)
+
+  for(i in 1:ncol(o)){
+    o[,i]<-order(d[,i],na.last = T)
+    r[,i]<-d[o[,i],i]
+  }
+
+  means<-as.numeric()
+  for(j in 1:nrow(r)){
+    means[j]<-mean(as.numeric(r[j,]),na.rm=T)
+  }
+
+  for(j in 1:ncol(d)){
+    for(i in 1:nrow(d)){
+      if(is.na(d[o[i,j],j])){d[o[i,j],j]<-NA}else{d[o[i,j],j]<-means[i]}}
+  }
+
+  romics_object$data<-d
+
+  romics_object<-romicsUpdateSteps(romics_object,arguments)
+
+  return(romics_object)
+}
+
+
 #' unlog2data()
 #' @description Reverses the log2 tranformation of the romics_object data layer.
 #' @param romics_object has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log2transform()
@@ -193,5 +235,4 @@ medianNormFactor<-function(romics_object, main_factor= "factor"){
     return(romics_object)
 
 }
-
 

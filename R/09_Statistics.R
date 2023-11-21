@@ -569,7 +569,6 @@ romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main")
 
   #extract data from the romics_object
   data<-romics_object$data
-  #t_data<-t(data)
 
   #check if the $statistic object already is a part of the Romics_object (if not create it)
   if(is.null(romics_object$statistics)){
@@ -596,11 +595,11 @@ romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main")
   levels_factor<-levels(factor)
 
   ANOVA_results<-numeric()
-  # to be able to perform an anova at least two level of the have to have >2 values
+  # to be able to perform an anova at least two level of the have to have >=2 values
   for(i in 1:nrow(data)){
     t<-data.frame(v=as.numeric(data[i,]),f=factor)
     t<-t[!is.na(t[,1]),]
-    if(sum(table(t$f)>2)==length(table(t$f))){
+    if(sum(table(t$f)>=2)==length(table(t$f))){
       a<-unlist(summary(aov(t[,1] ~ t[,2])))
       ANOVA_results[i]<-a[names(a)=="Pr(>F)1"]
     }else{

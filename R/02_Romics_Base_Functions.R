@@ -64,8 +64,7 @@ romicsCreateObject<-function(data, metadata, IDs, main_factor="none", custom_col
     if(!is.data.frame(IDs) & sum(rownames(data) %in% IDs[,1])!=nrow(data)){stop("'IDs'has to be a data.frame with all the ids of the data included in the first column")}
     #the rownames will be matched with the one of the data
     IDs<-merge(data.frame(original=rownames(data)),IDs,by.x=1,by.y=1)
-    rownames(IDs)<-IDs$original
-    IDs<-IDs[,-1]
+    rownames(IDs)<-IDs[,1]
   }else{IDs<-"unknown"}
 
 # select the main_factor to use based in the user input this factor will be used as default if not indicated by user in a variety of functions
@@ -272,41 +271,24 @@ romicsChangeIDs<- function(romics_object , newIDs = "newIDs" ) {
     stop("newIDs has to be a character vector of lenght 1 and has to be a colname(romics_object$Ids)")
   }
   #the IDs correspondance table is saved in the table t
-  t<- data.frame(original_IDs=rownames(romics_object$IDs),new_IDs=IDs[,colnames(IDs)==newIDs])
+  IDs<-romics_object$IDs
+  t<- data.frame(original_IDs=rownames(romics_object$data),order=1:length(rownames(romics_object$data)))
 
-  #we need to identify if this ID column contain missing values OR duplicated values, if those exist the problems need to be fixed
-  #first the missing ids
-  j<-1
-  for (i in 1:nrow(t)){
-  if(t$new_IDs[i]==""){t$new_IDs[i]=paste0("undefined_",j)
-  j<-j+1}
-  }
+  #we need to extract the corresponding columns from the IDs layer
+  t<-merge(t,IDs,by.x = 1,by.y = 0,all.x = T,)
+  t<-t[,c("original_IDs","order",newIDs)]
+  t[is.na(t[,3]),3]<-paste0("Undefined_ID_",t[is.na(t[,3]),1])
+  t[t[,3]=="",3]<-paste0("Undefined_ID_",t[t[,3]=="",1])
+  t<-t[order(t$order),]
+  for(i in 1:5){t[duplicated(t[,3]),3]<-paste0("duplicated_",t[duplicated(t[,3]),3])}
 
-  #second the duplicated IDs
-  j<-1
-  for (i in 1:nrow(t)){
-    if(duplicated(t$new_IDs)[i]){t$new_IDs[i]=paste0(t$new_IDs[i],"_duplicated_",j)
-    j<-j+1}
-  }
-
-  #the rownames of the IDs table are updated
-  rownames(romics_object$IDs)<- t$newIDs
-
-  #update the data layer
-  old_IDs<-data.frame(old_IDs=rownames(romics_object$data))
-  u<-merge(old_IDs,t,by.x=1,by.y=1)
-  rownames(romics_object$data)<- u[,2]
-
-  #update the missingdata layer
-  old_IDs<-data.frame(old_IDs=rownames(romics_object$missingdata))
-  u<-merge(old_IDs,t,by.x=1,by.y=1)
-  rownames(romics_object$missingdata)<- u[,2]
+  #update the data and missingdata layers
+  rownames(romics_object$data)<- t[,3]
+  rownames(romics_object$missingdata)<- t[,3]
 
   #update the statistics layer
   if("statistics" %in% names(romics_object)){
-    old_IDs<-data.frame(old_IDs=rownames(romics_object$statistics))
-    u<-merge(old_IDs,t,by.x=1,by.y=1)
-    rownames(romics_object$statistics)<- u[,2]
+    rownames(romics_object$statistics)<- t[,3]
   }
 
   #Update the steps
@@ -725,7 +707,7 @@ romicsExportData<-function(romics_object, statistics = FALSE, missing_data = FAL
     }
 
   if(IDs==TRUE){
-    if("IDs" %in% names(romics_proteins)){
+    if("IDs" %in% names(romics_object)){
       ids <- romics_object$IDs
       ids <- cbind(original_ids=rownames(ids),ids)
       df<-cbind(original_ids=rownames(df),df)

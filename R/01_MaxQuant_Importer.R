@@ -231,3 +231,124 @@ extractMaxQuantIDs<-function(file= "/filepath/proteinGroups.txt", cont.rm=TRUE,s
 
 }
 
+#' extractFragPipe()
+#' @description Extracts the quantification information from a FragPipe combined_protein.csv file
+#' @param file This has to be the file path and file name of the FragPipe combined_protein.csv file from which the information has to be extracted
+#' @param quantification_type has to be one of the following options : 'MaxLFQ','Intensity','Total Spectral Count','Unique Spectral Count' Indicate what type of quantification needs to be extracted from the combined_protein.csv table
+#' @param cont.rm has to be TRUE or FALSE, indicates if the contaminants have to be removed
+#' @details This function will extracts the quantification information from one quantification time of a FragPipe combined_protein.csv file.
+#' @return it will return a data.frame with a first column containing the Protein IDs as first column, the other columns will be the Quantitative columns corresponding to the quantitation mode selected.
+#' @author Geremy Clair
+#' @export
+extractFragPipe<-function(file= "/filepath/proteinGroups.txt",quantification_type="MaxLFQ", cont.rm=TRUE){
+  # ensure that the file is named ombined_protein.csv
+  #if(substr(file,nchar(file)-16, nchar(file))!="proteinGroups.txt"){stop("The specified file is not a ProteinGroup file")}
+  if(!quantification_type %in% c("MaxLFQ","Intensity","Total Spectral Count","Unique Spectral Count")){stop("The quantification_type is not appropriate")}
+  if(missing(cont.rm)){cont.rm<-TRUE}
+
+  if(quantification_type=="MaxLFQ"){quantification_type="MaxLFQ Intensity"}
+  # read the protein group file
+  prGR <- read.delim(file)
+  n<-nrow(prGR)
+  colnames(prGR)<-gsub("\\."," ",colnames(prGR))
+  print(paste(n,"proteins were detected."))
+
+  if(cont.rm==TRUE){
+    prGR<-prGR[!grepl("contam_", prGR$Protein),]
+    m<-nrow(prGR)
+    print(paste(n-m,"contaminants were removed."))
+    print(paste(m,"protein remained."))
+    }
+
+  #Create a counts df
+  count<- data.frame(cbind(prGR[,colnames(prGR)=="Protein ID"],prGR[,grep(quantification_type,colnames(prGR))]))
+  colnames(count)<-gsub("\\."," ",colnames(count))
+  colnames(count)<-gsub(paste0(" ",quantification_type),"",colnames(count))
+  print(paste(ncol(count)-1,"samples had",quantification_type, "values."))
+
+  return(count)
+}
+
+#' extractFragPipeIDs()
+#' @description Extracts the IDs from a FragPipe combined_protein.csv file
+#' @param file This has to be the file path and file name of the FragPipe combined_protein.csv file from which the information has to be extracted
+#' @param cont.rm has to be TRUE or FALSE, indicates if the contaminants have to be removed
+#' @details This function will extracts the quantification information from one quantification time of a FragPipe combined_protein.csv file.
+#' @return it will return a data.frame with a first column containing the Protein IDs as first column, the other columns will be the Quantitative columns corresponding to the quantitation mode selected.
+#' @author Geremy Clair
+#' @export
+extractFragPipeIDs<-function(file= "/filepath/proteinGroups.txt",cont.rm=TRUE){
+  # ensure that the file is named ombined_protein.csv
+  #if(substr(file,nchar(file)-16, nchar(file))!="proteinGroups.txt"){stop("The specified file is not a ProteinGroup file")}
+  if(missing(cont.rm)){cont.rm<-TRUE}
+
+  # read the protein group file
+  prGR <- read.delim(file)
+  n<-nrow(prGR)
+  colnames(prGR)<-gsub("\\."," ",colnames(prGR))
+  print(paste(n,"proteins were detected."))
+
+  if(cont.rm==TRUE){
+    prGR<-prGR[!grepl("contam_", prGR$Protein),]
+    m<-nrow(prGR)
+    print(paste(n-m,"contaminants were removed."))
+    print(paste(m,"protein remained."))
+  }
+
+  #Create a counts df
+  IDs<- data.frame(prGR[,colnames(prGR) %in% c("Protein",
+                                               "Protein ID",
+                                               "Entry Name",
+                                               "Gene",
+                                               "Protein Length",
+                                               "Organism",
+                                               "Protein Existence",
+                                               "Description",
+                                               "Protein Probability",
+                                               "Top Peptide Probability",
+                                               "Combined Total Peptides",
+                                               "Indistinguishable Proteins")])
+
+  IDs<- cbind(Protein.ID=IDs$Protein.ID, IDs[,colnames(IDs)!="Protein.ID"])
+
+
+  return(IDs)
+}
+
+#' extractDIANN()
+#' @description Extracts the quantification information from a DIANN report.pg_matrix.tsv file
+#' @param file This has to be the file path and file name of the FragPipe report.pg_matrix.tsv file from which the information has to be extracted
+#' @details This function will extracts the quantification information from one quantification time of a DIA-NN report.pg_matrix.tsv file.
+#' @return it will return a data.frame with a first column containing the Protein IDs as first column, the other columns will be the Quantitative columns corresponding to the quantitation mode selected.
+#' @author Geremy Clair
+#' @export
+extractDIANN<-function(file= "/filepath/report.pg_matrix.tsv"){
+  # read the protein group file
+  prGR <- read.delim(file)
+  n<-nrow(prGR)
+  colnames(prGR)<-gsub("\\."," ",colnames(prGR))
+  print(paste(n,"proteins were detected."))
+
+  #Create a counts df
+  count<- data.frame(cbind(Protein_Group=prGR[,colnames(prGR)=="Protein Group"],prGR[,!colnames(prGR) %in% c("Protein Group","Protein Ids","Protein Names", "Genes","First Protein Description")]))
+  return(count)
+}
+
+#' extractDIANNIDs()
+#' @description Extracts the IDs information from a DIANN report.pg_matrix.tsv file
+#' @param file This has to be the file path and file name of the FragPipe report.pg_matrix.tsv file from which the information has to be extracted
+#' @details This function will extracts the quantification information from one quantification time of a DIA-NN report.pg_matrix.tsv file.
+#' @return it will return a data.frame with a first column containing the Protein IDs as first column, the other columns will be the Quantitative columns corresponding to the quantitation mode selected.
+#' @author Geremy Clair
+#' @export
+extractDIANNIDs<-function(file= "/filepath/report.pg_matrix.tsv"){
+  # read the protein group file
+  prGR <- read.delim(file)
+  n<-nrow(prGR)
+  colnames(prGR)<-gsub("\\."," ",colnames(prGR))
+  print(paste(n,"proteins were detected."))
+
+  #Create a counts df
+  IDs<- data.frame(prGR[,colnames(prGR) %in% c("Protein Group","Protein Ids","Protein Names", "Genes","First Protein Description")])
+  return(IDs)
+}
