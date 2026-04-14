@@ -6,7 +6,7 @@
 #' @author Geremy Clair and Feng Song
 #' @export
 lmp <- function (modelobject) {
-    if (class(modelobject) != "lm") stop("The function lmp has been design to work on objects of class 'lm', your object was not of this class")
+    if (!inherits(modelobject, "lm")) stop("The function lmp has been design to work on objects of class 'lm', your object was not of this class")
     f <- summary(modelobject)$fstatistic
     p <- pf(f[1],f[2],f[3],lower.tail=F)
     attributes(p) <- NULL
@@ -75,14 +75,14 @@ getTrend <- function(sData, m = NULL, p=0.05, type = "both" ) {
 #' @param romics_object has to be a romics_object created using the function romicsCreateObject() (see dedicated documentation) and has to be numeric.
 #' @param factor has to be a factor contained in the romics_object created, the list of factor can be extracted using the function romicsFactorNames() (see dedicated documentation)
 #' @param log_factor Boolean, indicate if the factor needs to be log transformed (TRUE), or not (FALSE). By default the factor is not transformed
-#' @param type indicates if linear and/or quadratic trends analysis have to be performed, has to be 'both', 'linear',or 'quadratic'.
+#' @param analysis_type indicates if linear and/or quadratic trends analysis have to be performed, has to be 'both', 'linear',or 'quadratic'.
 #' @param p indicates the minimal fitting p-value to be considered.
 #' @details This function allows to calculate the linear and quadratic p value and estimate the best fitting model
 #' @return This function returns a romics_object with new columns in the stat layer corresponding to the best fitting model, and the linear and/or quadratic p-values
 #' @export
-romicsTrend <- function(romics_object, factor="main",  log_factor = FALSE, type = "both", p=0.05) {
+romicsTrend <- function(romics_object, factor="main",  log_factor = FALSE, analysis_type = "both", p=0.05) {
     arguments<-as.list(match.call())
-    if(!is.romics_object(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+    if(!is.romicsObject(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
     if(missing(factor)){factor="main"}
     if(!factor %in% c("main",romicsFactorNames(romics_object))){
         warning("The selected factor is not in the list of factors of the romics_object")
@@ -125,7 +125,7 @@ romicsTrend <- function(romics_object, factor="main",  log_factor = FALSE, type 
     }
 
     for(i in 1:nrow(data)){
-        if(i==1){r=t(getTrend(as.numeric(data[i,]),f,p,type))}else{r=rbind(r,t(getTrend(as.numeric(data[i,]),f,p,type)))}
+        if(i==1){r=t(getTrend(as.numeric(data[i,]),f,p,analysis_type))}else{r=rbind(r,t(getTrend(as.numeric(data[i,]),f,p,analysis_type)))}
         }
 
     r<-data.frame(r)
@@ -169,7 +169,7 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
   if (grepl("log_factor=", trendArgs)) {
     factorscale <- regmatches(trendArgs, regexec("log_factor='(.*?)'", trendArgs))[[1]][2]
   }
-  if(!is.romics_object(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+  if(!is.romicsObject(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(factor)){factor="main"}
   if(!factor %in% c("main",romicsFactorNames(romics_object))){
     warning("The selected factor is not in the list of factors of the romics_object")
@@ -271,7 +271,7 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
 #' @export
 romicsTrendHeatmap<-function(romics_object,factor="main", log_factor = FALSE, ...){
     trendArgs <- romics_object$steps[max(which(grepl("fun\\|romicsTrend",romics_object$steps)))]
-    if(!is.romics_object(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+    if(!is.romicsObject(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
     if(is.null(romics_object$statistics$best_fitted_trend)){print("The trend analysis was not perform on the romics_object selected, please run the trend analysis using the function romicsTrend()")}
     if (grepl("factor=", trendArgs)) {
         factor <- regmatches(trendArgs, regexec("factor='(.*?)'", trendArgs))[[1]][2]
