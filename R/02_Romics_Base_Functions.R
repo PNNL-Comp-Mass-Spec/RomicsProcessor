@@ -1312,15 +1312,40 @@ romicsLogCheck<-function(romics_object){
 #' @author Geremy Clair
 #' @export
 romicsCreateDependencies<-function(){
-  Required<-data.frame(Required=as.character(getDependencies("RomicsProcessor")), Version_used=NA)
-  for(i in 1:nrow(Required)){
-    Required$Version_used[i]<- as.character(packageVersion(Required$Required[i]))
-  }
-  Required[,1]<-as.character(Required[,1])
+  # Get package dependencies from DESCRIPTION file
+  desc <- packageDescription("RomicsProcessor")
+  imports_str <- desc$Imports
 
-  Required<-rbind(Required,c( Required= "r", Version_used=paste0(R.Version()$major,".",R.Version()$minor)))
-  Required<-rbind(c( Required= "RomicsProcessor", Version_used=as.character(packageVersion("RomicsProcessor"))),Required )
+  # Parse the Imports string to extract package names
+  if(!is.na(imports_str)) {
+    packages <- trimws(strsplit(imports_str, ",")[[1]])
+    # Remove version specifications (e.g., "package (>= 1.0)" -> "package")
+    packages <- gsub("\\s*\\(.*\\)$", "", packages)
+  } else {
+    packages <- character(0)
   }
+
+  # Create data frame with required packages
+  Required <- data.frame(Required = packages, Version_used = NA, stringsAsFactors = FALSE)
+
+  # Get version for each package
+  for(i in 1:nrow(Required)){
+    tryCatch({
+      Required$Version_used[i] <- as.character(packageVersion(Required$Required[i]))
+    }, error = function(e) {
+      Required$Version_used[i] <<- "unavailable"
+    })
+  }
+
+  Required[,1] <- as.character(Required[,1])
+
+  # Add R version
+  Required <- rbind(Required, c(Required = "r", Version_used = paste0(R.Version()$major, ".", R.Version()$minor)))
+  # Add RomicsProcessor itself at the top
+  Required <- rbind(c(Required = "RomicsProcessor", Version_used = as.character(packageVersion("RomicsProcessor"))), Required)
+
+  return(Required)
+}
 
 #' romicsAddDependency()
 #' @description Adds a package to the list of dependencies of the romics_object. Enables developers to add automatically a dependency when their function has been applied by the user on their romics_object.
