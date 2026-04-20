@@ -7,7 +7,7 @@
 romicsLogCheck(romics_object)
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 }
 \value{
 This function will return TRUE or FALSE indicating if the object was or not log transformed using the function log2transform

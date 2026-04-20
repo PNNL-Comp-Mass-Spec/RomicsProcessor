@@ -4,21 +4,24 @@
 \alias{romicsChangeIDs}
 \title{romicsChangeIDs()}
 \usage{
-romicsChangeIDs(romics_object, newIDs = "newIDs")
+romicsChangeIDs(romics_object, newIDs)
 }
 \arguments{
-\item{romics_object}{A object created using the function romicsCreateObject() and containing a list of IDs in the 'IDs' layer}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 
-\item{newIDs}{has to be a character vector maching exactly one of the column name of the 'IDs' layer}
+\item{newIDs}{Character string. Must match exactly one of the column names of the 'IDs' layer}
 }
 \value{
-This function returns a modified romics object, please see the create_romics_object() documentation.
+This function returns a modified romics object with updated IDs and conversion history stored.
 }
 \description{
-Change the main IDs of the romics_object
+Change the main IDs of the romics_object using a specified column from the IDs layer
 }
 \details{
-changes the IDs of an romics_object.
+Changes the row names (IDs) of the data, missingdata, and statistics layers using the specified column
+from the IDs layer. Always stores the conversion history with "original" and "converted" columns.
+Updates the IDs table with "Original_IDs" and "Current_IDs" columns to enable reverse mapping.
+Missing mappings are handled with "Undefined_ID_matched_to_" prefix.
 }
 \author{
 Geremy Clair

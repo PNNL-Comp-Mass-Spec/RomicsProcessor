@@ -11,7 +11,7 @@ romicsANOVA(romics_object, padj = TRUE, padj_method = "BH", factor = "main")
 
 \item{padj}{Boolean indincating wheter to perform or not adjustment of pvalues}
 
-\item{padj_method}{correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}}
+\item{padj_method}{correction method. Must be in  c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr")}
 
 \item{factor}{A character string indicating the factor to use for the test, the list of the available factor can be obtained by using the function romics_factors(), if missing the function will use the main factor of the object.}
 }

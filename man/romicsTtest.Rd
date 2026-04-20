@@ -41,6 +41,8 @@ romicsTtest(
 \item{percentage_completeness}{a numerical value comprised between 0 and 100 to indicate the minimum completeness required in at least one group calculate the T.test (if set completeness is not met, p and fold change will be NA)}
 
 \item{reverse_order}{a boolean to indicate if the order of the factors needs to be reversed (this will make the calculated fold changes values A/B become B/A or log2(A/B) become log2(B/A))}
+
+\item{...}{other parameters can be passed down to the t.test() function from the 'stat' package.}
 }
 \value{
 an romics_object with the statistical layer containing the newly generated t.tests and fold-changes

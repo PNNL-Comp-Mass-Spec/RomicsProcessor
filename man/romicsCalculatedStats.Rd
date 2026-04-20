@@ -7,7 +7,7 @@
 romicsCalculatedStats(romics_object)
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 }
 \value{
 This function will return character vector containing the stat columns previously calculated for a romics_object, if no stats were previously calculated an error message will be displayed

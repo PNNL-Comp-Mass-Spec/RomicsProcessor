@@ -2,17 +2,18 @@
 % Please edit documentation in R/02_Romics_Base_Functions.R
 \name{romicsExportData}
 \alias{romicsExportData}
-\title{romicsOutputData()}
+\title{romicsExportData()}
 \usage{
 romicsExportData(
   romics_object,
+  data = TRUE,
   statistics = FALSE,
   missing_data = FALSE,
   IDs = FALSE
 )
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{statistics}{boolean, has to be TRUE or FALSE. Indicates if the statistics should be exported along with the data (FALSE by default).}
 

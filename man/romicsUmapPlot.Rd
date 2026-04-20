@@ -6,44 +6,74 @@
 \usage{
 romicsUmapPlot(
   romics_object,
-  umap_config = umap.defaults,
-  label = TRUE,
-  method = c("naive", "umap-learn"),
-  lock_seed = TRUE,
-  seed = 42,
-  color_by = c("factor", "variable"),
-  factor = "main",
-  variable = "variable_name",
-  color_palette = viridis(n = 20),
-  scale = TRUE
+  Xcomp = 1,
+  Ycomp = 2,
+  Zcomp = NULL,
+  label = FALSE,
+  feature = NULL,
+  factor_name = NULL,
+  color_palette = NULL,
+  standardize = TRUE,
+  size = 3,
+  alpha = 0.8,
+  plotly = FALSE,
+  force_color_update = FALSE,
+  xlim = NULL,
+  ylim = NULL,
+  zlim = NULL
 )
 }
 \arguments{
-\item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
+\item{romics_object}{A romics_object that has UMAP embeddings in its embeddings layer (generated using romicsUmap)}
 
-\item{umap_config}{object of class umap.config (see umap() function documentation)}
+\item{Xcomp}{numerical/double. Indicate the component to plot on the X axis (default: 1)}
 
-\item{method}{character, implementation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn')}
+\item{Ycomp}{numerical/double. Indicate the component to plot on the Y axis (default: 2)}
 
-\item{lock_seed}{has to be TRUE or FALSE to indicate if the seed is locked to enable reproducing plotting}
+\item{Zcomp}{numerical/double. If provided, creates a 3D plot with this component on the Z axis (default: NULL)}
 
-\item{seed}{numeric value indicating what seed to use when random seed are used}
+\item{label}{boolean. Indicate if the sample name labels should be plotted (default: FALSE, applies only to 2D plots)}
 
-\item{color_by}{has to be either 'factor' or 'variable to indicate if the coloring of the sample points is done using the factor set with the parameter 'factor' or with the numerical values of a variable feature set with the factor 'variable'}
+\item{feature}{character string. If provided, the plot will be colored according to the values of this feature.
+If NULL (default), coloring will be based on the factor specified by factor_name.}
 
-\item{factor}{has to be a factor of the romics_object, the existing factors names can be found using the function romicsFactorNames()}
+\item{factor_name}{character string. The name of the factor in romics_object$metadata to use for coloring the points
+when feature is NULL. If NULL (default), the romics_object's main_factor will be used.}
 
-\item{color_palette}{has to be a R gradient color palette (viridis(n=20) by default) this gradient color palette will be used to color the points when the 'color_by' parameter is set to 'variable'}
+\item{color_palette}{a color palette to use. For categorical factors, should be a vector with one color per level.
+For continuous features (when feature is specified), should be a gradient color palette.
+Default: NULL (uses colors_romics for factors, viridis for features).}
 
-\item{scale}{has to be TRUE or FALSE to indicate if the palette defined in color_palette has to be displayed or not.}
+\item{standardize}{boolean. Indicates if the feature values should be scaled when coloring by feature (default: TRUE)}
 
-\item{...}{further arguments passed to or from other methods}
+\item{size}{numeric. Size of the points in the plot (default: 3)}
+
+\item{alpha}{numeric. Transparency of the points in the plot (default: 0.8)}
+
+\item{plotly}{boolean. If TRUE, generates an interactive plotly plot instead of a static ggplot (default: FALSE)}
+
+\item{force_color_update}{boolean. If TRUE, forces color regeneration even for main factor (default: FALSE)}
 }
 \value{
-Returns either a ggplot2 showing the sample umap plot
+Returns either a ggplot2 plot or a plotly interactive plot.
 }
 \description{
-Plots the samples on the umap. Can be colored either by a factor or by the values of a given variable present in the dataset. This function require the data to be full in the layer data to be run. Calculate the umap of the data layer of the romics_object using the package umap.
+Plots the samples on a UMAP plot in 2D or 3D.
+The plot can be colored by any factor in the romics_object's metadata or by feature values.
+This function uses the UMAP embeddings stored in the romics_object.
+}
+\details{
+This function plots UMAP results using the embeddings stored in the romics_object.
+       If Zcomp is provided, a 3D interactive plot is generated using plotly.
+       If Zcomp is NULL, a 2D plot is generated using ggplot2.
+
+       Color palette behavior:
+       - For categorical factors: If color_palette is provided and has enough colors, it will be used.
+         Otherwise, colors_romics or ROP_colors will be used (with warning if insufficient).
+       - For continuous features: If color_palette is NULL, viridis is used. Otherwise, the provided palette is used.
+
+       When using a non-main factor for coloring without a custom color_palette, the function automatically
+       updates the romics_object using romicsChangeFactor() to ensure consistent colors across plots.
 }
 \author{
 Geremy Clair

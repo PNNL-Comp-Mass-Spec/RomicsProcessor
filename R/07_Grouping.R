@@ -34,11 +34,53 @@ romicsHclust<-function(romics_object, method_dist="euclidean", method_hclust="wa
   colors_dend<-colors_dend[order=hc$order]
 
   #color the branches
-  dd <- color_branches(dd,k = NULL, h = NULL,col=as.vector(colors_dend))
+  dd <- dendextend::color_branches(dd,k = NULL, h = NULL,col=as.vector(colors_dend))
 
   #plot the dendrogram to choose the number of clusters
   par(cex=0.7, mar=c(8, 8, 4, 1))
   plot(dd,main="Hierarchical clustering samples", sub="")
+}
+
+# Helper function for consistent factor coloring across plot functions
+assign_factor_colors <- function(factor_values, color_palette = NULL, romics_object = NULL) {
+  unique_levels <- unique(factor_values)
+  n_levels <- length(unique_levels)
+
+  if(!is.null(color_palette) && length(color_palette) > 0) {
+    colors_to_use <- color_palette
+    if(length(colors_to_use) < n_levels) {
+      if(exists("ROP_colors", envir = .GlobalEnv)) {
+        additional_colors <- get("ROP_colors", envir = .GlobalEnv)
+        colors_to_use <- c(colors_to_use, additional_colors)
+      }
+    }
+    if(length(colors_to_use) < n_levels) {
+      colors_to_use <- c(colors_to_use, rainbow(n_levels - length(colors_to_use)))
+    }
+  } else if(!is.null(romics_object) && "colors_romics" %in% rownames(romics_object$metadata)) {
+    colors_romics_vec <- as.character(romics_object$metadata["colors_romics", ])
+    colors_to_use <- unique(colors_romics_vec)
+    if(length(colors_to_use) < n_levels) {
+      if(exists("ROP_colors", envir = .GlobalEnv)) {
+        additional_colors <- get("ROP_colors", envir = .GlobalEnv)
+        colors_to_use <- c(colors_to_use, additional_colors)
+      }
+    }
+    if(length(colors_to_use) < n_levels) {
+      colors_to_use <- c(colors_to_use, rainbow(n_levels - length(colors_to_use)))
+    }
+  } else if(exists("ROP_colors", envir = .GlobalEnv)) {
+    colors_to_use <- get("ROP_colors", envir = .GlobalEnv)
+    if(length(colors_to_use) < n_levels) {
+      colors_to_use <- c(colors_to_use, rainbow(n_levels - length(colors_to_use)))
+    }
+  } else {
+    colors_to_use <- rainbow(n_levels)
+  }
+
+  color_mapping <- setNames(colors_to_use[1:n_levels], unique_levels)
+  colors_out <- as.character(color_mapping[as.character(factor_values)])
+  return(colors_out)
 }
 
 #' romicsPCA()
@@ -172,16 +214,14 @@ romicsPCA <- function(romics_object, verbose = TRUE, ncp, n_components = NULL, s
 #' @param Ycomp numerical/double. Indicate the component to plot on the Y axis (default: 2)
 #' @param Zcomp numerical/double. If provided, creates a 3D plot with this component on the Z axis (default: NULL)
 #' @param label boolean. Indicate if the sample name labels should be plotted (default: FALSE, applies only to 2D plots)
-#' @param plot_type should be one of the following options to indicate the type of plot to be returned:
+#' @param plotType should be one of the following options to indicate the type of plot to be returned:
 #'        'dual' (for both sample plot and variance plot), 'individual', or 'percentage' (default: "dual").
 #'        Note: The 'dual' and 'percentage' options only work for 2D plots (when Zcomp is NULL).
 #' @param feature character string. If provided, the plot will be colored according to the values of this feature.
 #'        If NULL (default), coloring will be based on the factor specified by factor_name.
 #' @param factor_name character string. The name of the factor in romics_object$metadata to use for coloring the points
 #'        when feature is NULL. If NULL (default), the romics_object's main_factor will be used.
-#' @param color_palette a color palette to use. For categorical factors, should be a vector with one color per level.
-#'        For continuous features (when feature is specified), should be a gradient color palette.
-#'        Default: NULL (uses colors_romics for factors, viridis for features).
+#' @param color_palette a gradient color palette to use when coloring by feature (default: viridis(n=20))
 #' @param standardize boolean. Indicates if the feature values should be scaled when coloring by feature (default: TRUE)
 #' @param size numeric. Size of the points in the plot (default: 3)
 #' @param alpha numeric. Transparency of the points in the plot (default: 0.8)
@@ -189,8 +229,8 @@ romicsPCA <- function(romics_object, verbose = TRUE, ncp, n_components = NULL, s
 #' @param show_outline boolean. If FALSE, removes point outlines and shows only fill colors (default: TRUE)
 #' @details This function plots PCA results using the embeddings stored in the romics_object.
 #'        If Zcomp is provided, a 3D interactive plot is generated using plotly. In 3D mode, only the sample plot
-#'        is available (plot_type settings are ignored).
-#'        If Zcomp is NULL, a 2D plot is generated using ggplot2, and can include the variance plot depending on plot_type.
+#'        is available (plotType settings are ignored).
+#'        If Zcomp is NULL, a 2D plot is generated using ggplot2, and can include the variance plot depending on plotType.
 #'        For the variance percentage plot (2D mode only), the function looks for PCA_results in the global environment.
 #'        When using a non-main factor for coloring, the function automatically updates the romics_object
 #'        using romicsChangeFactor() to ensure consistent colors across plots.
@@ -201,9 +241,10 @@ romicsPCA <- function(romics_object, verbose = TRUE, ncp, n_components = NULL, s
 #' @return Returns either a ggplot2 plot, a grid.arrange combined plot (for 2D dual plots), or a plotly 3D plot.
 #' @author Geremy Clair
 #' @export
-romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FALSE, plot_type="dual",
+romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FALSE, plotType="dual",
                           feature=NULL, factor_name=NULL, color_palette=NULL,
-                          standardize=TRUE, size=3, alpha=0.8, plotly=FALSE, show_outline=TRUE){
+                          standardize=TRUE, size=3, alpha=0.8, plotly=FALSE, show_outline=TRUE,
+                          xlim=NULL, ylim=NULL, zlim=NULL){
   # Input validation
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
     stop("romics_object is missing or is not in the appropriate format")
@@ -230,6 +271,10 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
       if(factor_name != romics_object$main_factor) {
         message(paste0("Changing factor to ", factor_name, ", this operation may take a few seconds."))
         romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
+        # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+        if("colors_romics" %in% rownames(romics_object$metadata)) {
+          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+        }
       }
     }
   }
@@ -269,9 +314,9 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
 
   # Try to get PCA_results from global environment
   has_pca_results <- exists("PCA_results", envir = .GlobalEnv)
-  if(!has_pca_results && !is_3d_plot && (plot_type == "dual" || plot_type == "percentage")){
-    warning("PCA_results object not found in global environment. Setting plot_type to 'individual'")
-    plot_type <- "individual"
+  if(!has_pca_results && !is_3d_plot && (plotType == "dual" || plotType == "percentage")){
+    warning("PCA_results object not found in global environment. Setting plotType to 'individual'")
+    plotType <- "individual"
   }
 
   # Extract the specific components for plotting
@@ -296,99 +341,33 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
     }
   }
 
-  # Prepare coloring data
+  # Set default color_palette for continuous features only
+  if(is.null(color_palette) && color_by == "feature") {
+    color_palette <- viridis::viridis(n = 20)
+  }
+
+  # Prepare coloring data - using unified color assignment
   if(color_by == "factor") {
     # Extract factor values
     factor_values <- as.character(romicsExtractFactor(romics_object, factor = "main"))
-    unique_factors <- unique(factor_values)
-    n_levels <- length(unique_factors)
-
-    # Handle color palette for categorical factors
-    if(!is.null(color_palette)) {
-      # User provided a custom color palette - USE IT DIRECTLY
-      message(paste0("Using custom color palette for factor '", factor_name,
-                     "' (", n_levels, " levels)"))
-
-      if(length(color_palette) < n_levels) {
-        # Not enough colors provided
-        warning(paste0("Provided color_palette has ", length(color_palette),
-                       " colors but ", n_levels, " are needed."))
-
-        # Supplement with ROP_colors if available
-        if(exists("ROP_colors")) {
-          message(paste0("Supplementing with ROP_colors."))
-          supplemented_colors <- c(color_palette, ROP_colors)
-          colors <- supplemented_colors[1:n_levels]
-
-          if(length(colors) < n_levels) {
-            stop(paste0("Insufficient colors. Need ", n_levels, " but only have ", length(supplemented_colors), "."))
-          }
-        } else {
-          message("ROP_colors not found. Using rainbow colors to supplement.")
-          colors <- c(color_palette, rainbow(n_levels - length(color_palette)))
-        }
-      } else {
-        # Enough colors provided - use them!
-        colors <- color_palette[1:n_levels]
-      }
-
-      # Assign colors to factor levels
-      names(colors) <- unique_factors
-
-      # Show what we're doing
-      message("Custom color assignment:")
-      for(i in seq_along(colors)) {
-        message(paste0("  ", names(colors)[i], " → ", colors[i]))
-      }
-
-    } else {
-      # No color palette provided, use colors_romics if available
-      if("colors_romics" %in% rownames(romics_object$metadata)) {
-        colors_romics <- as.character(romicsExtractFactor(romics_object, factor = "colors_romics"))
-        # Create unique factor-to-color mapping
-        colors <- c()
-        for(factor_level in unique_factors) {
-          first_occurrence_idx <- which(factor_values == factor_level)[1]
-          colors[factor_level] <- colors_romics[first_occurrence_idx]
-        }
-      } else {
-        # Fallback: use ROP_colors or generate colors
-        warning("colors_romics not found in metadata and no color_palette provided.")
-        if(exists("ROP_colors")) {
-          message(paste0("Using ROP_colors (need ", n_levels, " colors)."))
-          if(length(ROP_colors) < n_levels) {
-            warning(paste0("ROP_colors has only ", length(ROP_colors),
-                           " colors but ", n_levels, " are needed. Supplementing with rainbow colors."))
-            colors <- c(ROP_colors, rainbow(n_levels - length(ROP_colors)))
-          } else {
-            colors <- ROP_colors[1:n_levels]
-          }
-        } else {
-          message("ROP_colors not found. Generating rainbow colors.")
-          colors <- rainbow(n_levels)
-        }
-        names(colors) <- unique_factors
-      }
-    }
-
-    color_values <- factor_values
+    # Use unified color assignment function
+    color_values_mapped <- assign_factor_colors(factor_values, color_palette = color_palette, romics_object = romics_object)
+    color_values <- factor(factor_values)
     color_title <- factor_name
 
+    # Create named color vector for ggplot - match each unique level to its color
+    unique_levels <- unique(as.character(factor_values))
+    idx <- match(unique_levels, as.character(factor_values))
+    colors <- setNames(color_values_mapped[idx], unique_levels)
   } else { # color_by == "feature"
     # Extract feature values
     feature_values <- as.numeric(romics_object$data[feature, ])
-
     # Scale if requested
     if(standardize) {
       feature_values <- as.numeric(scale(feature_values))
     }
-
-    # Set color palette for continuous values
-    if(is.null(color_palette)) {
-      color_palette <- viridis::viridis(n=20)
-    }
-
     color_values <- feature_values
+    color_values_mapped <- NA  # Not used for continuous coloring
     color_title <- feature
   }
 
@@ -420,7 +399,7 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
                              colors = color_palette,
                              text = ~sample)
     }
-    fig <- fig %>% plotly::add_markers(size = size, opacity = alpha, line = list(width = 0))
+    fig <- fig %>% plotly::add_markers(size = size, opacity = alpha)
     fig <- fig %>% plotly::layout(
       scene = list(
         xaxis = list(title = x_label),
@@ -450,7 +429,7 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
 
     # Create explained variance plot if PCA_results is available
     if(has_pca_results){
-      explained_plot <- fviz_screeplot(pca_results, barcolor = "gray20", barfill = "gray20") +
+      explained_plot <- factoextra::fviz_screeplot(pca_results, barcolor = "gray20", barfill = "gray20") +
         theme_ROP() +
         theme(axis.text.x = element_text(angle = 0)) +
         ggtitle("Percentage of exp. variance")
@@ -510,9 +489,9 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
     }
 
     # Return the appropriate plot
-    if(plot_type == "dual" && has_pca_results && !plotly){
+    if(plotType == "dual" && has_pca_results && !plotly){
       grid.arrange(explained_plot, pca_indiv_plot, ncol = 2)
-    } else if(plot_type == "percentage" && has_pca_results && !plotly){
+    } else if(plotType == "percentage" && has_pca_results && !plotly){
       return(explained_plot)
     } else {
       return(pca_indiv_plot)
@@ -773,7 +752,7 @@ romicsUmap <- function(romics_object, verbose=TRUE, n_neighbors=30, n_components
 #' @param size numeric. Size of the points in the plot (default: 3)
 #' @param alpha numeric. Transparency of the points in the plot (default: 0.8)
 #' @param plotly boolean. If TRUE, generates an interactive plotly plot instead of a static ggplot (default: FALSE)
-#' @param show_outline boolean. If FALSE, removes point outlines and shows only fill colors (default: TRUE)
+#' @param force_color_update boolean. If TRUE, forces color regeneration even for main factor (default: FALSE)
 #' @details This function plots UMAP results using the embeddings stored in the romics_object.
 #'        If Zcomp is provided, a 3D interactive plot is generated using plotly.
 #'        If Zcomp is NULL, a 2D plot is generated using ggplot2.
@@ -790,7 +769,8 @@ romicsUmap <- function(romics_object, verbose=TRUE, n_neighbors=30, n_components
 #' @export
 romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FALSE,
                            feature=NULL, factor_name=NULL, color_palette=NULL,
-                           standardize=TRUE, size=3, alpha=0.8, plotly=FALSE, show_outline=TRUE){
+                           standardize=TRUE, size=3, alpha=0.8, plotly=FALSE, force_color_update=FALSE,
+                           xlim=NULL, ylim=NULL, zlim=NULL){
 
   # Input validation
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
@@ -816,12 +796,16 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       }
     }
 
-    # Update factor if it's different from main_factor
+    # Always update factor if it's different OR if force_color_update is TRUE
     # BUT: Don't update if custom color_palette is provided (we'll handle colors ourselves)
-    if(factor_name != romics_object$main_factor) {
+    if(factor_name != romics_object$main_factor || force_color_update) {
       if(is.null(color_palette)) {
         message(paste0("Changing factor to ", factor_name, ", this operation may take a few seconds."))
         romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
+        # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+        if("colors_romics" %in% rownames(romics_object$metadata)) {
+          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+        }
       } else {
         message(paste0("Using factor '", factor_name, "' with custom color palette (skipping romicsChangeFactor)."))
         # Just update the main_factor without regenerating colors
@@ -872,82 +856,18 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
     z_values <- as.numeric(umap_embeddings[paste0("umap_component_", Zcomp), ])
   }
 
-  # Prepare coloring data
+  # Set default color_palette for continuous features only
+  if(is.null(color_palette) && color_by == "feature") {
+    color_palette <- viridis::viridis(n = 20)
+  }
+
+  # Prepare coloring data - using unified color assignment
   if(color_by == "factor") {
     # Extract factor values
     factor_values <- as.character(romicsExtractFactor(romics_object, factor = "main"))
-    unique_factors <- unique(factor_values)
-    n_levels <- length(unique_factors)
-
-    # Handle color palette for categorical factors
-    if(!is.null(color_palette)) {
-      # User provided a custom color palette - USE IT DIRECTLY
-      message(paste0("Using custom color palette for factor '", factor_name,
-                     "' (", n_levels, " levels)"))
-
-      if(length(color_palette) < n_levels) {
-        # Not enough colors provided
-        warning(paste0("Provided color_palette has ", length(color_palette),
-                       " colors but ", n_levels, " are needed."))
-
-        # Supplement with ROP_colors if available
-        if(exists("ROP_colors")) {
-          message(paste0("Supplementing with ROP_colors."))
-          supplemented_colors <- c(color_palette, ROP_colors)
-          colors <- supplemented_colors[1:n_levels]
-
-          if(length(colors) < n_levels) {
-            stop(paste0("Insufficient colors. Need ", n_levels, " but only have ", length(supplemented_colors), "."))
-          }
-        } else {
-          message("ROP_colors not found. Using rainbow colors to supplement.")
-          colors <- c(color_palette, rainbow(n_levels - length(color_palette)))
-        }
-      } else {
-        # Enough colors provided - use them!
-        colors <- color_palette[1:n_levels]
-      }
-
-      # Assign colors to factor levels
-      names(colors) <- unique_factors
-
-      # Show what we're doing
-      message("Custom color assignment:")
-      for(i in seq_along(colors)) {
-        message(paste0("  ", names(colors)[i], " → ", colors[i]))
-      }
-
-    } else {
-      # No color palette provided, use colors_romics if available
-      if("colors_romics" %in% rownames(romics_object$metadata)) {
-        colors_romics <- as.character(romicsExtractFactor(romics_object, factor = "colors_romics"))
-        # Create unique factor-to-color mapping
-        colors <- c()
-        for(factor_level in unique_factors) {
-          first_occurrence_idx <- which(factor_values == factor_level)[1]
-          colors[factor_level] <- colors_romics[first_occurrence_idx]
-        }
-      } else {
-        # Fallback: use ROP_colors or generate colors
-        warning("colors_romics not found in metadata and no color_palette provided.")
-        if(exists("ROP_colors")) {
-          message(paste0("Using ROP_colors (need ", n_levels, " colors)."))
-          if(length(ROP_colors) < n_levels) {
-            warning(paste0("ROP_colors has only ", length(ROP_colors),
-                           " colors but ", n_levels, " are needed. Supplementing with rainbow colors."))
-            colors <- c(ROP_colors, rainbow(n_levels - length(ROP_colors)))
-          } else {
-            colors <- ROP_colors[1:n_levels]
-          }
-        } else {
-          message("ROP_colors not found. Generating rainbow colors.")
-          colors <- rainbow(n_levels)
-        }
-        names(colors) <- unique_factors
-      }
-    }
-
-    color_values <- factor_values
+    # Use unified color assignment function
+    color_values_mapped <- assign_factor_colors(factor_values, color_palette = color_palette, romics_object = romics_object)
+    color_values <- factor(factor_values)
     color_title <- factor_name
 
   } else { # color_by == "feature"
@@ -959,13 +879,16 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       feature_values <- as.numeric(scale(feature_values))
     }
 
-    # Set color palette for continuous values
-    if(is.null(color_palette)) {
-      color_palette <- viridis::viridis(n=20)
-    }
-
     color_values <- feature_values
     color_title <- feature
+  }
+
+  # Create color mapping for factor-based coloring
+  if(color_by == "factor") {
+    # Create a named vector mapping factor levels to colors
+    unique_levels <- unique(as.character(factor_values))
+    idx <- match(unique_levels, as.character(factor_values))
+    colors <- setNames(color_values_mapped[idx], unique_levels)
   }
 
   # For 3D plot
@@ -1003,7 +926,7 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       scene = list(
         xaxis = list(title = paste0("UMAP Component ", Xcomp)),
         yaxis = list(title = paste0("UMAP Component ", Ycomp)),
-        zaxis = list(title = paste0("UMAP Component ", Zcomp))
+        zaxis = list(title = paste0("UMAP Component ", Zcomp), range = if(!is.null(zlim)) zlim else NULL)
       ),
       coloraxis = list(colorbar = list(title = color_title))
     )
@@ -1024,50 +947,28 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       umap_coordinates$color_var <- as.factor(umap_coordinates$color_var)
     }
 
-    # Create individual plot with outline control
-    if(show_outline) {
-      # Traditional plot with outlines
-      umap_plot <- ggplot2::ggplot(umap_coordinates, ggplot2::aes(x = x, y = y, colour = color_var)) +
-        ggplot2::geom_point(size = size, alpha = alpha) +
-        ggplot2::labs(colour = color_title)
-    } else {
-      # Plot without outlines using fill
-      umap_plot <- ggplot2::ggplot(umap_coordinates, ggplot2::aes(x = x, y = y, fill = color_var)) +
-        ggplot2::geom_point(size = size, alpha = alpha, colour = NA, shape = 21) +
-        ggplot2::labs(fill = color_title)
-    }
-
-    # Add common elements
-    umap_plot <- umap_plot +
+    # Create individual plot
+    umap_plot <- ggplot2::ggplot(umap_coordinates, ggplot2::aes(x = x, y = y, colour = color_var)) +
+      ggplot2::geom_point(size = size, alpha = alpha, stroke = 0) +
       ggplot2::xlab(paste0("UMAP Component ", Xcomp)) +
       ggplot2::ylab(paste0("UMAP Component ", Ycomp)) +
       ggplot2::ggtitle("UMAP Plot") +
+      ggplot2::labs(colour = color_title) +
+      ggplot2::scale_x_continuous(limits = if(!is.null(xlim)) xlim else NULL) +
+      ggplot2::scale_y_continuous(limits = if(!is.null(ylim)) ylim else NULL) +
       theme_ROP()
 
     # Add appropriate color scale
     if(color_by == "factor") {
-      if(show_outline) {
-        umap_plot <- umap_plot + ggplot2::scale_color_manual(values = colors)
-      } else {
-        umap_plot <- umap_plot + ggplot2::scale_fill_manual(values = colors)
-      }
+      umap_plot <- umap_plot + ggplot2::scale_color_manual(values = colors)
     } else if(color_by == "feature") {
-      if(show_outline) {
-        umap_plot <- umap_plot + ggplot2::scale_color_gradientn(colors = color_palette, na.value = "gray20")
-      } else {
-        umap_plot <- umap_plot + ggplot2::scale_fill_gradientn(colors = color_palette, na.value = "gray20")
-      }
+      umap_plot <- umap_plot + ggplot2::scale_color_gradientn(colors = color_palette, na.value = "gray20")
     }
 
     # Add labels if requested
     if(label == TRUE){
-      if(show_outline) {
-        umap_plot <- umap_plot +
-          ggplot2::geom_text(ggplot2::aes(colour = color_var), size = 3, label = umap_coordinates$sample)
-      } else {
-        umap_plot <- umap_plot +
-          ggplot2::geom_text(ggplot2::aes(fill = color_var), size = 3, label = umap_coordinates$sample)
-      }
+      umap_plot <- umap_plot +
+        ggplot2::geom_text(ggplot2::aes(colour = color_var), size = 3, label = umap_coordinates$sample)
     }
 
     # Convert to plotly if requested
@@ -1084,7 +985,7 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
 #' @description Keeps or drops a subset of specific elements/columns from the romics_object
 #' @param romics_object A romics_object created using createRomicsObject()
 #' @param subset_vector A character vector of factor levels or colnames to keep in the object.
-#' @param filter_mode Either 'keep' or 'drop' to indicate if you want to conserve or to drop the elements from a given factor
+#' @param type Either 'keep' or 'drop' to indicate if you want to conserve or to drop the elements from a given factor
 #' @param by Either 'colnames' or 'level' to indicate what you want to keep or drop.
 #' @param factor A factor contained in the metadata of the romics_object, to obtain the list of factors please use the function romicsFactorNames()
 #' @param handle_embeddings Either 'remove' (default) or 'subset'. How to handle embeddings when subsetting.
@@ -1093,7 +994,7 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
 #' @return This function generates a subsetted romics_object
 #' @author Geremy Clair
 #' @export
-romicsSubset <- function(romics_object, subset_vector, filter_mode = "keep", by = "colnames",
+romicsSubset <- function(romics_object, subset_vector, type = "keep", by = "colnames",
                          factor = "main", handle_embeddings = "remove") {
   arguments <- as.list(match.call())
 
@@ -1102,8 +1003,8 @@ romicsSubset <- function(romics_object, subset_vector, filter_mode = "keep", by 
   }
   if(missing(subset_vector)) {stop("Your subsetting vector is missing")}
   if(!is.character(subset_vector)) {stop("Your subset vector has to be a character vector")}
-  if(missing(filter_mode)) {filter_mode <- "keep"}
-  if(!filter_mode %in% c("keep", "drop")) {stop("<filter_mode> has to be either 'keep' or 'drop'")}
+  if(missing(type)) {type <- "keep"}
+  if(!type %in% c("keep", "drop")) {stop("<type> has to be either 'keep' or 'drop'")}
   if(missing(by)) {by <- "colnames"}
   if(!by %in% c("colnames", "level")) {stop("<by> has to be either 'colnames' or 'level'")}
   if(!handle_embeddings %in% c("remove", "subset")) {
@@ -1131,7 +1032,7 @@ romicsSubset <- function(romics_object, subset_vector, filter_mode = "keep", by 
     if(sum(subset_vector %in% colnames(romics_object$data)) != length(subset_vector)) {
       warning("Not all the elements of the subset_vector were present in the colnames of the data")
     }
-    if(filter_mode == "keep") {
+    if(type == "keep") {
       sub_logical <- colnames(romics_object$data) %in% subset_vector
     } else {
       sub_logical <- !colnames(romics_object$data) %in% subset_vector
@@ -1503,9 +1404,7 @@ romicsTsne <- function(romics_object, verbose=TRUE, perplexity=30, dims=2, initi
 #'        If NULL (default), coloring will be based on the factor specified by factor_name.
 #' @param factor_name character string. The name of the factor in romics_object$metadata to use for coloring the points
 #'        when feature is NULL. If NULL (default), the romics_object's main_factor will be used.
-#' @param color_palette a color palette to use. For categorical factors, should be a vector with one color per level.
-#'        For continuous features (when feature is specified), should be a gradient color palette.
-#'        Default: NULL (uses colors_romics for factors, viridis for features).
+#' @param color_palette a gradient color palette to use when coloring by feature (default: viridis(n=20))
 #' @param standardize boolean. Indicates if the feature values should be scaled when coloring by feature (default: TRUE)
 #' @param size numeric. Size of the points in the plot (default: 3)
 #' @param alpha numeric. Transparency of the points in the plot (default: 0.8)
@@ -1525,7 +1424,8 @@ romicsTsne <- function(romics_object, verbose=TRUE, perplexity=30, dims=2, initi
 #' @export
 romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FALSE,
                            feature=NULL, factor_name=NULL, color_palette=NULL,
-                           standardize=TRUE, size=3, alpha=0.8, plotly=FALSE, show_outline=TRUE){
+                           standardize=TRUE, size=3, alpha=0.8, plotly=FALSE, show_outline=TRUE,
+                           xlim=NULL, ylim=NULL, zlim=NULL){
   # Input validation
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
     stop("romics_object is missing or is not in the appropriate format")
@@ -1552,6 +1452,10 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       if(factor_name != romics_object$main_factor) {
         message(paste0("Changing factor to ", factor_name, ", this operation may take a few seconds."))
         romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
+        # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+        if("colors_romics" %in% rownames(romics_object$metadata)) {
+          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+        }
       }
     }
   }
@@ -1597,100 +1501,37 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
     z_values <- as.numeric(tsne_embeddings[paste0("tsne_component_", Zcomp), ])
   }
 
-  # Prepare coloring data
+  # Set default color_palette for continuous features only
+  if(is.null(color_palette) && color_by == "feature") {
+    color_palette <- viridis::viridis(n = 20)
+  }
+
+  # Prepare coloring data - using unified color assignment
   if(color_by == "factor") {
     # Extract factor values
     factor_values <- as.character(romicsExtractFactor(romics_object, factor = "main"))
-    unique_factors <- unique(factor_values)
-    n_levels <- length(unique_factors)
-
-    # Handle color palette for categorical factors
-    if(!is.null(color_palette)) {
-      # User provided a custom color palette - USE IT DIRECTLY
-      message(paste0("Using custom color palette for factor '", factor_name,
-                     "' (", n_levels, " levels)"))
-
-      if(length(color_palette) < n_levels) {
-        # Not enough colors provided
-        warning(paste0("Provided color_palette has ", length(color_palette),
-                       " colors but ", n_levels, " are needed."))
-
-        # Supplement with ROP_colors if available
-        if(exists("ROP_colors")) {
-          message(paste0("Supplementing with ROP_colors."))
-          supplemented_colors <- c(color_palette, ROP_colors)
-          colors <- supplemented_colors[1:n_levels]
-
-          if(length(colors) < n_levels) {
-            stop(paste0("Insufficient colors. Need ", n_levels, " but only have ", length(supplemented_colors), "."))
-          }
-        } else {
-          message("ROP_colors not found. Using rainbow colors to supplement.")
-          colors <- c(color_palette, rainbow(n_levels - length(color_palette)))
-        }
-      } else {
-        # Enough colors provided - use them!
-        colors <- color_palette[1:n_levels]
-      }
-
-      # Assign colors to factor levels
-      names(colors) <- unique_factors
-
-      # Show what we're doing
-      message("Custom color assignment:")
-      for(i in seq_along(colors)) {
-        message(paste0("  ", names(colors)[i], " → ", colors[i]))
-      }
-
-    } else {
-      # No color palette provided, use colors_romics if available
-      if("colors_romics" %in% rownames(romics_object$metadata)) {
-        colors_romics <- as.character(romicsExtractFactor(romics_object, factor = "colors_romics"))
-        # Create unique factor-to-color mapping
-        colors <- c()
-        for(factor_level in unique_factors) {
-          first_occurrence_idx <- which(factor_values == factor_level)[1]
-          colors[factor_level] <- colors_romics[first_occurrence_idx]
-        }
-      } else {
-        # Fallback: use ROP_colors or generate colors
-        warning("colors_romics not found in metadata and no color_palette provided.")
-        if(exists("ROP_colors")) {
-          message(paste0("Using ROP_colors (need ", n_levels, " colors)."))
-          if(length(ROP_colors) < n_levels) {
-            warning(paste0("ROP_colors has only ", length(ROP_colors),
-                           " colors but ", n_levels, " are needed. Supplementing with rainbow colors."))
-            colors <- c(ROP_colors, rainbow(n_levels - length(ROP_colors)))
-          } else {
-            colors <- ROP_colors[1:n_levels]
-          }
-        } else {
-          message("ROP_colors not found. Generating rainbow colors.")
-          colors <- rainbow(n_levels)
-        }
-        names(colors) <- unique_factors
-      }
-    }
-
-    color_values <- factor_values
+    # Use unified color assignment function
+    color_values_mapped <- assign_factor_colors(factor_values, color_palette = color_palette, romics_object = romics_object)
+    color_values <- factor(factor_values)
     color_title <- factor_name
-
   } else { # color_by == "feature"
     # Extract feature values
     feature_values <- as.numeric(romics_object$data[feature, ])
-
     # Scale if requested
     if(standardize) {
       feature_values <- as.numeric(scale(feature_values))
     }
-
-    # Set color palette for continuous values
-    if(is.null(color_palette)) {
-      color_palette <- viridis::viridis(n=20)
-    }
-
     color_values <- feature_values
+    color_values_mapped <- NA  # Not used for continuous coloring
     color_title <- feature
+  }
+
+  # Create color mapping for factor-based coloring
+  if(color_by == "factor") {
+    # Create a named vector mapping factor levels to colors
+    unique_levels <- unique(as.character(factor_values))
+    idx <- match(unique_levels, as.character(factor_values))
+    colors <- setNames(color_values_mapped[idx], unique_levels)
   }
 
   # For 3D plot
@@ -1703,12 +1544,10 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       color_var = color_values,
       sample = colnames(romics_object$data)
     )
-
     # Convert factor to factor type for plotly if needed
     if(color_by == "factor") {
       tsne_coord$color_var <- as.factor(tsne_coord$color_var)
     }
-
     # Create 3D plot
     if(color_by == "factor") {
       fig <- plotly::plot_ly(tsne_coord, x = ~TSNE1, y = ~TSNE2, z = ~TSNE3,
@@ -1721,17 +1560,15 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
                              colors = color_palette,
                              text = ~sample)
     }
-
-    fig <- fig %>% plotly::add_markers(size = size, opacity = alpha, line = list(width = 0))
+    fig <- fig %>% plotly::add_markers(size = size, opacity = alpha)
     fig <- fig %>% plotly::layout(
       scene = list(
         xaxis = list(title = paste0("t-SNE Component ", Xcomp)),
         yaxis = list(title = paste0("t-SNE Component ", Ycomp)),
-        zaxis = list(title = paste0("t-SNE Component ", Zcomp))
+        zaxis = list(title = paste0("t-SNE Component ", Zcomp), range = if(!is.null(zlim)) zlim else NULL)
       ),
       coloraxis = list(colorbar = list(title = color_title))
     )
-
     return(fig)
   } else {
     # Create data frame for 2D plot
@@ -1764,6 +1601,8 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       ggplot2::xlab(paste0("t-SNE Component ", Xcomp)) +
       ggplot2::ylab(paste0("t-SNE Component ", Ycomp)) +
       ggplot2::ggtitle("t-SNE Plot") +
+      ggplot2::scale_x_continuous(limits = if(!is.null(xlim)) xlim else NULL) +
+      ggplot2::scale_y_continuous(limits = if(!is.null(ylim)) ylim else NULL) +
       theme_ROP()
 
     # Add appropriate color scale
@@ -1807,11 +1646,11 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
 #' have to contain the same <samples> (data columns).
 #' @param origin_romics_object has to be a romics_object created using romicsCreateObject()
 #' @param receiving_romics_object has to be a romics_object created using romicsCreateObject() and containing the same samples as the origin_romics_object.
-#' @param methods a vector indicating which embeddings to transfer. Options are "pca", "umap", and "tsne". Default: c("pca","umap","tsne")
+#' @param type a vector indicating which embeddings to transfer. Options are "pca", "umap", and "tsne". Default: c("pca","umap","tsne")
 #' @return Returns the receiving_romics_object with the transferred embeddings.
 #' @author Geremy Clair
 #' @export
-romicsTransferEmbeddings <- function(origin_romics_object, receiving_romics_object, methods = c("pca","umap","tsne")){
+romicsTransferEmbeddings <- function(origin_romics_object, receiving_romics_object, type = c("pca","umap","tsne")){
   arguments <- as.list(match.call())
 
   if(!is.romicsObject(origin_romics_object) | missing(origin_romics_object)) {
@@ -1820,12 +1659,12 @@ romicsTransferEmbeddings <- function(origin_romics_object, receiving_romics_obje
   if(!is.romicsObject(receiving_romics_object) | missing(receiving_romics_object)) {
     stop("<receiving_romics_object> is missing or is not in the appropriate format.")
   }
-  if(missing(methods)){
-    methods = c("pca", "umap", "tsne")
+  if(missing(type)){
+    type = c("pca", "umap", "tsne")
   }
 
-  # Standardize the methods parameter to lowercase for case-insensitive comparison
-  methods <- tolower(methods)
+  # Standardize the type parameter to lowercase for case-insensitive comparison
+  type <- tolower(type)
 
   # Check that both objects have the same samples (but allow different order)
   origin_samples <- colnames(origin_romics_object$data)
@@ -1888,17 +1727,17 @@ romicsTransferEmbeddings <- function(origin_romics_object, receiving_romics_obje
   }
 
   # Handle PCA embeddings transfer
-  if("pca" %in% methods){
+  if("pca" %in% type){
     transfer_embeddings("pca_component_", "PCA")
   }
 
   # Handle UMAP embeddings transfer
-  if("umap" %in% methods){
+  if("umap" %in% type){
     transfer_embeddings("umap_component_", "UMAP")
   }
 
   # Handle t-SNE embeddings transfer
-  if("tsne" %in% methods){
+  if("tsne" %in% type){
     transfer_embeddings("tsne_component_", "t-SNE")
   }
 
@@ -2305,26 +2144,8 @@ romicsKmeansSamples <- function(romics_object,
 #'         Clusters are named as "{factor_name}_001", "{factor_name}_002", etc.
 #'         A message will indicate the number of clusters found and confirm the factor was added.
 #' @author Geremy Clair
-#' romicsLouvainSamples_old()
-#' @description DEPRECATED: Original (slow) version of Louvain clustering. Use romicsLouvainSamples() instead for significantly better performance.
-#' This function is kept for backward compatibility only.
-#' @param romics_object A romics_object created using romicsCreateObject().
-#' @param cluster_using Character string specifying which data to use for clustering.
-#' @param k Number of nearest neighbors to use in graph construction.
-#' @param resolution Resolution parameter for the clustering.
-#' @param target_clusters Optional integer specifying the desired number of clusters.
-#' @param max_iterations Maximum number of iterations when trying to reach target_clusters.
-#' @param tolerance Tolerance for target_clusters.
-#' @param factor_name Character string specifying the name for the new factor.
-#' @param weights Optional edge weights for the graph.
-#' @param lock.seed Logical. If TRUE, uses a fixed seed for reproducible clustering.
-#' @param seed Numeric value for the random seed.
-#' @param use_approximate Logical. If TRUE and FNN available, uses fast approximate KNN.
-#' @param ... Additional parameters passed to igraph::cluster_louvain().
-#' @return Returns the romics_object with cluster assignments added to metadata.
-#' @author Geremy Clair
 #' @export
-romicsLouvainSamples_old <- function(romics_object,
+romicsLouvainSamples <- function(romics_object,
                                  cluster_using = c("data", "pca", "umap", "tsne"),
                                  k = 20,
                                  resolution = 1.0,
@@ -2464,269 +2285,6 @@ romicsLouvainSamples_old <- function(romics_object,
     final_weights[i] <- 1 / (dist_val + 1e-10)
   }
   igraph::E(g)$weight <- final_weights
-
-  # Function to perform clustering
-  perform_clustering <- function(res) {
-    louvain_result <- igraph::cluster_louvain(g, resolution = res, ...)
-    cluster_assignments <- igraph::membership(louvain_result)
-    n_clusters <- max(cluster_assignments)
-    return(list(result = louvain_result, assignments = cluster_assignments, n_clusters = n_clusters))
-  }
-
-  # Main clustering logic
-  if (!is.null(target_clusters)) {
-    message(paste("Attempting to find approximately", target_clusters, "clusters..."))
-
-    current_resolution <- resolution
-    best_resolution <- resolution
-    best_result <- NULL
-    best_diff <- Inf
-
-    # Initial clustering
-    clustering_result <- perform_clustering(current_resolution)
-    current_n_clusters <- clustering_result$n_clusters
-    best_result <- clustering_result
-    best_diff <- abs(current_n_clusters - target_clusters)
-
-    message(paste("Initial clustering with resolution", round(current_resolution, 4), "found", current_n_clusters, "clusters"))
-
-    # Iterative adjustment
-    iteration <- 1
-    while (abs(current_n_clusters - target_clusters) > tolerance && iteration <= max_iterations) {
-
-      # Adjust resolution
-      if (current_n_clusters < target_clusters) {
-        current_resolution <- current_resolution * 1.2
-      } else {
-        current_resolution <- current_resolution * 0.8
-      }
-
-      # Perform clustering
-      clustering_result <- perform_clustering(current_resolution)
-      current_n_clusters <- clustering_result$n_clusters
-
-      message(paste("Iteration", iteration, ": resolution", round(current_resolution, 4), "found", current_n_clusters, "clusters"))
-
-      # Update best result if closer to target
-      current_diff <- abs(current_n_clusters - target_clusters)
-      if (current_diff < best_diff) {
-        best_diff <- current_diff
-        best_result <- clustering_result
-        best_resolution <- current_resolution
-      }
-
-      iteration <- iteration + 1
-    }
-
-    # Use best result
-    final_result <- best_result
-    message(paste("Final result: using resolution", round(best_resolution, 4), "with", final_result$n_clusters, "clusters"))
-
-  } else {
-    # Use specified resolution directly
-    message("Running Louvain clustering...")
-    final_result <- perform_clustering(resolution)
-  }
-
-  # Format cluster labels
-  cluster_assignments <- final_result$assignments
-  max_digits <- nchar(as.character(max(cluster_assignments)))
-  format_string <- paste0("%s_%0", max_digits, "d")
-  cluster_labels <- sprintf(format_string, factor_name, cluster_assignments)
-
-  # Check if factor already exists
-  if(factor_name %in% rownames(romics_object$metadata)) {
-    warning(paste(factor_name, "was previously calculated and will be replaced by the newly computed values."))
-    romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != factor_name, ]
-  }
-
-  # Add new factor to metadata
-  new_factor <- data.frame(matrix(cluster_labels, nrow = 1))
-  colnames(new_factor) <- colnames(romics_object$metadata)
-  rownames(new_factor) <- factor_name
-  romics_object$metadata <- rbind(romics_object$metadata, new_factor)
-
-  message(paste(factor_name, "was added to the romics factors."))
-  message(paste("Found", max(cluster_assignments), "clusters"))
-
-  # Update steps
-  romics_object <- romicsUpdateSteps(romics_object, arguments)
-
-  return(romics_object)
-}
-
-#' romicsLouvainSamples()
-#' @description OPTIMIZED VERSION: Generate Louvain community clustering for samples using fast k-nearest neighbor graph construction.
-#' Uses vectorized operations and avoids redundant distance calculations for significantly improved performance on large datasets.
-#' The clustering can be based on the full data matrix or dimensionally reduced data from PCA, UMAP, or t-SNE embeddings.
-#' @param romics_object A romics_object created using romicsCreateObject().
-#' @param cluster_using Character string specifying which data to use for clustering. Options: 'data', 'pca', 'umap', 'tsne'.
-#'        Default: 'data'
-#' @param k Number of nearest neighbors to use in graph construction. Default: 20
-#'        For datasets >50k samples, consider reducing this value (e.g., k=10) to improve memory efficiency.
-#' @param resolution Resolution parameter that determines the granularity of the clustering.
-#'        Higher values lead to more clusters. Default: 1.0
-#' @param target_clusters Optional integer specifying the desired number of clusters. If provided, the function will
-#'        iteratively adjust the resolution parameter to approximate this number. Default: NULL
-#' @param max_iterations Maximum number of iterations when trying to reach target_clusters. Default: 20
-#' @param tolerance Tolerance for target_clusters - clustering will stop if within this range. Default: 1
-#' @param factor_name Character string specifying the name for the new factor to be added to metadata.
-#'        Default: 'Louvain_clust'
-#' @param weights Optional edge weights for the graph. If NULL, distance-based weighting is used automatically.
-#' @param lock.seed Logical. If TRUE, uses a fixed seed for reproducible clustering. Default: TRUE
-#' @param seed Numeric value for the random seed when lock.seed=TRUE. Default: 42
-#' @param use_approximate Logical. If TRUE and FNN available, uses fast approximate KNN. Default: TRUE
-#' @param ... Additional parameters passed to igraph::cluster_louvain().
-#' @details OPTIMIZED IMPLEMENTATION:
-#'          - Pre-allocates edge matrices instead of vector concatenation (10-50x faster)
-#'          - Reuses KNN distances directly instead of recalculating (5-10x faster)
-#'          - Vectorizes weight calculations (3-5x faster)
-#'          - Overall expected speedup: 20-100x on large datasets
-#'
-#'          Uses the same interface as romicsLouvainSamples_old but with significantly improved performance.
-#' @return Returns the romics_object with cluster assignments added to metadata.
-#' @author Geremy Clair
-#' @export
-romicsLouvainSamples <- function(romics_object,
-                                 cluster_using = c("data", "pca", "umap", "tsne"),
-                                 k = 20,
-                                 resolution = 1.0,
-                                 target_clusters = NULL,
-                                 max_iterations = 20,
-                                 tolerance = 1,
-                                 factor_name = "Louvain_clust",
-                                 weights = NULL,
-                                 lock.seed = TRUE,
-                                 seed = 42,
-                                 use_approximate = TRUE,
-                                 ...) {
-
-  arguments <- as.list(match.call())
-
-  # Check for required packages
-  required_packages <- c("igraph")
-  if (use_approximate) {
-    required_packages <- c(required_packages, "FNN")
-  }
-  for (pkg in required_packages) {
-    if (!requireNamespace(pkg, quietly = TRUE)) {
-      stop(paste("The", pkg, "package is required. Please install it with: install.packages('", pkg, "')", sep = ""))
-    }
-  }
-
-  # Input validation
-  if(!is.romicsObject(romics_object) | missing(romics_object)) {
-    stop("romics_object is missing or is not in the appropriate format.")
-  }
-
-  # Validate target_clusters
-  if (!is.null(target_clusters)) {
-    if (!is.numeric(target_clusters) || length(target_clusters) != 1 || target_clusters < 1) {
-      stop("target_clusters must be a positive integer")
-    }
-    target_clusters <- as.integer(target_clusters)
-  }
-
-  # Set defaults for missing parameters
-  if(missing(cluster_using)) {
-    cluster_using <- "data"
-  } else {
-    cluster_using <- tolower(cluster_using)[1]
-  }
-  if(!cluster_using %in% c("data", "pca", "umap", "tsne")) {
-    stop("cluster_using has to be one of: 'data', 'pca', 'umap', or 'tsne'.")
-  }
-
-  # Check if embeddings exist if using pca, umap, or tsne
-  if(cluster_using %in% c("pca", "umap", "tsne") && is.null(romics_object$embeddings)) {
-    stop("Dimension reduction embeddings were not computed for this romics_object.")
-  }
-
-  # Set seed for reproducibility
-  if(lock.seed) {
-    set.seed(seed)
-  } else {
-    set.seed(as.numeric(Sys.time()))
-  }
-
-  # Prepare data for clustering based on specified method
-  if(cluster_using == "data") {
-    m <- as.matrix(t(romics_object$data))
-  } else if(cluster_using == "umap") {
-    if(sum(grepl("umap_component_", rownames(romics_object$embeddings))) == 0) {
-      stop("UMAP embeddings were not computed for this romics_object.")
-    }
-    m <- t(romics_object$embeddings[grepl("umap_component_", rownames(romics_object$embeddings)), ])
-  } else if(cluster_using == "pca") {
-    if(sum(grepl("pca_component_", rownames(romics_object$embeddings))) == 0) {
-      stop("PCA embeddings were not computed for this romics_object.")
-    }
-    m <- t(romics_object$embeddings[grepl("pca_component_", rownames(romics_object$embeddings)), ])
-  } else if(cluster_using == "tsne") {
-    if(sum(grepl("tsne_component_", rownames(romics_object$embeddings))) == 0) {
-      stop("t-SNE embeddings were not computed for this romics_object.")
-    }
-    m <- t(romics_object$embeddings[grepl("tsne_component_", rownames(romics_object$embeddings)), ])
-  }
-
-  n_samples <- nrow(m)
-  n_dims <- ncol(m)
-  message(paste("Processing", n_samples, "samples with", n_dims, "dimensions"))
-
-  # For very large datasets, ensure we're using a reasonable k
-  k <- min(k, n_samples - 1)
-
-  # Build graph once using KNN
-  message("Building optimized k-nearest neighbor graph...")
-  if (use_approximate && requireNamespace("FNN", quietly = TRUE)) {
-    knn_result <- FNN::get.knn(m, k = k)
-    knn_indices <- knn_result$nn.index
-    knn_distances <- knn_result$nn.dist
-  } else {
-    # Manual implementation for fallback
-    knn_indices <- matrix(0, nrow = n_samples, ncol = k)
-    knn_distances <- matrix(0, nrow = n_samples, ncol = k)
-
-    for (i in 1:n_samples) {
-      diffs <- sweep(m, 2, m[i, ], "-")
-      distances <- sqrt(rowSums(diffs^2))
-      distances[i] <- Inf
-      nearest_idx <- order(distances)[1:k]
-      knn_indices[i, ] <- nearest_idx
-      knn_distances[i, ] <- distances[nearest_idx]
-      if (i %% 1000 == 0) message(paste("Processed", i, "of", n_samples, "samples"))
-    }
-  }
-
-  # OPTIMIZATION: Pre-allocate edge matrix instead of concatenating vectors
-  max_edges <- n_samples * k
-  edges <- matrix(0, nrow = max_edges, ncol = 2)
-  edge_weights <- numeric(max_edges)
-  edge_idx <- 0
-
-  # Build edges using vectorized operations
-  for (i in 1:n_samples) {
-    for (j in 1:k) {
-      neighbor <- knn_indices[i, j]
-      if (neighbor > 0 && neighbor != i) {
-        edge_idx <- edge_idx + 1
-        edges[edge_idx, ] <- c(i, neighbor)
-        # OPTIMIZATION: Reuse KNN distances directly instead of recalculating
-        edge_weights[edge_idx] <- 1 / (knn_distances[i, j] + 1e-10)
-      }
-    }
-  }
-
-  # Trim edges to actual size
-  edges <- edges[1:edge_idx, ]
-  edge_weights <- edge_weights[1:edge_idx]
-
-  # Create graph
-  g <- igraph::graph_from_edgelist(edges, directed = FALSE)
-  g <- igraph::simplify(g, edge.attr.comb = list(weight = "mean"))
-
-  # Set edge weights directly
-  igraph::E(g)$weight <- edge_weights
 
   # Function to perform clustering
   perform_clustering <- function(res) {
@@ -2895,28 +2453,9 @@ romicsLouvainSamples <- function(romics_object,
 #' }
 #' @seealso \code{\link{romicsLouvainSamples}} for Louvain clustering,
 #'          \code{\link{romicsPCA}}, \code{\link{romicsUMAP}} for dimensionality reduction
-#' romicsLeidenSamples_old()
-#' @description DEPRECATED: Original (slow) version of Leiden clustering. Use romicsLeidenSamples() instead for significantly better performance.
-#' This function is kept for backward compatibility only.
-#' @param romics_object A romics_object created using romicsCreateObject().
-#' @param cluster_using Character string specifying which data to use for clustering.
-#' @param k Number of nearest neighbors to use in graph construction.
-#' @param resolution Resolution parameter for the clustering.
-#' @param target_clusters Optional integer specifying the desired number of clusters.
-#' @param max_iterations Maximum number of iterations when trying to reach target_clusters.
-#' @param tolerance Tolerance for target_clusters.
-#' @param factor_name Character string specifying the name for the new factor.
-#' @param weights Optional edge weights for the graph.
-#' @param lock.seed Logical. If TRUE, uses a fixed seed for reproducible clustering.
-#' @param seed Numeric value for the random seed.
-#' @param use_approximate Logical. If TRUE and FNN available, uses fast approximate KNN.
-#' @param objective_function Character string: 'modularity', 'CPM', or 'significance'.
-#' @param n_iterations Maximum number of Leiden iterations.
-#' @param ... Additional parameters passed to igraph::cluster_leiden().
-#' @return Returns the romics_object with cluster assignments added to metadata.
 #' @author Geremy Clair
 #' @export
-romicsLeidenSamples_old <- function(romics_object,
+romicsLeidenSamples <- function(romics_object,
                                 cluster_using = c("data", "pca", "umap", "tsne"),
                                 k = 20,
                                 resolution = 1.0,
@@ -3072,289 +2611,6 @@ romicsLeidenSamples_old <- function(romics_object,
     final_weights[i] <- 1 / (dist_val + 1e-10)
   }
   igraph::E(g)$weight <- final_weights
-
-  # Function to perform clustering
-  perform_clustering <- function(res) {
-    leiden_result <- igraph::cluster_leiden(g,
-                                            resolution = res,
-                                            objective_function = objective_function,
-                                            n_iterations = n_iterations,
-                                            ...)
-    cluster_assignments <- igraph::membership(leiden_result)
-    n_clusters <- max(cluster_assignments)
-    return(list(result = leiden_result, assignments = cluster_assignments, n_clusters = n_clusters))
-  }
-
-  # Main clustering logic
-  if (!is.null(target_clusters)) {
-    message(paste("Attempting to find approximately", target_clusters, "clusters..."))
-
-    current_resolution <- resolution
-    best_resolution <- resolution
-    best_result <- NULL
-    best_diff <- Inf
-
-    # Initial clustering
-    clustering_result <- perform_clustering(current_resolution)
-    current_n_clusters <- clustering_result$n_clusters
-    best_result <- clustering_result
-    best_diff <- abs(current_n_clusters - target_clusters)
-
-    message(paste("Initial clustering with resolution", round(current_resolution, 4), "found", current_n_clusters, "clusters"))
-
-    # Iterative adjustment
-    iteration <- 1
-    while (abs(current_n_clusters - target_clusters) > tolerance && iteration <= max_iterations) {
-
-      # Adjust resolution
-      if (current_n_clusters < target_clusters) {
-        current_resolution <- current_resolution * 1.2
-      } else {
-        current_resolution <- current_resolution * 0.8
-      }
-
-      # Perform clustering
-      clustering_result <- perform_clustering(current_resolution)
-      current_n_clusters <- clustering_result$n_clusters
-
-      message(paste("Iteration", iteration, ": resolution", round(current_resolution, 4), "found", current_n_clusters, "clusters"))
-
-      # Update best result if closer to target
-      current_diff <- abs(current_n_clusters - target_clusters)
-      if (current_diff < best_diff) {
-        best_diff <- current_diff
-        best_result <- clustering_result
-        best_resolution <- current_resolution
-      }
-
-      iteration <- iteration + 1
-    }
-
-    # Use best result
-    final_result <- best_result
-    message(paste("Final result: using resolution", round(best_resolution, 4), "with", final_result$n_clusters, "clusters"))
-
-  } else {
-    # Use specified resolution directly
-    message(paste("Running Leiden clustering with", objective_function, "objective function..."))
-    final_result <- perform_clustering(resolution)
-  }
-
-  # Format cluster labels
-  cluster_assignments <- final_result$assignments
-  max_digits <- nchar(as.character(max(cluster_assignments)))
-  format_string <- paste0("%s_%0", max_digits, "d")
-  cluster_labels <- sprintf(format_string, factor_name, cluster_assignments)
-
-  # Check if factor already exists
-  if(factor_name %in% rownames(romics_object$metadata)) {
-    warning(paste(factor_name, "was previously calculated and will be replaced by the newly computed values."))
-    romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != factor_name, ]
-  }
-
-  # Add new factor to metadata
-  new_factor <- data.frame(matrix(cluster_labels, nrow = 1))
-  colnames(new_factor) <- colnames(romics_object$metadata)
-  rownames(new_factor) <- factor_name
-  romics_object$metadata <- rbind(romics_object$metadata, new_factor)
-
-  message(paste(factor_name, "was added to the romics factors."))
-  message(paste("Found", max(cluster_assignments), "clusters using", objective_function, "objective function"))
-
-  # Update steps
-  romics_object <- romicsUpdateSteps(romics_object, arguments)
-
-  return(romics_object)
-}
-
-#' romicsLeidenSamples()
-#' @description OPTIMIZED VERSION: Generate Leiden community clustering for samples using fast k-nearest neighbor graph construction.
-#' Uses vectorized operations and avoids redundant distance calculations for significantly improved performance on large datasets.
-#' The clustering can be based on the full data matrix or dimensionally reduced data from PCA, UMAP, or t-SNE embeddings.
-#' @param romics_object A romics_object created using romicsCreateObject().
-#' @param cluster_using Character string specifying which data to use for clustering. Options: 'data', 'pca', 'umap', 'tsne'.
-#'        Default: 'data'
-#' @param k Number of nearest neighbors to use in graph construction. Default: 20
-#'        For datasets >50k samples, consider reducing this value (e.g., k=10) to improve memory efficiency.
-#' @param resolution Resolution parameter that determines the granularity of the clustering. Default: 1.0
-#' @param target_clusters Optional integer specifying the desired number of clusters. Default: NULL
-#' @param max_iterations Maximum number of iterations when trying to reach target_clusters. Default: 20
-#' @param tolerance Tolerance for target_clusters - clustering will stop if within this range. Default: 1
-#' @param factor_name Character string specifying the name for the new factor to be added to metadata.
-#'        Default: 'Leiden_clust'
-#' @param weights Optional edge weights for the graph. If NULL, distance-based weighting is used automatically.
-#' @param lock.seed Logical. If TRUE, uses a fixed seed for reproducible clustering. Default: TRUE
-#' @param seed Numeric value for the random seed when lock.seed=TRUE. Default: 42
-#' @param use_approximate Logical. If TRUE and FNN available, uses fast approximate KNN. Default: TRUE
-#' @param objective_function Character string: 'modularity', 'CPM', or 'significance'. Default: 'modularity'
-#' @param n_iterations Maximum number of Leiden iterations. Default: -1 (run until convergence)
-#' @param ... Additional parameters passed to igraph::cluster_leiden().
-#' @details OPTIMIZED IMPLEMENTATION:
-#'          - Pre-allocates edge matrices instead of vector concatenation (10-50x faster)
-#'          - Reuses KNN distances directly instead of recalculating (5-10x faster)
-#'          - Vectorizes weight calculations (3-5x faster)
-#'          - Overall expected speedup: 20-100x on large datasets
-#'
-#'          Uses the same interface as romicsLeidenSamples_old but with significantly improved performance.
-#' @return Returns the romics_object with cluster assignments added to metadata.
-#' @author Geremy Clair
-#' @export
-romicsLeidenSamples <- function(romics_object,
-                                cluster_using = c("data", "pca", "umap", "tsne"),
-                                k = 20,
-                                resolution = 1.0,
-                                target_clusters = NULL,
-                                max_iterations = 20,
-                                tolerance = 1,
-                                factor_name = "Leiden_clust",
-                                weights = NULL,
-                                lock.seed = TRUE,
-                                seed = 42,
-                                use_approximate = TRUE,
-                                objective_function = c("modularity", "CPM", "significance"),
-                                n_iterations = -1,
-                                ...) {
-
-  arguments <- as.list(match.call())
-
-  # Check for required packages
-  required_packages <- c("igraph")
-  if (use_approximate) {
-    required_packages <- c(required_packages, "FNN")
-  }
-  for (pkg in required_packages) {
-    if (!requireNamespace(pkg, quietly = TRUE)) {
-      stop(paste("The", pkg, "package is required. Please install it with: install.packages('", pkg, "')", sep = ""))
-    }
-  }
-
-  # Check for Leiden algorithm availability
-  if (!exists("cluster_leiden", where = "package:igraph", mode = "function")) {
-    stop("The Leiden algorithm is not available in your igraph version. Please update igraph: install.packages('igraph')")
-  }
-
-  # Input validation
-  if(!is.romicsObject(romics_object) | missing(romics_object)) {
-    stop("romics_object is missing or is not in the appropriate format.")
-  }
-
-  # Validate target_clusters
-  if (!is.null(target_clusters)) {
-    if (!is.numeric(target_clusters) || length(target_clusters) != 1 || target_clusters < 1) {
-      stop("target_clusters must be a positive integer")
-    }
-    target_clusters <- as.integer(target_clusters)
-  }
-
-  # Set defaults for missing parameters
-  if(missing(cluster_using)) {
-    cluster_using <- "data"
-  } else {
-    cluster_using <- tolower(cluster_using)[1]
-  }
-  if(!cluster_using %in% c("data", "pca", "umap", "tsne")) {
-    stop("cluster_using has to be one of: 'data', 'pca', 'umap', or 'tsne'.")
-  }
-
-  if(missing(objective_function)) {
-    objective_function <- "modularity"
-  } else {
-    objective_function <- objective_function[1]
-  }
-  if(!objective_function %in% c("modularity", "CPM", "significance")) {
-    stop("objective_function has to be one of: 'modularity', 'CPM', or 'significance'.")
-  }
-
-  # Check if embeddings exist if using pca, umap, or tsne
-  if(cluster_using %in% c("pca", "umap", "tsne") && is.null(romics_object$embeddings)) {
-    stop("Dimension reduction embeddings were not computed for this romics_object.")
-  }
-
-  # Set seed for reproducibility
-  if(lock.seed) {
-    set.seed(seed)
-  } else {
-    set.seed(as.numeric(Sys.time()))
-  }
-
-  # Prepare data for clustering based on specified method
-  if(cluster_using == "data") {
-    m <- as.matrix(t(romics_object$data))
-  } else if(cluster_using == "umap") {
-    if(sum(grepl("umap_component_", rownames(romics_object$embeddings))) == 0) {
-      stop("UMAP embeddings were not computed for this romics_object.")
-    }
-    m <- t(romics_object$embeddings[grepl("umap_component_", rownames(romics_object$embeddings)), ])
-  } else if(cluster_using == "pca") {
-    if(sum(grepl("pca_component_", rownames(romics_object$embeddings))) == 0) {
-      stop("PCA embeddings were not computed for this romics_object.")
-    }
-    m <- t(romics_object$embeddings[grepl("pca_component_", rownames(romics_object$embeddings)), ])
-  } else if(cluster_using == "tsne") {
-    if(sum(grepl("tsne_component_", rownames(romics_object$embeddings))) == 0) {
-      stop("t-SNE embeddings were not computed for this romics_object.")
-    }
-    m <- t(romics_object$embeddings[grepl("tsne_component_", rownames(romics_object$embeddings)), ])
-  }
-
-  n_samples <- nrow(m)
-  n_dims <- ncol(m)
-  message(paste("Processing", n_samples, "samples with", n_dims, "dimensions"))
-
-  # For very large datasets, ensure we're using a reasonable k
-  k <- min(k, n_samples - 1)
-
-  # Build graph once using KNN
-  message("Building optimized k-nearest neighbor graph...")
-  if (use_approximate && requireNamespace("FNN", quietly = TRUE)) {
-    knn_result <- FNN::get.knn(m, k = k)
-    knn_indices <- knn_result$nn.index
-    knn_distances <- knn_result$nn.dist
-  } else {
-    # Manual implementation for fallback
-    knn_indices <- matrix(0, nrow = n_samples, ncol = k)
-    knn_distances <- matrix(0, nrow = n_samples, ncol = k)
-
-    for (i in 1:n_samples) {
-      diffs <- sweep(m, 2, m[i, ], "-")
-      distances <- sqrt(rowSums(diffs^2))
-      distances[i] <- Inf
-      nearest_idx <- order(distances)[1:k]
-      knn_indices[i, ] <- nearest_idx
-      knn_distances[i, ] <- distances[nearest_idx]
-      if (i %% 1000 == 0) message(paste("Processed", i, "of", n_samples, "samples"))
-    }
-  }
-
-  # OPTIMIZATION: Pre-allocate edge matrix instead of concatenating vectors
-  max_edges <- n_samples * k
-  edges <- matrix(0, nrow = max_edges, ncol = 2)
-  edge_weights <- numeric(max_edges)
-  edge_idx <- 0
-
-  # Build edges using vectorized operations
-  for (i in 1:n_samples) {
-    for (j in 1:k) {
-      neighbor <- knn_indices[i, j]
-      if (neighbor > 0 && neighbor != i) {
-        edge_idx <- edge_idx + 1
-        edges[edge_idx, ] <- c(i, neighbor)
-        # OPTIMIZATION: Reuse KNN distances directly instead of recalculating
-        edge_weights[edge_idx] <- 1 / (knn_distances[i, j] + 1e-10)
-      }
-    }
-  }
-
-  # Trim edges to actual size
-  edges <- edges[1:edge_idx, ]
-  edge_weights <- edge_weights[1:edge_idx]
-
-  # Create graph
-  g <- igraph::graph_from_edgelist(edges, directed = FALSE)
-  g <- igraph::simplify(g, edge.attr.comb = list(weight = "mean"))
-
-  # Set edge weights directly
-  igraph::E(g)$weight <- edge_weights
 
   # Function to perform clustering
   perform_clustering <- function(res) {

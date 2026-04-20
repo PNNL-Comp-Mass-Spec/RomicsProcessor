@@ -1,2 +1,0 @@
-"0","romics_proteins<-log2transform(romics_proteins)"
-"0","distribBoxplot(romics_proteins)"

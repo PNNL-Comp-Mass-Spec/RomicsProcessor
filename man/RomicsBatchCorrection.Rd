@@ -6,28 +6,31 @@
 \usage{
 romicsBatchCorrection(
   romics_object,
-  batch_factor = "factor",
+  batch_factor,
   method = "ComBat",
+  verbose = TRUE,
   ...
 )
 }
 \arguments{
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
-\item{batch_factor}{has to be a factor contained in the romics_object that will serve as batch covariate To obtain the}
+\item{batch_factor}{A character string specifying the factor contained in the romics_object that will serve as batch covariate. To obtain the list of factors, use romicsFactorNames()}
 
-\item{method}{has to be either 'ComBat' or 'mean.only' to indicate how the ComBat function should be run.}
+\item{method}{A character string that must be either 'ComBat' or 'mean.only' to indicate how the ComBat function should be run.}
 
-\item{...}{parameters can be passed to sva::ComBat(), see sva::ComBat() documentation for more details.}
+\item{verbose}{Logical. If TRUE, prints detailed information about the batch correction process. Default: TRUE}
+
+\item{...}{Additional parameters passed to sva::ComBat(). See sva::ComBat() documentation for more details.}
 }
 \value{
-This function returns a transformed romics_object.
+This function returns a transformed romics_object with batch-corrected data.
 }
 \description{
 Performs the sva::ComBat() batch correction on the data layer of the romics_object. The data layer must not contain missing values and the factor utilized will be the one used for the correction.
 }
 \details{
-This function is used to perform a ComBat batch correction on a romics_object. it can be performed using the ComBat method or using a mean.only method. sva::ComBat() documentation for more details.
+This function performs ComBat batch correction on a romics_object. It can be performed using the ComBat method or using a mean.only method. The batch factor is automatically converted to the appropriate format for ComBat. See sva::ComBat() documentation for more details.
 }
 \author{
 Geremy Clair

@@ -7,7 +7,7 @@
 #' @author Geremy Clair
 #' @export
 romicsPmartR<- function(romics_object, type="proData"){
-  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+  if(!is.romicsObject(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(!"pmartR" %in% rownames(installed.packages()) & !"package:pmartR"  %in% search()){stop("to run this function the package 'pmartR' has to be installed and loaded")}
   if(!"pmartR" %in% (.packages())){
     library("pmartR")

@@ -8,6 +8,12 @@ imputeMissing(romics_object, nb_stdev = 1.8, width_stdev = 0.5, seed = 42)
 }
 \arguments{
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
+
+\item{nb_stdev}{Numeric. Number of standard deviations to shift the imputation distribution from the median. Default: 1.8}
+
+\item{width_stdev}{Numeric. Width of the imputation distribution in standard deviations. Default: 0.5}
+
+\item{seed}{Integer. Random seed for reproducible results. Default: 42}
 }
 \value{
 The function will return a modified romics_object that will have imputed data, however the missingdata layer will conserve the location of the missingness, the missingness can subsequently be restored using the function romicsRestoreMissing().
@@ -16,7 +22,7 @@ The function will return a modified romics_object that will have imputed data, h
 Imputes the data using a normal distribution down-shifted from the median by a user defined number of standard deviations and a user defined width. the distribution of the imputed data can be evaluated using the function imputeMissingEval().
 }
 \details{
-This function will impute the data using the method described in the Perseus paper by Tyranova et al. 2016 (Nature Method). By default the data is imputed with values in a normal distribution 1.8 standard deviation away from the median  and a width of distribution of 0.5.
+This function will impute the data using the method described in the Perseus paper by Tyranova et al. 2016 (Nature Method). By default the data is imputed with values in a normal distribution 1.8 standard deviation away from the median and a width of distribution of 0.5.
 }
 \author{
 Geremy Clair

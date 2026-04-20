@@ -7,7 +7,7 @@
 romicsUpdateColor(romics_object)
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 }
 \value{
 This function returns a romics_object with updated colors.

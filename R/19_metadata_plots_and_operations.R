@@ -13,10 +13,12 @@ romicsMetadataRelations <- function(romics_object = romics_object,
                                     factors = c("factor1", "factor2", "factor3"),
                                     textsize = 3,
                                     colors = NULL) {
-  # Check for required packages
+  # Check for required packages and attach ggalluvial
   if (!requireNamespace("ggalluvial", quietly = TRUE)) {
     stop("The ggalluvial package is required for this function. Please install it with: install.packages('ggalluvial')")
   }
+  # Attach ggalluvial so stat_stratum is available
+  library(ggalluvial)
 
   # Input validation
   if(!is.romicsObject(romics_object) || missing(romics_object)) {

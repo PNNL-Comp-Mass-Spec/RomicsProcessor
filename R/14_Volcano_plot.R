@@ -1,52 +1,130 @@
 #' romicsVolcano()
-#' @description generate one or multiple volcano plots from t.test or wilcox.test run using the functions romicsTtest() or romicsWilcoxTest() respectively
-#' @param p_type 'p' or 'padj' to indicate the type of tpvalue to consider for the volcano plots.
+#' @description generate one or multiple volcano plots from t.test, wilcox.test, or LMM run using the functions romicsTtest(), romicsWilcoxTest(), or romicsLMM() respectively
+#' @param p_type 'p' or 'padj' to indicate the type of pvalue to consider for the volcano plots.
 #' @param p numeric value to indicate the maximum pvalue to use for the coloring of the volcano plot
 #' @param colors numeric vector of lenght 3 used to color the features lower, not significantly changing and higher in the considered comparisons.
-#' @param stat_type 't.test' or 'wilcox.test' to indicate what statistics to use for the volcano plots generation.
+#' @param stat_type 't.test', 'wilcox.test', 'LMM' or 'auto' to indicate what statistics to use for the volcano plots generation. If 'auto', will detect available tests.
 #' @param plot either 'all' if all paired comparisons have to be displayed OR a vector of numeric values comprised between 1 and the maximum number of possible plots generated.
-#' @param plot_type 'plotly' or 'ggplot' to indicate the type of plot to be returned.
-#' @details generate one or multiple volcano plots from t.test or wilcox.test run using the functions romicsTtest() or romicsWilcoxTest() respectively
-#' @return This function will print different plot requested
+#' @param plotly logical (TRUE or FALSE) to indicate whether to return interactive plotly plots (TRUE) or static ggplot plots (FALSE).
+#' @param label_features logical (TRUE or FALSE) to indicate whether to label top features on the plot.
+#' @param top_features numeric value indicating the number of top upregulated and downregulated features to label (only those passing the filters).
+#' @param top_features_by 'abundance' or 'p' to indicate the criteria for selecting top features. 'abundance' selects by fold change magnitude, 'p' selects by p-value significance.
+#' @param xlim numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.
+#' @param ylim numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)). If NULL, limits are determined automatically.
+#' @param size numeric value for point size in the plots. Default is 2.
+#' @param alpha numeric value for point opacity in the plots (0-1). Default is 0.5.
+#' @details generate one or multiple volcano plots from t.test, wilcox.test, or LMM run using the functions romicsTtest(), romicsWilcoxTest(), or romicsLMM() respectively. Automatically detects whether data is clustered or not. If xlim or ylim are specified, a warning is issued if any data points fall outside these limits.
+#' @return This function will print different plots requested
 #' @author Geremy Clair
 #' @export
-romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6,colors = c("#2cbcb2", "#242021", "#d44e28"),stat_type="t.test",plot="all", plot_type="ggplot"){
-  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
-  if(missing(p_type)){p_type="p"}
-  if(!p_type %in% c("p","padj")){stop("'p_type' has to be either 'p' or 'padj'")}
-  if(missing(colors)){colors=c("#2cbcb2", "#242021", "#d44e28")}
-  if(!is.character(colors)| length(colors)!=3){
-    warning("'colors' should be a color character vector of lenght 3. The defaults colors were used")
-    colors=c("#2cbcb2", "#242021", "#d44e28")
+romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change = 0.6,
+                          colors = c("#2cbcb2", "#242021", "#d44e28"),
+                          stat_type = "auto", plot = "all", plotly = FALSE,
+                          label_features = FALSE, top_features = 10, top_features_by = "abundance",
+                          xlim = NULL, ylim = NULL, size = 2, alpha = 0.5) {
+
+  if(!is.romicsObject(romics_object) | missing(romics_object)) {
+    stop("romics_object is missing or is not in the appropriate format")
   }
-  if(missing(p)){p=0.05}
-  if(!is.numeric(p)|p>1|p<0){stop("'p' should be numeric and comprised between 0 and 1.")}
-  if(missing(min_fold_change)){min_fold_change=0.6}
-  if(!is.numeric(min_fold_change)|min_fold_change<0){stop("'min_fold_change' should be numeric and comprised higher than 0.")}
-  if(missing(plot_type)){plot_type="ggplot"}
-  if(!plot_type %in% c("plotly","ggplot")){
-    warning("'plot_type' was not either 'plotly' or 'ggplot' the 'plotly' type was used by default.")
-    plot_type="plotly"
+  if(missing(p_type)){p_type = "p"}
+  if(!p_type %in% c("p", "padj")){
+    stop("'p_type' has to be either 'p' or 'padj'")
+  }
+  if(missing(colors)){
+    colors = c("#2cbcb2", "#242021", "#d44e28")
+  }
+  if(!is.character(colors) | length(colors) != 3){
+    warning("'colors' should be a color character vector of lenght 3. The defaults colors were used")
+    colors = c("#2cbcb2", "#242021", "#d44e28")
+  }
+  if(missing(p)){p = 0.05}
+  if(!is.numeric(p) | p > 1 | p < 0){
+    stop("'p' should be numeric and comprised between 0 and 1.")
+  }
+  if(missing(min_fold_change)){min_fold_change = 0.6}
+  if(!is.numeric(min_fold_change) | min_fold_change < 0){
+    stop("'min_fold_change' should be numeric and comprised higher than 0.")
+  }
+  if(missing(plotly)){plotly = FALSE}
+  if(!is.logical(plotly)){
+    warning("'plotly' was not logical (TRUE/FALSE). FALSE was used by default (ggplot output).")
+    plotly = FALSE
+  }
+  if(missing(label_features)){label_features = FALSE}
+  if(!is.logical(label_features)){
+    warning("'label_features' was not logical (TRUE/FALSE). FALSE was used by default.")
+    label_features = FALSE
+  }
+  if(missing(top_features)){top_features = 10}
+  if(!is.numeric(top_features) | top_features < 0 | top_features != round(top_features)){
+    warning("'top_features' should be a positive integer. 10 was used by default.")
+    top_features = 10
+  }
+  if(missing(top_features_by)){top_features_by = "abundance"}
+  if(!top_features_by %in% c("abundance", "p")){
+    warning("'top_features_by' should be either 'abundance' or 'p'. 'abundance' was used by default.")
+    top_features_by = "abundance"
+  }
+  if(missing(plot)){plot = "all"}
+  if(missing(xlim)){xlim = NULL}
+  if(!is.null(xlim)){
+    if(!is.numeric(xlim) | length(xlim) != 2){
+      warning("'xlim' should be a numeric vector of length 2 (e.g., c(-2, 2)). NULL was used by default.")
+      xlim = NULL
+    } else if(xlim[1] >= xlim[2]){
+      warning("'xlim' should have xlim[1] < xlim[2]. NULL was used by default.")
+      xlim = NULL
     }
-  if(missing(plot)){plot="all"}
-  #extract stats
-  stats<-romics_object$statistics
-  #remove duplicate columns
-  stats<-stats[,unique(colnames(stats))]
+  }
+  if(missing(ylim)){ylim = NULL}
+  if(!is.null(ylim)){
+    if(!is.numeric(ylim) | length(ylim) != 2){
+      warning("'ylim' should be a numeric vector of length 2 (e.g., c(0, 10)). NULL was used by default.")
+      ylim = NULL
+    } else if(ylim[1] >= ylim[2]){
+      warning("'ylim' should have ylim[1] < ylim[2]. NULL was used by default.")
+      ylim = NULL
+    }
+  }
 
-  #verify if Ttest and or WilcoxTest exist
-  if(sum(grepl("_Ttest_p",colnames(stats)))+sum(grepl("_Wilcox_test_p",colnames(stats)))<=0){stop("Prior to plot the volcano plot(s) either T.tests or Wilcox.tests have to be run, to run these test use the functions romicsTtest() and/or romicsWilcoxTest()")}
-  #if stat_type missing use t.test by default unless does not exist (then use wilcox.test)
+  # Extract stats
+  stats <- romics_object$statistics
+  # Remove duplicate columns
+  stats <- stats[, unique(colnames(stats))]
+
+  # Auto-detect stat_type if not specified
+  if(stat_type == "auto"){
+    if(sum(grepl("_Ttest_p", colnames(stats))) > 0) {
+      stat_type = "t.test"
+      print("'stat_type' was set to 't.test' (auto-detected)")
+    } else if(sum(grepl("_Wilcox_test_p", colnames(stats))) > 0) {
+      stat_type = "wilcox.test"
+      print("'stat_type' was set to 'wilcox.test' (auto-detected)")
+    } else if(sum(grepl("_LMMtest_p", colnames(stats))) > 0) {
+      stat_type = "LMM"
+      print("'stat_type' was set to 'LMM' (auto-detected)")
+    } else {
+      stop("No statistical tests found in the romics_object")
+    }
+  }
+
+  # Verify if test type exists
+  if(sum(grepl("_Ttest_p", colnames(stats))) +
+     sum(grepl("_Wilcox_test_p", colnames(stats))) +
+     sum(grepl("_LMMtest_p", colnames(stats))) <= 0) {
+    stop("Prior to plot the volcano plot(s) either T.tests, Wilcox.tests, or LMM tests have to be run")
+  }
+
+  # If stat_type missing use t.test by default unless does not exist
   if(missing(stat_type)){
-    if(sum(grepl("_Ttest_p",colnames(stats)))>0){
-      stat_type="t.test"
-      print("'stat_type' was missing 't.test' were used by default")}else{
-      stat_type="wilcox.test"
-      print("'stat_type' was missing 'wilcox.test' were used by default")}
-    }
-  if(!stat_type %in% c("t.test","wilcox.test")){stop("'stat_type' has to be either 't.test' or 'wilcox.test'.")}
+    stat_type = "t.test"
+    print("'stat_type' was missing 't.test' were used by default")
+  }
+  if(!stat_type %in% c("t.test", "wilcox.test", "LMM")){
+    stop("'stat_type' has to be 't.test', 'wilcox.test', or 'LMM'.")
+  }
 
-  #remove columns with p or padj (depending on the p_type)
+  # Remove columns with p or padj (depending on the p_type)
   if (p_type == "p") {
     stats <- stats[, !grepl("_padj$", colnames(stats))]
   }
@@ -54,81 +132,736 @@ romicsVolcano<-function(romics_object, p_type= "p", p= 0.05, min_fold_change=0.6
     stats <- stats[, !grepl("_p$", colnames(stats))]
   }
 
-  #identify Ttest or WilcoxTests columns
-  if(stat_type=="t.test"){
-    test_col<-stats[grepl("_Ttest_",colnames(stats))]
-    colnames(test_col)<-sub("_Ttest.*","",colnames(test_col))
-    colnames(test_col)<-sub("_vs_","\\/",colnames(test_col))
-  }else{
-    test_col<-stats[grepl("_Wilcox_test_",colnames(stats))]
-    colnames(test_col)<-sub("_Wilcox_test_.*","",colnames(test_col))
-    colnames(test_col)<-sub("_vs_","\\/",colnames(test_col))
-    }
+  # Check if data is clustered (has "_within_" pattern)
+  is_clustered <- grepl("_within_", colnames(stats))
+  clustered_data <- any(is_clustered)
 
-  #transform the test columns to calculate the -log10(p(test))
-    test_col<- log10(test_col)*-1
-    fc_col <- stats[grepl("\\/", colnames(stats))] #collected earlier in function (following creation of 'stats' object)
+  # Extract appropriate test columns based on stat_type
+  if(stat_type == "t.test"){
+    test_col <- stats[, grepl("_Ttest_", colnames(stats)), drop = FALSE]
+    colnames(test_col) <- sub("_Ttest_.*", "", colnames(test_col))
+    colnames(test_col) <- sub("_vs_", "\\/", colnames(test_col))
+  } else if(stat_type == "wilcox.test") {
+    test_col <- stats[, grepl("_Wilcox_test_", colnames(stats)), drop = FALSE]
+    colnames(test_col) <- sub("_Wilcox_test_.*", "", colnames(test_col))
+    colnames(test_col) <- sub("_vs_", "\\/", colnames(test_col))
+  } else if(stat_type == "LMM"){
+    test_col <- stats[, grepl("_LMMtest_", colnames(stats)), drop = FALSE]
+    # For LMM, extract everything before _LMMtest_
+    colnames(test_col) <- sub("_LMMtest_.*", "", colnames(test_col))
+    colnames(test_col) <- sub("_vs_", "\\/", colnames(test_col))
+  }
 
-  #identify the fold_change columns
-  if(sum(grepl("log\\(",colnames(fc_col)))==ncol(fc_col)){fc_log=TRUE}else{
-  if(sum(grepl("log\\(",colnames(fc_col)))==0){fc_log=FALSE}else{
+  # Transform the test columns to calculate the -log10(p(test))
+  test_col <- log10(test_col) * -1
+
+  # Identify the fold_change columns
+  if(stat_type == "LMM" | clustered_data){
+    fc_col <- stats[, grepl("log\\(.*\\/.*\\)", colnames(stats)), drop = FALSE]
+  } else {
+    fc_col <- stats[, grepl("log\\(.*\\/.*\\)", colnames(stats)), drop = FALSE]
+  }
+
+  # Check if all fold changes are logged
+  if(sum(grepl("log\\(", colnames(fc_col))) == ncol(fc_col)){
+    fc_log = TRUE
+  } else if(sum(grepl("log\\(", colnames(fc_col))) == 0){
+    fc_log = FALSE
+  } else {
     warning("some of the fold-changes in the statistics layer of the 'romics_object' were calculated both prior and after log_transform.")
     warning("Only the log transformed will be used to generate the Volcano plots")
-    fc_col<-fc_col[,grepl("log\\(",colnames(fc_col))]
+    fc_col <- fc_col[, grepl("log\\(", colnames(fc_col)), drop = FALSE]
+  }
+
+  # If not logged then log transform the fold change columns
+  if(fc_log == FALSE){
+    fc_col = log2(fc_col)
+    log_type = 2
+    min_fold_change <- log2(min_fold_change)
+  } else {
+    if(romicsLogCheck(romics_object) & grepl("fun\\|log2", romics_object$steps[grepl("fun\\|log", romics_object$steps)])){
+      log_type = 2
+    } else {
+      log_type = 10
     }
   }
 
-  #if not logged then log transform the fold change columns
-  if(fc_log==FALSE){
-    fc_col=log2(fc_col)
-    log_type=2
-    min_fold_change<-log2(min_fold_change)
-    }else{
-      if(romicsLogCheck(romics_object)&grepl("fun\\|log2",romics_object$steps[grepl("fun\\|log",romics_object$steps)])){log_type=2}else{log_type=10}
-    }
+  # Format the colnames so they are identical to the pvalues ones
+  if(clustered_data){
+    # For clustered: "log(CHR/CTL)_within_Leiden_clust_01" -> "CHR/CTL_within_Leiden_clust_01"
+    colnames(fc_col) <- sub("log\\(", "", colnames(fc_col))
+    colnames(fc_col) <- sub("\\)_", "_", colnames(fc_col))
+    colnames(fc_col) <- sub("_vs_", "\\/", colnames(fc_col))
+  } else {
+    # For non-clustered: "log(CHR/CTL)" -> "CHR/CTL"
+    colnames(fc_col) <- sub("log", "", colnames(fc_col))
+    colnames(fc_col) <- sub("\\(", "", colnames(fc_col))
+    colnames(fc_col) <- sub("\\)$", "", colnames(fc_col))
+  }
 
-  #format the colnames so they are identical to the pvalues ones
-  colnames(fc_col)<-sub("log","",colnames(fc_col))
-  colnames(fc_col)<-sub("\\(","",colnames(fc_col))
-    colnames(fc_col)<-sub("\\)$","",colnames(fc_col))
+  minus_log_p <- log10(p) * -1
 
-  minus_log_p<-log10(p)*-1
+  if(sum(colnames(fc_col) %in% colnames(test_col)) != ncol(fc_col)){
+    warning("Some of the fold-change columns were not having a equivalent statistical test to generate a Volcano plot.")
+  }
 
-  if(sum(colnames(fc_col) %in% colnames(test_col))!=ncol(fc_col)){warning("Some of the fold-change columns were not having a equivalent statistical test to generate a Volcano plot.")}
-
-  if(plot=="all"){plot<-1:ncol(fc_col)}
-
-  if(!is.numeric(plot) & sum(!plot %in% 1:ncol(fc_col))!=0){stop(paste0("'plot' as to be either 'all' or a numeric vector with values comprised between 1 and ",ncol(fc_col),"."))}else{
+  if(plot == "all"){plot <- 1:ncol(fc_col)}
+  if(!is.numeric(plot) & sum(!plot %in% 1:ncol(fc_col)) != 0){
+    stop(paste0("'plot' as to be either 'all' or a numeric vector with values comprised between 1 and ", ncol(fc_col), "."))
+  } else {
     for(i in plot){
-      df<-cbind(rownames(fc_col),fc_col[i], test_col[colnames(test_col)==colnames(fc_col)[i]])
-      colnames(df)<-c("ID","fc","p")
+      # Ensure we're getting a data frame, not a vector
+      fc_col_i <- fc_col[, i, drop = FALSE]
+      test_col_match <- colnames(fc_col_i)[1]
+      test_col_i <- test_col[, colnames(test_col) == test_col_match, drop = FALSE]
 
-      class<- rep("non_significant",nrow(df))
-      class[df$p>minus_log_p&df$fc<(min_fold_change*-1)]<-"down"
-      class[df$p>minus_log_p&df$fc>(min_fold_change)]<-"up"
-      class<-paste0(class,"_in_",sub("\\/.*","",colnames(fc_col[i])))
-      df$class<-class
+      # Check if match exists
+      if(ncol(test_col_i) == 0) {
+        warning(paste0("No matching p-value column found for ", test_col_match, ". Skipping this comparison."))
+        next
+      }
 
-      if(plot_type=="ggplot"){
-      fig<-ggplot(df,aes(x=fc,y=p,colour=class))+geom_point(alpha=0.5)+
-      theme_ROP()+ggtitle(paste0("Volcano plot for ",colnames(fc_col[i])))+
-      xlab(paste0("log",log_type,"(",colnames(fc_col[i]),")"))+
-      ylab(paste0("-log10(",p_type,"_",stat_type,"_",colnames(fc_col[i]),")"))+
-      scale_colour_manual(values=colors)
-      plot(fig)
-      }else{
-        title=paste0("Volcano plot for ",colnames(fc_col[i]))
-      fig<-plot_ly(x = df$fc,
-                   y = df$p,
-                   color =df$class,
-                   colors=colors,
-                   type = "scatter",mode="markers",
-                   text=paste("ID=",df$ID)) %>% layout(title=paste0("Volcano plot for ",colnames(fc_col[i])),
-                            xaxis=list(title=paste0("log",log_type,"(",colnames(fc_col[i]),")")),
-                            yaxis=list(title=paste0("-log10(",p_type,"_",stat_type,"_",colnames(fc_col[i]),")")))
-      print(fig)
+      df <- data.frame(
+        ID = rownames(fc_col_i),
+        fc = as.numeric(fc_col_i[, 1]),
+        p = as.numeric(test_col_i[, 1]),
+        stringsAsFactors = FALSE
+      )
+
+      # Extract comparison and cluster info from column name
+      col_name <- colnames(fc_col_i)[1]
+
+      # Check if this is a clustered result (contains "_within_")
+      if(grepl("_within_", col_name)){
+        # Extract comparison and cluster information
+        comparison <- sub("_within_.*", "", col_name)
+        cluster_info <- sub(".*_within_", "", col_name)
+        title_suffix <- paste0(" (", cluster_info, ")")
+      } else {
+        # For standard tests
+        comparison <- col_name
+        title_suffix <- ""
+      }
+
+      class <- rep("non_significant", nrow(df))
+      class[df$p > minus_log_p & df$fc < (min_fold_change * -1)] <- "down"
+      class[df$p > minus_log_p & df$fc > (min_fold_change)] <- "up"
+      class <- paste0(class, "_in_", comparison)
+      df$class <- class
+
+      # Check for out-of-bounds points if limits are specified
+      if(!is.null(xlim)){
+        n_out_x <- sum(df$fc < xlim[1] | df$fc > xlim[2], na.rm=TRUE)
+        if(n_out_x > 0){
+          warning(paste0("For comparison '", comparison, "': ", n_out_x, " feature(s) have fold-change values outside xlim [", xlim[1], ", ", xlim[2], "]"))
+        }
+      }
+      if(!is.null(ylim)){
+        n_out_y <- sum(df$p < ylim[1] | df$p > ylim[2], na.rm=TRUE)
+        if(n_out_y > 0){
+          warning(paste0("For comparison '", comparison, "': ", n_out_y, " feature(s) have p-value(s) outside ylim [", ylim[1], ", ", ylim[2], "]"))
+        }
+      }
+
+      # Prepare labels for top features
+      df$label <- ""
+      if(label_features && top_features > 0) {
+        # Get top upregulated features (passing filters)
+        up_features <- df[grepl("up_in_", df$class), ]
+        if(nrow(up_features) > 0) {
+          if(top_features_by == "abundance") {
+            up_features <- up_features[order(up_features$fc, decreasing = TRUE), ]
+          } else {
+            up_features <- up_features[order(up_features$p, decreasing = TRUE), ]
+          }
+          n_up_to_label <- min(top_features, nrow(up_features))
+          if(n_up_to_label > 0) {
+            df$label[df$ID %in% up_features$ID[1:n_up_to_label]] <- df$ID[df$ID %in% up_features$ID[1:n_up_to_label]]
+          }
+        }
+        # Get top downregulated features (passing filters)
+        down_features <- df[grepl("down_in_", df$class), ]
+        if(nrow(down_features) > 0) {
+          if(top_features_by == "abundance") {
+            down_features <- down_features[order(down_features$fc, decreasing = FALSE), ]
+          } else {
+            down_features <- down_features[order(down_features$p, decreasing = TRUE), ]
+          }
+          n_down_to_label <- min(top_features, nrow(down_features))
+          if(n_down_to_label > 0) {
+            df$label[df$ID %in% down_features$ID[1:n_down_to_label]] <- df$ID[df$ID %in% down_features$ID[1:n_down_to_label]]
+          }
+        }
+      }
+
+      plot_title <- paste0("Volcano plot for ", comparison, title_suffix)
+      yaxis_title <- paste0("-log10(", p_type, "_", stat_type, "_", comparison, ")")
+      xaxis_title <- paste0("log", log_type, "(", comparison, ")")
+
+      if(!plotly){
+        fig <- ggplot(df, aes(x = fc, y = p, colour = class)) +
+          geom_point(alpha = alpha, size = size) +
+          theme_ROP() +
+          ggtitle(plot_title) +
+          xlab(xaxis_title) +
+          ylab(yaxis_title) +
+          scale_colour_manual(values = colors)
+
+        # Add axis limits if specified
+        if(!is.null(xlim) | !is.null(ylim)){
+          fig <- fig + coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)
+        }
+
+        # Add labels if requested
+        if(label_features && any(df$label != "")) {
+          fig <- fig + ggrepel::geom_text_repel(aes(label = label),
+                                                color = "black",
+                                                size = 3,
+                                                max.overlaps = Inf,
+                                                show.legend = FALSE)
+        }
+        plot(fig)
+      } else {
+        # Create text for hover
+        hover_text <- paste("ID=", df$ID)
+        if(label_features) {
+          hover_text[df$label != ""] <- paste("ID=", df$ID[df$label != ""], "(Top feature)")
+        }
+
+        # Build xaxis list with optional range
+        xaxis_list <- list(title = xaxis_title)
+        if(!is.null(xlim)){
+          xaxis_list$range <- xlim
+        }
+        # Build yaxis list with optional range
+        yaxis_list <- list(title = yaxis_title)
+        if(!is.null(ylim)){
+          yaxis_list$range <- ylim
+        }
+
+        fig <- plotly::plot_ly(x = df$fc,
+                       y = df$p,
+                       color = df$class,
+                       colors = colors,
+                       type = "scatter", mode = "markers",
+                       text = hover_text,
+                       hovertemplate = "%{text}<extra></extra>",
+                       marker = list(size = size * 4, opacity = alpha)) %>%
+          plotly::layout(title = plot_title,
+                         xaxis = xaxis_list,
+                         yaxis = yaxis_list)
+
+        # Add text annotations for labeled points
+        if(label_features && any(df$label != "")) {
+          labeled_points <- df[df$label != "", ]
+          for(j in 1:nrow(labeled_points)) {
+            fig <- fig %>% plotly::add_annotations(
+              x = labeled_points$fc[j],
+              y = labeled_points$p[j],
+              text = labeled_points$label[j],
+              showarrow = TRUE,
+              arrowhead = 2,
+              arrowsize = 0.5,
+              ax = 20,
+              ay = -20,
+              font = list(size = 10)
+            )
+          }
+        }
+        print(fig)
       }
     }
+  }
+}
+
+
+#' romicsVolcanoByCluster()
+#' @description generate volcano plots for all comparisons within a specific cluster
+#' @param romics_object a romics object containing statistics
+#' @param within character string specifying the cluster to filter (e.g., "Leiden_clust_01")
+#' @param multipanel logical (TRUE or FALSE) to indicate whether to display all plots in a panel (TRUE) or one by one (FALSE)
+#' @param stat_type 't.test', 'wilcox.test', 'LMM' or 'auto' to indicate what statistics to use. If 'auto', will detect available tests.
+#' @param p_type 'p' or 'padj' to indicate the type of pvalue to consider for the volcano plots
+#' @param p numeric value to indicate the maximum pvalue to use for the coloring of the volcano plot
+#' @param min_fold_change numeric value indicating the minimum fold change threshold
+#' @param colors character vector of length 3 used to color the features (down, non-significant, up)
+#' @param plotly logical (TRUE or FALSE) to indicate whether to return interactive plotly plots (TRUE) or static ggplot plots (FALSE)
+#' @param label_features logical (TRUE or FALSE) to indicate whether to label top features on the plot
+#' @param top_features numeric value indicating the number of top upregulated and downregulated features to label
+#' @param top_features_by 'abundance' or 'p' to indicate the criteria for selecting top features
+#' @param n_cols numeric value indicating the number of columns in the multipanel layout (NULL for auto square-ish grid)
+#' @param return_plot logical (TRUE or FALSE) to indicate whether to return the plot object instead of printing it (default: FALSE)
+#' @param xlim numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.
+#' @param ylim numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)). If NULL, limits are determined automatically.
+#' @param size numeric value for point size in the plots. Default is 2.
+#' @param alpha numeric value for point opacity in the plots (0-1). Default is 0.5.
+#' @details generates volcano plots for all comparisons within a specific cluster from any statistical test (t.test, wilcox.test, or LMM). If xlim or ylim are specified, a warning is issued if any data points fall outside these limits.
+#' @return Returns plot list invisibly if return_plot=FALSE, or returns the combined plot object if return_plot=TRUE
+#' @author Geremy Clair
+#' @export
+romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, stat_type = "auto",
+                                   p_type = "p", p = 0.05, min_fold_change = 0.6,
+                                   colors = c("#2cbcb2", "#242021", "#d44e28"),
+                                   plotly = FALSE, label_features = FALSE, top_features = 10,
+                                   top_features_by = "abundance", n_cols = NULL, return_plot = FALSE,
+                                   xlim = NULL, ylim = NULL, size = 2, alpha = 0.5) {
+  # Input validation
+  if(!is.romicsObject(romics_object) | missing(romics_object)) {
+    stop("romics_object is missing or is not in the appropriate format")
+  }
+  if(missing(within)) {
+    stop("'within' parameter is required and should specify a cluster (e.g., 'Leiden_clust_01')")
+  }
+  if(!is.character(within)) {
+    stop("'within' should be a character string")
+  }
+  if(missing(multipanel)){multipanel = TRUE}
+  if(!is.logical(multipanel)){
+    warning("'multipanel' was not logical (TRUE/FALSE). TRUE was used by default.")
+    multipanel = TRUE
+  }
+  if(missing(stat_type)){stat_type = "auto"}
+  if(!stat_type %in% c("t.test", "wilcox.test", "LMM", "auto")){
+    stop("'stat_type' has to be 't.test', 'wilcox.test', 'LMM', or 'auto'.")
+  }
+  if(missing(p_type)){p_type = "p"}
+  if(!p_type %in% c("p", "padj")){
+    stop("'p_type' has to be either 'p' or 'padj'")
+  }
+  if(missing(colors)){
+    colors = c("#2cbcb2", "#242021", "#d44e28")
+  }
+  if(!is.character(colors) | length(colors) != 3){
+    warning("'colors' should be a color character vector of length 3. The defaults colors were used")
+    colors = c("#2cbcb2", "#242021", "#d44e28")
+  }
+  if(missing(p)){p = 0.05}
+  if(!is.numeric(p) | p > 1 | p < 0){
+    stop("'p' should be numeric and comprised between 0 and 1.")
+  }
+  if(missing(min_fold_change)){min_fold_change = 0.6}
+  if(!is.numeric(min_fold_change) | min_fold_change < 0){
+    stop("'min_fold_change' should be numeric and comprised higher than 0.")
+  }
+  if(missing(plotly)){plotly = FALSE}
+  if(!is.logical(plotly)){
+    warning("'plotly' was not logical (TRUE/FALSE). FALSE was used by default (ggplot output).")
+    plotly = FALSE
+  }
+  if(missing(label_features)){label_features = FALSE}
+  if(!is.logical(label_features)){
+    warning("'label_features' was not logical (TRUE/FALSE). FALSE was used by default.")
+    label_features = FALSE
+  }
+  if(missing(top_features)){top_features = 10}
+  if(!is.numeric(top_features) | top_features < 0 | top_features != round(top_features)){
+    warning("'top_features' should be a positive integer. 10 was used by default.")
+    top_features = 10
+  }
+  if(missing(top_features_by)){top_features_by = "abundance"}
+  if(!top_features_by %in% c("abundance", "p")){
+    warning("'top_features_by' should be either 'abundance' or 'p'. 'abundance' was used by default.")
+    top_features_by = "abundance"
+  }
+  if(!is.null(n_cols)){
+    if(!is.numeric(n_cols) | n_cols < 1 | n_cols != round(n_cols)){
+      warning("'n_cols' should be a positive integer or NULL (auto). NULL was used by default.")
+      n_cols = NULL
+    }
+  }
+  if(missing(return_plot)){return_plot = FALSE}
+  if(!is.logical(return_plot)){
+    warning("'return_plot' was not logical (TRUE/FALSE). FALSE was used by default.")
+    return_plot = FALSE
+  }
+  if(missing(xlim)){xlim = NULL}
+  if(!is.null(xlim)){
+    if(!is.numeric(xlim) | length(xlim) != 2){
+      warning("'xlim' should be a numeric vector of length 2 (e.g., c(-2, 2)). NULL was used by default.")
+      xlim = NULL
+    } else if(xlim[1] >= xlim[2]){
+      warning("'xlim' should have xlim[1] < xlim[2]. NULL was used by default.")
+      xlim = NULL
+    }
+  }
+  if(missing(ylim)){ylim = NULL}
+  if(!is.null(ylim)){
+    if(!is.numeric(ylim) | length(ylim) != 2){
+      warning("'ylim' should be a numeric vector of length 2 (e.g., c(0, 10)). NULL was used by default.")
+      ylim = NULL
+    } else if(ylim[1] >= ylim[2]){
+      warning("'ylim' should have ylim[1] < ylim[2]. NULL was used by default.")
+      ylim = NULL
     }
   }
 
+  # Extract stats
+  stats <- romics_object$statistics
+  stats <- stats[, unique(colnames(stats))]
+
+  # Auto-detect stat_type if not specified
+  if(stat_type == "auto"){
+    has_lmm_clustered    <- sum(grepl(paste0("_within_", within, "_LMMtest_"),    colnames(stats))) > 0
+    has_ttest_clustered  <- sum(grepl(paste0("_within_", within, "_Ttest_"),      colnames(stats))) > 0
+    has_wilcox_clustered <- sum(grepl(paste0("_within_", within, "_Wilcox_test_"), colnames(stats))) > 0
+
+    if(has_lmm_clustered) {
+      stat_type = "LMM"
+      print(paste0("'stat_type' was set to 'LMM' (auto-detected for cluster '", within, "')"))
+    } else if(has_ttest_clustered) {
+      stat_type = "t.test"
+      print(paste0("'stat_type' was set to 't.test' (auto-detected for cluster '", within, "')"))
+    } else if(has_wilcox_clustered) {
+      stat_type = "wilcox.test"
+      print(paste0("'stat_type' was set to 'wilcox.test' (auto-detected for cluster '", within, "')"))
+    } else {
+      stop(paste0("No statistical tests found for cluster '", within, "'. Please check the cluster name or run appropriate tests first."))
+    }
+  }
+
+  # Remove columns with p or padj (depending on the p_type)
+  if (p_type == "p") {
+    stats <- stats[, !grepl("_padj$", colnames(stats))]
+  }
+  if (p_type == "padj") {
+    stats <- stats[, !grepl("_p$", colnames(stats))]
+  }
+
+  # Filter columns for the specified cluster based on stat_type
+  if(stat_type == "t.test"){
+    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within)
+    test_pattern <- paste0("_within_", within, "_Ttest_")
+  } else if(stat_type == "wilcox.test"){
+    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within)
+    test_pattern <- paste0("_within_", within, "_Wilcox_test_")
+  } else if(stat_type == "LMM"){
+    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within)
+    test_pattern <- paste0("_within_", within, "_LMMtest_")
+  }
+
+  fc_cols   <- grepl(fc_pattern,   colnames(stats))
+  test_cols <- grepl(test_pattern, colnames(stats))
+
+  if(sum(fc_cols) == 0 | sum(test_cols) == 0) {
+    stop(paste0("No statistics found for cluster '", within, "' with stat_type '", stat_type,
+                "'. Please check the cluster name and test type."))
+  }
+
+  # Extract the filtered columns
+  fc_col   <- stats[, fc_cols,   drop = FALSE]
+  test_col <- stats[, test_cols, drop = FALSE]
+
+  # Process test columns based on stat_type — strip _within_<cluster>_<test>_... suffix
+  if(stat_type == "t.test"){
+    colnames(test_col) <- sub(paste0("_within_", within, "_Ttest_.*"),      "", colnames(test_col))
+  } else if(stat_type == "wilcox.test"){
+    colnames(test_col) <- sub(paste0("_within_", within, "_Wilcox_test_.*"), "", colnames(test_col))
+  } else if(stat_type == "LMM"){
+    colnames(test_col) <- sub(paste0("_within_", within, "_LMMtest_.*"),     "", colnames(test_col))
+  }
+  colnames(test_col) <- sub("_vs_", "\\/", colnames(test_col))
+  test_col <- log10(test_col) * -1
+
+  # Check if fold changes are logged
+  if(sum(grepl("log\\(", colnames(fc_col))) == ncol(fc_col)){
+    fc_log = TRUE
+  } else if(sum(grepl("log\\(", colnames(fc_col))) == 0){
+    fc_log = FALSE
+  } else {
+    warning("some of the fold-changes were calculated both prior and after log_transform. Only the log transformed will be used.")
+    fc_col <- fc_col[, grepl("log\\(", colnames(fc_col)), drop = FALSE]
+    fc_log = TRUE
+  }
+
+  # Log transform if needed
+  if(fc_log == FALSE){
+    fc_col = log2(fc_col)
+    log_type = 2
+    min_fold_change_adj <- log2(min_fold_change)
+  } else {
+    if(romicsLogCheck(romics_object) & grepl("fun\\|log2", romics_object$steps[grepl("fun\\|log", romics_object$steps)])){
+      log_type = 2
+    } else {
+      log_type = 10
+    }
+    min_fold_change_adj <- min_fold_change
+  }
+
+  # Format fold-change column names
+  colnames(fc_col) <- sub("log\\(", "", colnames(fc_col))
+  colnames(fc_col) <- sub("\\)_within_.*", "", colnames(fc_col))
+  colnames(fc_col) <- sub("_vs_", "\\/", colnames(fc_col))
+
+  minus_log_p <- log10(p) * -1
+
+  # Create list to store plots
+  plot_list <- list()
+
+  # Generate plots for each comparison
+  for(i in 1:ncol(fc_col)){
+    fc_col_i       <- fc_col[, i, drop = FALSE]
+    test_col_match <- colnames(fc_col_i)[1]
+    test_col_i     <- test_col[, colnames(test_col) == test_col_match, drop = FALSE]
+
+    if(ncol(test_col_i) == 0) {
+      warning(paste0("No matching p-value column found for ", test_col_match, ". Skipping this comparison."))
+      next
+    }
+
+    df <- data.frame(
+      ID = rownames(fc_col_i),
+      fc = as.numeric(fc_col_i[, 1]),
+      p  = as.numeric(test_col_i[, 1]),
+      stringsAsFactors = FALSE
+    )
+
+    comparison <- colnames(fc_col_i)[1]
+
+    class <- rep("non_significant", nrow(df))
+    class[df$p > minus_log_p & df$fc < (min_fold_change_adj * -1)] <- "down"
+    class[df$p > minus_log_p & df$fc >  min_fold_change_adj]        <- "up"
+    class <- paste0(class, "_in_", comparison)
+    df$class <- class
+
+    # Check for out-of-bounds points if limits are specified
+    if(!is.null(xlim)){
+      n_out_x <- sum(df$fc < xlim[1] | df$fc > xlim[2], na.rm=TRUE)
+      if(n_out_x > 0){
+        warning(paste0("For comparison '", comparison, "' in cluster '", within, "': ", n_out_x, " feature(s) have fold-change values outside xlim [", xlim[1], ", ", xlim[2], "]"))
+      }
+    }
+    if(!is.null(ylim)){
+      n_out_y <- sum(df$p < ylim[1] | df$p > ylim[2], na.rm=TRUE)
+      if(n_out_y > 0){
+        warning(paste0("For comparison '", comparison, "' in cluster '", within, "': ", n_out_y, " feature(s) have p-value(s) outside ylim [", ylim[1], ", ", ylim[2], "]"))
+      }
+    }
+
+    # Prepare labels for top features
+    df$label <- ""
+    if(label_features && top_features > 0) {
+      up_features <- df[grepl("up_in_", df$class), ]
+      if(nrow(up_features) > 0) {
+        if(top_features_by == "abundance") {
+          up_features <- up_features[order(up_features$fc, decreasing = TRUE), ]
+        } else {
+          up_features <- up_features[order(up_features$p, decreasing = TRUE), ]
+        }
+        n_up_to_label <- min(top_features, nrow(up_features))
+        if(n_up_to_label > 0) {
+          df$label[df$ID %in% up_features$ID[1:n_up_to_label]] <- df$ID[df$ID %in% up_features$ID[1:n_up_to_label]]
+        }
+      }
+      down_features <- df[grepl("down_in_", df$class), ]
+      if(nrow(down_features) > 0) {
+        if(top_features_by == "abundance") {
+          down_features <- down_features[order(down_features$fc, decreasing = FALSE), ]
+        } else {
+          down_features <- down_features[order(down_features$p, decreasing = TRUE), ]
+        }
+        n_down_to_label <- min(top_features, nrow(down_features))
+        if(n_down_to_label > 0) {
+          df$label[df$ID %in% down_features$ID[1:n_down_to_label]] <- df$ID[df$ID %in% down_features$ID[1:n_down_to_label]]
+        }
+      }
+    }
+
+    plot_title  <- paste0("Volcano plot for ", comparison)
+    yaxis_title <- paste0("-log10(", p_type, "_", stat_type, ")")
+    xaxis_title <- paste0("log", log_type, "(", comparison, ")")
+
+    if(!plotly){
+      fig <- ggplot(df, aes(x = fc, y = p, colour = class)) +
+        geom_point(alpha = alpha, size = size) +
+        theme_ROP() +
+        ggtitle(plot_title) +
+        xlab(xaxis_title) +
+        ylab(yaxis_title) +
+        scale_colour_manual(values = colors) +
+        theme(legend.position = "bottom",
+              plot.title  = element_text(hjust = 0.5, size = 10),
+              axis.title  = element_text(size = 9))
+
+      # Add axis limits if specified
+      if(!is.null(xlim) | !is.null(ylim)){
+        fig <- fig + coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)
+      }
+
+      if(label_features && any(df$label != "")) {
+        fig <- fig + ggrepel::geom_text_repel(aes(label = label),
+                                              color        = "black",
+                                              size         = 2.5,
+                                              max.overlaps = Inf,
+                                              show.legend  = FALSE)
+      }
+
+      plot_list[[i]] <- fig
+
+    } else {
+      hover_text <- paste("ID=", df$ID)
+      if(label_features) {
+        hover_text[df$label != ""] <- paste("ID=", df$ID[df$label != ""], "(Top feature)")
+      }
+
+      # Build xaxis list with optional range
+      xaxis_list <- list(title = xaxis_title)
+      if(!is.null(xlim)){
+        xaxis_list$range <- xlim
+      }
+      # Build yaxis list with optional range
+      yaxis_list <- list(title = yaxis_title)
+      if(!is.null(ylim)){
+        yaxis_list$range <- ylim
+      }
+
+      fig <- plot_ly(x = df$fc,
+                     y = df$p,
+                     color = df$class,
+                     colors = colors,
+                     type = "scatter", mode = "markers",
+                     text = hover_text,
+                     hovertemplate = "%{text}<extra></extra>",
+                     marker = list(size = size * 4, opacity = alpha)) %>%
+        plotly::layout(title  = plot_title,
+                       xaxis  = xaxis_list,
+                       yaxis  = yaxis_list)
+
+      if(label_features && any(df$label != "")) {
+        labeled_points <- df[df$label != "", ]
+        for(j in 1:nrow(labeled_points)) {
+          fig <- fig %>% plotly::add_annotations(
+            x         = labeled_points$fc[j],
+            y         = labeled_points$p[j],
+            text      = labeled_points$label[j],
+            showarrow = TRUE,
+            arrowhead = 2,
+            arrowsize = 0.5,
+            ax        = 20,
+            ay        = -20,
+            font      = list(size = 10)
+          )
+        }
+      }
+
+      plot_list[[i]] <- fig
+    }
+  }
+
+  # Remove NULL entries
+  plot_list <- plot_list[!sapply(plot_list, is.null)]
+
+  if(length(plot_list) == 0) {
+    stop("No plots were generated. Please check your input parameters.")
+  }
+
+  # Overall title string
+  overall_title_text <- paste0("Volcano plots within ", within)
+
+  # Create combined plot
+  if(!plotly){
+    if(multipanel){
+      n_plots <- length(plot_list)
+      if(is.null(n_cols)){
+        n_cols_used <- ceiling(sqrt(n_plots))
+      } else {
+        n_cols_used <- min(n_cols, n_plots)
+      }
+      n_rows <- ceiling(n_plots / n_cols_used)
+
+      grid <- cowplot::plot_grid(
+        plotlist = plot_list,
+        ncol     = n_cols_used,
+        nrow     = n_rows,
+        align    = "hv"
+      )
+
+      title_grob <- cowplot::ggdraw() +
+        cowplot::draw_label(
+          overall_title_text,
+          fontface = "bold",
+          x        = 0.5,
+          hjust    = 0.5,
+          size     = 13
+        )
+
+      combined_plot <- cowplot::plot_grid(
+        title_grob, grid,
+        ncol        = 1,
+        rel_heights = c(0.05, 1)
+      )
+
+      if(return_plot){
+        return(combined_plot)
+      } else {
+        print(combined_plot)
+        invisible(plot_list)
+      }
+
+    } else {
+      # One by one display
+      if(return_plot){
+        # If returning plots one by one, just return the list
+        return(plot_list)
+      } else {
+        for(i in seq_along(plot_list)) {
+          cat(paste0("\n--- Plot ", i, " of ", length(plot_list), " ---\n"))
+          print(plot_list[[i]])
+          if(i < length(plot_list)) {
+            invisible(readline(prompt = "Press [enter] to see next plot"))
+          }
+        }
+        invisible(plot_list)
+      }
+    }
+
+  } else {
+    # For plotly
+    if(multipanel){
+      n_plots <- length(plot_list)
+      if(is.null(n_cols)){
+        n_cols_used <- ceiling(sqrt(n_plots))
+      } else {
+        n_cols_used <- min(n_cols, n_plots)
+      }
+      n_rows <- ceiling(n_plots / n_cols_used)
+
+      combined_plot <- plotly::subplot(plot_list,
+                                       nrows  = n_rows,
+                                       ncols  = n_cols_used,
+                                       shareX = FALSE,
+                                       shareY = FALSE,
+                                       margin = 0.08) %>%
+        plotly::layout(
+          title = list(
+            text    = overall_title_text,
+            x       = 0.5,
+            xanchor = "center"
+          ),
+          showlegend = TRUE,
+          height     = 300 * n_rows,
+          width      = 400 * n_cols_used
+        )
+
+      if(return_plot){
+        return(combined_plot)
+      } else {
+        print(combined_plot)
+        invisible(plot_list)
+      }
+
+    } else {
+      if(return_plot){
+        return(plot_list)
+      } else {
+        for(i in seq_along(plot_list)) {
+          cat(paste0("\n--- Plot ", i, " of ", length(plot_list), " ---\n"))
+          print(plot_list[[i]])
+          if(i < length(plot_list)) {
+            invisible(readline(prompt = "Press [enter] to see next plot"))
+          }
+        }
+        invisible(plot_list)
+      }
+    }
+  }
+}

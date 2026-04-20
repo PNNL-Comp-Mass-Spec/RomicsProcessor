@@ -10,7 +10,7 @@ romicsAddDependency(
 )
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{new_dependency}{The name of one or more R package}
 }

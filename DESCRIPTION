@@ -1,7 +1,7 @@
 Package: RomicsProcessor
 Type: Package
 Title: omics-oriented package for reproducible and sharable data processing pipelines
-Version: 1.11.0
+Version: 1.12.0
 Author: @GeremyClair
 Maintainer: The package maintainer <geremy.clair@pnnl.gov>
 Description: This package enables processing omics datasets using an object type called romics_object, enabling FAIR-compatible science. The romics_object contains all the details to reprocess the data identically and to create processing pipelines.
@@ -32,6 +32,7 @@ Imports:
     lmerTest,
     emmeans,
     FactoMineR,
+    factoextra,
     missMDA,
     uwot,
     Rtsne,
@@ -43,7 +44,9 @@ Imports:
     grid,
     patchwork,
     FNN,
-    matrixStats
+    matrixStats,
+    ggsignif,
+    ggtree
 Depends:
     R (>= 4.0.0)
 Suggests:

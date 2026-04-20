@@ -9,7 +9,7 @@ romicsOutlierEval(
   seed = 42,
   metrics = c("Correlation", "Proportion_Missing", "MAD", "Skewness"),
   pvalue_threshold = 0.01,
-  label = TRUE
+  label = FALSE
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ romicsOutlierEval(
 
 \item{pvalue_threshold}{A numeric vector of lenght 1 indicating the pvalue threshold to be used.}
 
-\item{label}{Either TRUE or FALSE to indicate if the labels have to be plotted.}
+\item{label}{Either TRUE or FALSE to indicate if the sample labels have to be plotted. Default: FALSE}
 }
 \value{
 This function will print the pmartR filtering details and will return 2 plots the first one is a scatter plot of the pvalue by log2(Robust Mahalanobis Distance) the second one is a scatter plot of the log2(Robust Mahalanobis Distance) per sample.

@@ -7,7 +7,7 @@
 romicsFactorNames(romics_object)
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 }
 \value{
 A character vector containing the list of factor contained in an romics_object

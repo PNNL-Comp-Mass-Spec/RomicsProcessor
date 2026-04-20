@@ -6,40 +6,57 @@
 \usage{
 romicsPCA(
   romics_object,
-  ncp = 5,
+  verbose = TRUE,
+  ncp,
+  n_components = NULL,
   scale = TRUE,
   method = c("Regularized", "EM"),
   ncp.min = 0,
   ncp.max = 5,
-  method.cv = c("gcv", "loo", "Kfold"),
+  method.cv,
   ...
 )
 }
 \arguments{
-\item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
+\item{romics_object}{has to be a romics_object created using romicsCreateObject()}
 
-\item{ncp}{inherited from missmda::imputePCA().}
+\item{verbose}{boolean. If TRUE, also assigns the complete PCA results to PCA_results in the global environment}
 
-\item{scale}{inherited from missmda::imputePCA(). boolean. TRUE implies a same weight for each variable}
+\item{ncp}{number of principal components to compute. Default is 5 if method.cv is not provided.
+If method.cv is provided but ncp is not, the optimal number is estimated automatically.}
 
-\item{method}{inherited from missmda::imputePCA(). "Regularized" by default or "EM". TRUE implies a same weight for each variable}
+\item{n_components}{number of principal components to store in the embeddings layer. If NULL (default),
+stores all computed components. Must be <= ncp.}
 
-\item{ncp.min}{used only if ncp is not set. inherited from missmda::estim_ncpPCA().integer corresponding to the minimum number of components to test}
+\item{scale}{boolean. TRUE implies a same weight for each variable for the missMDA data imputation)}
 
-\item{ncp.max}{used only if ncp is not set. inherited from missmda::estim_ncpPCA().integer corresponding to the minimum number of components to test}
+\item{method}{"Regularized" (by default) or "EM". Used for missing value imputation using missMDA.}
 
-\item{...}{further arguments passed to or from other methods}
+\item{ncp.min}{used only if ncp is automatically estimated. Integer corresponding to the minimum number of components to test}
 
-\item{row.w}{inherited from missmda::imputePCA(). row weights (by default, a vector of 1 for uniform row weights)}
+\item{ncp.max}{used only if ncp is automatically estimated. Integer corresponding to the maximum number of components to test}
+
+\item{method.cv}{method for cross-validation when automatically determining the optimal number of components.
+One of "gcv" (generalized cross-validation), "loo" (leave-one-out), or "Kfold" (K-fold cross-validation).
+If provided and ncp is missing, triggers automatic estimation of the optimal number of components.}
+
+\item{...}{further arguments passed to missMDA functions.}
+
+\item{row.w}{row weights (by default, a vector of 1 for uniform row weights)}
 }
 \value{
-Return the results of the PCA performed on the current version of the romics_object
+Returns the romics_object with PCA results added to the embeddings layer.
 }
 \description{
-Calculate the PCA of the data layer of the romics_object using the package FactoMineR. If the data layer contains some missing values those will be imputed using the missMDA::imputePCA() method (see the documentation of this function for more details). This function will return the PCA results and not a romics_object
+Calculate the PCA of the data layer of the romics_object using the package FactoMineR.
+If the data layer contains some missing values those will be imputed using the missMDA::imputePCA() method.
+This function updates the romics_object by storing the PCA embeddings in the embeddings layer.
 }
 \details{
-This function uses the dist() and hclust() functions to calculate the hierachical clustering and then plots the hclust with colors based on the current main_factor of the romics_object.
+This function calculates PCA and stores the sample embeddings in the romics_object$embeddings layer.
+         If missing values are present in the data, they are imputed using missMDA::imputePCA().
+         When method.cv is provided but ncp is not, the optimal number of components is estimated using missMDA::estim_ncpPCA().
+         If verbose=TRUE, the complete PCA results are assigned to PCA_results in the global environment.
 }
 \author{
 Geremy Clair

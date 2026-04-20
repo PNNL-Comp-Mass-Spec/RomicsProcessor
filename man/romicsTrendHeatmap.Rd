@@ -4,7 +4,13 @@
 \alias{romicsTrendHeatmap}
 \title{romicsTrendHeatmap()}
 \usage{
-romicsTrendHeatmap(romics_object, factor = "main", log_factor = FALSE, ...)
+romicsTrendHeatmap(
+  romics_object,
+  factor = "main",
+  log_factor = FALSE,
+  collapse_by_factor = NULL,
+  ...
+)
 }
 \arguments{
 \item{romics_object}{has to be a romics_object created using the function romicsCreateObject() (see dedicated documentation) and has to be numeric.}

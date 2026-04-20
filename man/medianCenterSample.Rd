@@ -7,7 +7,7 @@
 medianCenterSample(romics_object)
 }
 \arguments{
-\item{romics_object}{has to be an romics_object created using romicsCreateObject() that has not been previously log-transformed using log10transform()}
+\item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 }
 \value{
 This function returns the transformed romics_object with updated data layer.

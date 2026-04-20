@@ -33,10 +33,10 @@ romicsWilcoxTest(
 
 \item{mode}{'vs' or 'enrichment' indicating if all the between group comparisons should be performed (vs) or if the features in a given group should be compared to all the other groups (enrichment).}
 
-\item{...}{other parameters can be passed down to the wilox.test() function from the 'stat' package.}
+\item{...}{other parameters can be passed down to the wilcox.test() function from the 'stat' package.}
 }
 \value{
-an romics_object with the statistical layer containing the newly generated t.tests and fold-changes
+an romics_object with the statistical layer containing the newly generated Wilcox tests and fold-changes
 }
 \description{
 Performs all possible paired Wilcoxon signed-rank test for each variable using the levels of the selected factor of the romics_object. The results are added as new columns in the statistics layers.

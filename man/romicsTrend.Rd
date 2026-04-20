@@ -8,7 +8,7 @@ romicsTrend(
   romics_object,
   factor = "main",
   log_factor = FALSE,
-  type = "both",
+  analysis_type = "both",
   p = 0.05
 )
 }
@@ -19,7 +19,7 @@ romicsTrend(
 
 \item{log_factor}{Boolean, indicate if the factor needs to be log transformed (TRUE), or not (FALSE). By default the factor is not transformed}
 
-\item{type}{indicates if linear and/or quadratic trends analysis have to be performed, has to be 'both', 'linear',or 'quadratic'.}
+\item{analysis_type}{indicates if linear and/or quadratic trends analysis have to be performed, has to be 'both', 'linear',or 'quadratic'.}
 
 \item{p}{indicates the minimal fitting p-value to be considered.}
 }

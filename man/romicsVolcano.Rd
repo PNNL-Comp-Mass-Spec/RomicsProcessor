@@ -10,32 +10,53 @@ romicsVolcano(
   p = 0.05,
   min_fold_change = 0.6,
   colors = c("#2cbcb2", "#242021", "#d44e28"),
-  stat_type = "t.test",
+  stat_type = "auto",
   plot = "all",
-  plot_type = "ggplot"
+  plotly = FALSE,
+  label_features = FALSE,
+  top_features = 10,
+  top_features_by = "abundance",
+  xlim = NULL,
+  ylim = NULL,
+  size = 2,
+  alpha = 0.5
 )
 }
 \arguments{
-\item{p_type}{'p' or 'padj' to indicate the type of tpvalue to consider for the volcano plots.}
+\item{p_type}{'p' or 'padj' to indicate the type of pvalue to consider for the volcano plots.}
 
 \item{p}{numeric value to indicate the maximum pvalue to use for the coloring of the volcano plot}
 
 \item{colors}{numeric vector of lenght 3 used to color the features lower, not significantly changing and higher in the considered comparisons.}
 
-\item{stat_type}{'t.test' or 'wilcox.test' to indicate what statistics to use for the volcano plots generation.}
+\item{stat_type}{'t.test', 'wilcox.test', 'LMM' or 'auto' to indicate what statistics to use for the volcano plots generation. If 'auto', will detect available tests.}
 
 \item{plot}{either 'all' if all paired comparisons have to be displayed OR a vector of numeric values comprised between 1 and the maximum number of possible plots generated.}
 
-\item{plot_type}{'plotly' or 'ggplot' to indicate the type of plot to be returned.}
+\item{plotly}{logical (TRUE or FALSE) to indicate whether to return interactive plotly plots (TRUE) or static ggplot plots (FALSE).}
+
+\item{label_features}{logical (TRUE or FALSE) to indicate whether to label top features on the plot.}
+
+\item{top_features}{numeric value indicating the number of top upregulated and downregulated features to label (only those passing the filters).}
+
+\item{top_features_by}{'abundance' or 'p' to indicate the criteria for selecting top features. 'abundance' selects by fold change magnitude, 'p' selects by p-value significance.}
+
+\item{xlim}{numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.}
+
+\item{ylim}{numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)). If NULL, limits are determined automatically.}
+
+\item{size}{numeric value for point size in the plots. Default is 2.}
+
+\item{alpha}{numeric value for point opacity in the plots (0-1). Default is 0.5.}
 }
 \value{
-This function will print different plot requested
+This function will print different plots requested
 }
 \description{
-generate one or multiple volcano plots from t.test or wilcox.test run using the functions romicsTtest() or romicsWilcoxTest() respectively
+generate one or multiple volcano plots from t.test, wilcox.test, or LMM run using the functions romicsTtest(), romicsWilcoxTest(), or romicsLMM() respectively
 }
 \details{
-generate one or multiple volcano plots from t.test or wilcox.test run using the functions romicsTtest() or romicsWilcoxTest() respectively
+generate one or multiple volcano plots from t.test, wilcox.test, or LMM run using the functions romicsTtest(), romicsWilcoxTest(), or romicsLMM() respectively. Automatically detects whether data is clustered or not. If xlim or ylim are specified, a warning is issued if any data points fall outside these limits.
 }
 \author{
 Geremy Clair

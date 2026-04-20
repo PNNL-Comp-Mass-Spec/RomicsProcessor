@@ -4,15 +4,15 @@
 \alias{romicsExtractFactor}
 \title{romicsExtractFactor()}
 \usage{
-romicsExtractFactor(romics_object, factor = "factor")
+romicsExtractFactor(romics_object, factor = "main")
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 
-\item{factor}{A factor contained in the romics_object, the list of factors can be obtained using the function romicsFactorNames()}
+\item{factor}{has to be either 'main' to indicate that the main factor has to be used (default) or a factor contained in the romics_object, the list of factors can be obtained using the function romicsFactorNames()}
 }
 \value{
-a factor contained in an romics_object the order is the same as the columns of the romics_object$data.
+a factor from an romics_object
 }
 \description{
 Extract a factor from the romics_object

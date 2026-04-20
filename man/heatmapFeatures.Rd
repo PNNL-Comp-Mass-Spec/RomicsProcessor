@@ -19,7 +19,8 @@ heatmapFeatures(
   show_clusters = FALSE,
   show_cluster_legend = FALSE,
   n_clusters = NULL,
-  clustering_method = "ward.D"
+  clustering_method = "ward.D",
+  collapse_by_factor = NULL
 )
 }
 \arguments{

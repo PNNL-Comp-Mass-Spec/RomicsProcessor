@@ -7,7 +7,7 @@
 romicsChangeFactor(romics_object, main_factor = "none")
 }
 \arguments{
-\item{romics_object}{A object created using the function romicsCreateObject().}
+\item{romics_object}{A object created using the function createRomicsObject().}
 
 \item{main_factor}{Either 'none' OR a factor from the romics_object (corresponding to a row from the original metadata file), the list of factors from an romics object can be obtained using the function romicsFactorNames().}
 }
@@ -18,7 +18,7 @@ This function returns a modified romics object, please see the create_romics_obj
 Change the main factor of the romics_object
 }
 \details{
-changes the main_factor of an romics_object and updates the colors to this new factor.
+changes the main_factor of an romics_object and updates the colors to this new factor. Also reorders the embeddings layer if present.
 }
 \author{
 Geremy Clair

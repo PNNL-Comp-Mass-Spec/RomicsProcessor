@@ -7,7 +7,7 @@
 romicsFilterMissing(
   romics_object,
   percentage_completeness = 50,
-  main_factor = "main",
+  factor = "main",
   all_groups = FALSE
 )
 }
@@ -16,7 +16,7 @@ romicsFilterMissing(
 
 \item{percentage_completeness}{Numerical vector indicating the minimum percentage of data to be considered}
 
-\item{main_factor}{has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames() on the romics_object}
+\item{factor}{has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames() on the romics_object}
 
 \item{all_groups}{if this parameter is TRUE the completeness requirement is for each and every group, if not, the completeness requirement is for at least one group.}
 }
@@ -27,7 +27,7 @@ The function will return a filtered romics_object with the rows of the data and 
 Filters out the variables of the romics_object below the choosen percentage of completeness. The percentage of completeness can either be global or by factor of a given factor (in this later case if the percentage of completeness is achieved for at least one level of the factor it the variable will be kept).
 }
 \details{
-This function will use the completeness of the features in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default main_factor is the main factor of the object, the percentage_completeness is set at 50%
+This function will use the completeness of the features in the overall samples (when none is used as factor), or of a given level of a specific defined factor (in this case the factor has to be set to either "main" or to the given factor of filtering). By default factor is the main factor of the object, the percentage_completeness is set at 50%
 }
 \author{
 Geremy Clair, Nicholas Day

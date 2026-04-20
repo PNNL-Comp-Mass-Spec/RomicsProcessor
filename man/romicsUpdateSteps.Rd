@@ -7,7 +7,7 @@
 romicsUpdateSteps(romics_object, arguments)
 }
 \arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{arguments}{the arguments of a function are required to read the user input of a function, this user input will be used to generate the steps, the arguments are obtained by running the following code <arguments<-as.list(match.call())> in the first line of a function}
 }

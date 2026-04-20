@@ -9,14 +9,31 @@ imputeMissingEval(
   nb_stdev = 1.8,
   width_stdev = 0.5,
   bin = 1,
-  scale_x = c(-10, 10)
+  scale_x = "auto",
+  sample_size = 1e+05,
+  set.seed = TRUE,
+  seed = 42
 )
 }
 \arguments{
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
+
+\item{nb_stdev}{number of standard deviations away from the median to place the missingness. Default: 1.8}
+
+\item{width_stdev}{width of the random values used for imputation expressed in standard deviation from the data. Default: 0.5}
+
+\item{bin}{binwidth for the histogram. Default: 1}
+
+\item{scale_x}{numeric vector of length 2 for x-axis limits. Default: c(-10,10)}
+
+\item{sample_size}{maximum number of data points to use for visualization (for performance with large datasets). Default: 100000}
+
+\item{set.seed}{logical indicating whether to set a seed for reproducible results. Default: TRUE}
+
+\item{seed}{numeric value for the random seed when set.seed=TRUE. Default: 42}
 }
 \value{
-This function will return a ggplot2 geom_bar plot. it can then be further visually adjusted using the ggplot2 commands
+This function will return a ggplot2 geom_histogram plot. it can then be further visually adjusted using the ggplot2 commands
 }
 \description{
 Plots the distribution of the data to be imputed using the imputeMissing() function. Enables  to optimize the parameters prior to apply the imputeMissing() function.

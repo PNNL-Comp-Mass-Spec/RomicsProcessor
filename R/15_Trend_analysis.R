@@ -269,7 +269,7 @@ singleVariableTrend<-function(romics_object, variable="variable", factor="main",
 #' @return This function returns a list
 #' @author Geremy Clair and Feng Song
 #' @export
-romicsTrendHeatmap<-function(romics_object,factor="main", log_factor = FALSE, ...){
+romicsTrendHeatmap<-function(romics_object,factor="main", log_factor = FALSE, collapse_by_factor = NULL, ...){
     trendArgs <- romics_object$steps[max(which(grepl("fun\\|romicsTrend",romics_object$steps)))]
     if(!is.romicsObject(romics_object) || missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
     if(is.null(romics_object$statistics$best_fitted_trend)){print("The trend analysis was not perform on the romics_object selected, please run the trend analysis using the function romicsTrend()")}
@@ -307,6 +307,13 @@ romicsTrendHeatmap<-function(romics_object,factor="main", log_factor = FALSE, ..
     rowCols[rowCols=="linear_increasing"]<-"#0099ff"
     rowCols[rowCols=="quadratic_concave"]<-"#ffcc00"
     rowCols[rowCols=="quadratic_convex"]<-"#9900ff"
+
+    # Collapse by factor if requested
+    if (!is.null(collapse_by_factor) && collapse_by_factor != FALSE) {
+      collapse_factor <- if(isTRUE(collapse_by_factor)) factor else collapse_by_factor
+      data <- collapse_data_by_factor(romics_object, romics_object$data[rownames(data), ], collapse_factor)
+      f <- sort(unique(as.numeric(romicsExtractFactor(romics_object, factor = collapse_factor))))
+    }
 
     if (log_factor == TRUE) {
         f <- log(f)

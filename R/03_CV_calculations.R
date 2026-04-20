@@ -6,9 +6,8 @@
 #' @details This function will calculate the CVs, the percentage CVs, and on demand will plot the barplot and/or the boxplot of the CVs per sampletype. The CVs are calculated on unlogged romics_object only, if the data was logged transformed, it will be unlogged prior to perform the calculations.
 #' @author Geremy Clair
 #' @export
-
 romicsCVs<-function(romics_object, factor="main", plot="all"){
-  if(!is.romics_object(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
+  if(!is.romicsObject(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(factor=="main") {factor<-romics_object$main_factor}
   if(!factor %in% romicsFactorNames(romics_object)){
     print("Your factor does not exist in your data, here is the list of the existing factors:")
@@ -82,3 +81,36 @@ romicsCVs<-function(romics_object, factor="main", plot="all"){
 
   return(results)
 }
+
+#' romicsCountDetect()
+#' @description Calculates the in how many samples the features are detected and generates a table with these metrics
+#' @param romics_object A romics_object created using romicsCreateObject()
+#' @details TCalculates the in how many samples the features are detected and generates a table with these metrics in a data frame
+#' @author Geremy Clair
+#' @export
+romicsCountDetect<-function(romics_object){
+  if(!is.romicsObject(romics_object)){stop("Your <romics_object> has to be an romics_object created using the function romicsCreateObject().")}
+  t<-data.frame(count=rowSums((romics_object$missingdata)))
+  t$count<-ncol(romics_object$missingdata)-t
+  Detected_in<-as.factor(t(t$count))
+  Detected_in<-as.data.frame(t(table(Detected_in)))[-1]
+  Detected_in$Percent<-Detected_in$Freq/nrow(romics_object$missingdata)*100
+  return(Detected_in)}
+
+#' romicsCountDetectPlot()
+#' @description Calculates the in how many samples the features are detected and generates a plot with these metrics
+#' @param romics_object A romics_object created using romicsCreateObject()
+#' @details TCalculates the in how many samples the features are detected and generates a table with these metrics in a ggplot
+#' @author Geremy Clair
+#' @export
+romicsCountDetectPlot<-function(romics_object,percent=TRUE){
+  t<-romicsCountDetect(romics_object)
+  t$Percent_detected<-round(t$Percent,2)
+  if(percent==TRUE){
+    p<-ggplot(t,aes(x=Detected_in,y=Percent_detected))+geom_bar(stat="identity")+theme_ROP()+geom_text(aes(label=Percent_detected), vjust=-0.3, color="gray20", size=3.5)
+  }else{
+    p<-ggplot(t,aes(x=Detected_in,y=Freq))+geom_bar(stat="identity")+theme_ROP()+geom_text(aes(label=Freq), vjust=-0.3, color="gray20", size=3.5)
+  }
+  return(p)
+}
+

@@ -6,34 +6,72 @@
 \usage{
 romicsUmap(
   romics_object,
-  umap_config = umap.defaults,
-  method = c("naive", "umap-learn"),
-  lock_seed = TRUE,
-  seed = 42
+  verbose = TRUE,
+  n_neighbors = 30,
+  n_components = 2,
+  metric = "euclidean",
+  standardize = TRUE,
+  init,
+  use_pca_embeddings = FALSE,
+  pca_ncp,
+  lock.seed = TRUE,
+  seed = 42,
+  ...
 )
 }
 \arguments{
-\item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
+\item{romics_object}{has to be a romics_object created using romicsCreateObject() note that the data cannot contain missing values, missing values (e.g., NA) can be imputed using a RomicsProcessor::impute function. After performing the umap the imputation can be cancelled using the romicsRestoreMissing() function.}
 
-\item{umap_config}{object of class umap.config (see umap() function documentation)}
+\item{verbose}{boolean. If TRUE, also assigns the complete UMAP model to UMAP_results in the global environment}
 
-\item{method}{character, implementation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn')}
+\item{n_neighbors}{The size of local neighborhood (in terms of number of neighboring sample points) used for manifold approximation. Larger values result in more global views of the manifold, while smaller values result in more local data being preserved. In general values should be in the range 2 to 100.}
 
-\item{lock_seed}{has to be TRUE or FALSE to indicate if the seed is locked to enable reproducing plotting}
+\item{n_components}{The dimension of the space to embed into. This defaults to 2 to provide easy visualization, but can reasonably be set to any integer value in the range 2 to 100.}
+
+\item{metric}{Type of distance metric to use to find nearest neighbors. For nn_method = "annoy" this can be one of: "euclidean" (the default), "cosine", "manhattan", "hamming","correlation" (a distance based on the Pearson correlation), "categorical" (see below).}
+
+\item{standardize}{Scaling to apply to the data layer of the romics_object: "none" or FALSE or NULL No scaling; "Z" or "scale" or TRUE Scale each feature to zero mean and variance 1; "maxabs" Center each feature to mean 0, then divide each element by the maximum absolute value over the entire matrix; "range" Range scale the entire matrix, so the smallest element is 0 and the largest is 1; "colrange" Scale each feature in the range (0,1); For UMAP, the default is "none".}
+
+\item{init}{Type of initialization for the coordinates. Options are:
+\itemize{
+  \item "spectral" Spectral embedding using the normalized Laplacian of the fuzzy 1-skeleton, with Gaussian noise added
+  \item "normlaplacian" Spectral embedding using the normalized Laplacian of the fuzzy 1-skeleton, without noise
+  \item "random" Coordinates assigned using a uniform random distribution between -10 and 10
+  \item "lvrandom" Coordinates assigned using a Gaussian distribution with standard deviation 1e-4, as used in LargeVis (Tang et al., 2016) and t-SNE
+  \item "laplacian" Spectral embedding using the Laplacian Eigenmap (Belkin and Niyogi, 2002)
+  \item "pca" The first two principal components from PCA of X if X is a data frame, and from a 2-dimensional classical MDS if X is of class "dist"
+  \item "spca" Like "pca", but each dimension is then scaled so the standard deviation is 1e-4, to give a distribution similar to that used in t-SNE. This is an alias for init = "pca", init_sdev = 1e-4
+  \item "agspectral" An "approximate global" modification of "spectral" which all edges in the graph to a value of 1, and then sets a random number of edges (negative_sample_rate edges per vertex) to 0.1, to approximate the effect of non-local affinities
+  \item "pca_embeddings" Use existing PCA embeddings from the romics_object embeddings layer (see use_pca_embeddings parameter)
+  \item A matrix of initial coordinates
+}
+For spectral initializations, ("spectral", "normlaplacian", "laplacian", "agspectral"), if more than one connected component is identified, no spectral initialization is attempted. Instead a PCA-based initialization is attempted. If verbose = TRUE the number of connected components are logged to the console. The existence of multiple connected components implies that a global view of the data cannot be attained with this initialization. Increasing the value of n_neighbors may help.}
+
+\item{use_pca_embeddings}{Logical. If TRUE and init is not specified, will attempt to use PCA embeddings from the romics_object embeddings layer for initialization.
+If TRUE and no PCA embeddings are found, will run romicsPCA() first. Default is FALSE.
+When TRUE, the number of PCA components used will match n_components.}
+
+\item{pca_ncp}{Integer. Number of principal components to calculate if PCA needs to be run for initialization.
+Only used when use_pca_embeddings = TRUE and PCA embeddings don't exist. Default is max(10, n_components).}
+
+\item{lock.seed}{has to be TRUE or FALSE to indicate if the seed is locked to enable reproducing plotting}
 
 \item{seed}{numeric value indicating what seed to use when random seed are used}
 
 \item{...}{Arguments passed to umap function.}
 }
 \value{
-Returns a umap result
+Returns a romics_object with UMAP embeddings added to the embeddings layer.
 }
 \description{
-Calculate the umap of the data layer of the romics_object using the package umap. This function require the data to be full in the layer data to be run.
-Plots the samples on the PCA sample plot, the percentage of explained variance, or both on demand using ggplots2. The colors used for the plotting will correspond to the main_factor of the romics_object. The axis to be plotted can be chosen. The PCA results are calculated using the function romicsPCA (see the documentation of this function for more details).
+This function utilizes uwot::umap() function to calculate the umap embedding based on the data contained in a Romics_object and export the embedding in the metadata layer of the romics_object.
+You can use a subset of features to generate the embedding, all the parameters of the uwot::umap() function are available, see the documentation of this function for more details.
+The results are recorded in the embeddings layer of the romics_object, with rows named 'umap_component_1', 'umap_component_2', etc.
+If a umap was run previously, the embedding will replace the current embedding.
 }
 \details{
-This function will
+This function calculates UMAP embeddings and stores them in the romics_object. It can also store the complete
+UMAP model in the global environment if verbose=TRUE.
 }
 \author{
 Geremy Clair
