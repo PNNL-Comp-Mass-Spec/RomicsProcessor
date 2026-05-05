@@ -941,16 +941,16 @@ romicsGlmBinomial <- function(romics_object,
 
       # Create column names with cluster suffix - match t-test order (i,2 vs i,1)
       colnames(r)[colnames(r) == "p"] <- paste0(
-        as.character(by2combinations[i, 2]), "_vs_",
-        as.character(by2combinations[i, 1]), cluster_suffix, "_glmBinomialTest_p"
+        as.character(by2combinations[i, 2]), "_vs_others",
+        cluster_suffix, "_glmBinomialTest_p"
       )
       colnames(r)[colnames(r) == "adj"] <- paste0(
-        as.character(by2combinations[i, 2]), "_vs_",
-        as.character(by2combinations[i, 1]), cluster_suffix, "_glmBinomialTest_padj"
+        as.character(by2combinations[i, 2]), "_vs_others",
+        cluster_suffix, "_glmBinomialTest_padj"
       )
       colnames(r)[colnames(r) == "dir"] <- paste0(
-        as.character(by2combinations[i, 2]), "_vs_",
-        as.character(by2combinations[i, 1]), cluster_suffix, "_directionality"
+        as.character(by2combinations[i, 2]), "_vs_others",
+        cluster_suffix, "_directionality"
       )
 
       cluster_results <- cbind(cluster_results, r)
