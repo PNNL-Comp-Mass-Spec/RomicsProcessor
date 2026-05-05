@@ -929,8 +929,12 @@ romicsComplexHeatmap <- function(romics_object,
   # Collapse by factor if requested
   if (!is.null(collapse_by_factor) && collapse_by_factor != FALSE) {
     collapse_factor <- if(isTRUE(collapse_by_factor)) factor_name else collapse_by_factor
-    data_matrix <- collapse_data_by_factor(romics_object, data_matrix, collapse_factor)
-    data_matrix_for_clustering <- collapse_data_by_factor(romics_object, data_matrix_for_clustering, collapse_factor)
+    # Create temporary romics object with the filtered data for collapsing
+    # (in case zero-variance rows were removed)
+    temp_romics <- romics_object
+    temp_romics$data <- romics_object$data[rownames(data_matrix), , drop = FALSE]
+    data_matrix <- collapse_data_by_factor(temp_romics, data_matrix, collapse_factor)
+    data_matrix_for_clustering <- collapse_data_by_factor(temp_romics, data_matrix_for_clustering, collapse_factor)
   }
 
   # Ensure stats_df rows match data_matrix rows (in case some were removed)
