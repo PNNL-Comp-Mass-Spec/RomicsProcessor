@@ -2022,9 +2022,10 @@ featureSignificanceToTests <- function(
     if (is_significant && test_type %in% c("Ttest", "Wilcox_test")) {
       # Extract comparison to find fold-change column
       comparison_base <- sub(paste0("_", test_type, "$"), "", comparison_name)
+      fc_pattern <- gsub("_vs_", "/", comparison_base)
 
-      # Look for fold-change column in format: log(A/B) or just numeric ratio
-      fc_cols <- grep(paste0("log\\(.*", gsub("_vs_", "/", comparison_base), "\\)"), stat_columns, value = TRUE)
+      # Look for fold-change column in format: log(A/B) or (A/B)
+      fc_cols <- grep(paste0("(log)?\\(", fc_pattern, "\\)"), stat_columns, value = TRUE)
 
       if (length(fc_cols) > 0) {
         fc_val <- romics_object$statistics[feature, fc_cols[1]]
