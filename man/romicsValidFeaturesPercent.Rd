@@ -2,7 +2,7 @@
 % Please edit documentation in R/04_Manage_Missing.R
 \name{romicsValidFeaturesPercent}
 \alias{romicsValidFeaturesPercent}
-\title{romicsValidFeaturesPercent()}
+\title{Calculate Percentage of Valid Features}
 \usage{
 romicsValidFeaturesPercent(
   romics_object,
@@ -11,17 +11,18 @@ romicsValidFeaturesPercent(
   features = NULL
 )
 }
-\arguments{
-\item{romics_object}{has to be a romics_object created using romicsCreateObject()}
-
-\item{return_type}{Character string specifying the output format. Options are: "table" (default) returns a data frame with feature names and percentages; "vector" returns a named numeric vector; "plot" returns a ggplot2 bar plot.}
-
-\item{reorder}{Character string indicating how to order features in the output. Options are: NULL (original order), "ascending" (lowest to highest valid %), "descending" (highest to lowest valid %). Only applicable for "table" and "plot" return types.}
-
-\item{features}{Character vector containing a list of specific features to analyze. If NULL (default), all features are included.}
-}
 \description{
 Calculates and returns the percentage of samples that have valid (non-missing) values for each feature in the romics_object.
+
+\strong{Parameters:}
+
+\code{romics_object}: has to be a romics_object created using romicsCreateObject()
+
+\code{return_type}: Character string specifying the output format. Options are: "table" (default) returns a data frame with feature names and percentages; "vector" returns a named numeric vector; "plot" returns a ggplot2 bar plot.
+
+\code{reorder}: Character string indicating how to order features in the output. Options are: NULL (original order), "ascending" (lowest to highest valid %), "descending" (highest to lowest valid %). Only applicable for "table" and "plot" return types.
+
+\code{features}: Character vector containing a list of specific features to analyze. If NULL (default), all features are included.
 }
 \details{
 This function calculates the percentage of samples (columns) that have valid (non-missing) values for each feature (row) in the romics_object$data layer. This is complementary to romicsValidFeatures() which counts valid features per sample.

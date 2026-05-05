@@ -2,7 +2,7 @@
 % Please edit documentation in R/08_Heatmap_and_multifeature_plots.R
 \name{heatmapFeatures}
 \alias{heatmapFeatures}
-\title{heatmapFeatures()}
+\title{Create Interactive Heatmap Visualization}
 \usage{
 heatmapFeatures(
   romics_object,
@@ -23,43 +23,46 @@ heatmapFeatures(
   collapse_by_factor = NULL
 )
 }
-\arguments{
-\item{romics_object}{A romics object containing $data, $statistics, and $metadata layers}
+\description{
+Creates an interactive heatmap visualization from a romics object with hierarchical clustering and optional statistical filtering
 
-\item{factor}{Character string specifying the factor to use for grouping samples. Default: "main" uses the main factor. Use romicsFactorNames() to see available factors}
+\strong{Parameters:}
 
-\item{scale_feature}{TRUE or FALSE, if TRUE scales features by rows (z-score normalization). Default: TRUE}
+\code{romics_object}: A romics object containing $data, $statistics, and $metadata layers
 
-\item{feature_list}{Character vector of features to include in heatmap. If NULL, uses all features. Default: NULL}
+\code{factor}: Character string specifying the factor to use for grouping samples. Default: "main" uses the main factor. Use romicsFactorNames() to see available factors
 
-\item{filter_by_stat_column}{Character string specifying the statistics column to filter features. If NULL, no filtering applied. Example: "Healthy_vs_Disease_Ttest_padj". Default: NULL}
+\code{scale_feature}: TRUE or FALSE, if TRUE scales features by rows (z-score normalization). Default: TRUE
 
-\item{stat_column_filter}{Character string specifying the filter expression using operators <, >, <=, >=, ==, !=. Example: "<0.05" or ">1.5". Only used if filter_by_stat_column is specified. Default: NULL}
+\code{feature_list}: Character vector of features to include in heatmap. If NULL, uses all features. Default: NULL
 
-\item{gradient_colors}{Character vector of colors for the heatmap gradient. If NULL, uses viridis color scale. For 3 colors: c(low, mid, high). For 2 colors: c(low, high). Default: NULL}
+\code{filter_by_stat_column}: Character string specifying the statistics column to filter features. If NULL, no filtering applied. Example: "Healthy_vs_Disease_Ttest_padj". Default: NULL
 
-\item{viridis_option}{Character string specifying the viridis color scale option. Only used if gradient_colors is NULL. Accepted values: "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "mako", "turbo". Default: "viridis"}
+\code{stat_column_filter}: Character string specifying the filter expression using operators <, >, <=, >=, ==, !=. Example: "<0.05" or ">1.5". Only used if filter_by_stat_column is specified. Default: NULL
 
-\item{show_completeness}{TRUE or FALSE, if TRUE shows data completeness as tile transparency (alpha). If FALSE, completely missing data (0% completeness) is shown as black tiles. Default: TRUE}
+\code{gradient_colors}: Character vector of colors for the heatmap gradient. If NULL, uses viridis color scale. For 3 colors: c(low, mid, high). For 2 colors: c(low, high). Default: NULL
 
-\item{show_dendrogram}{TRUE or FALSE, if TRUE displays hierarchical clustering dendrogram on the left side of the heatmap. Requires ggdendro package. Default: TRUE}
+\code{viridis_option}: Character string specifying the viridis color scale option. Only used if gradient_colors is NULL. Accepted values: "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "mako", "turbo". Default: "viridis"
 
-\item{show_feature_names}{TRUE or FALSE, if TRUE displays feature names on the right side of the heatmap. Default: TRUE}
+\code{show_completeness}: TRUE or FALSE, if TRUE shows data completeness as tile transparency (alpha). If FALSE, completely missing data (0% completeness) is shown as black tiles. Default: TRUE
 
-\item{show_clusters}{TRUE or FALSE, if TRUE displays cluster assignments as a sidebar. Default: FALSE}
+\code{show_dendrogram}: TRUE or FALSE, if TRUE displays hierarchical clustering dendrogram on the left side of the heatmap. Requires ggdendro package. Default: TRUE
 
-\item{show_cluster_legend}{TRUE or FALSE, if TRUE displays the cluster legend. Only used if show_clusters is TRUE. Default: FALSE}
+\code{show_feature_names}: TRUE or FALSE, if TRUE displays feature names on the right side of the heatmap. Default: TRUE
 
-\item{n_clusters}{Integer specifying the number of clusters to cut the dendrogram into. Only used if show_clusters is TRUE. Default: NULL (no clustering)}
+\code{show_clusters}: TRUE or FALSE, if TRUE displays cluster assignments as a sidebar. Default: FALSE
 
-\item{clustering_method}{Character string specifying hierarchical clustering method. Accepted values: "complete", "average", "single", "ward.D", "ward.D2". Default: "complete"}
+\code{show_cluster_legend}: TRUE or FALSE, if TRUE displays the cluster legend. Only used if show_clusters is TRUE. Default: FALSE
+
+\code{n_clusters}: Integer specifying the number of clusters to cut the dendrogram into. Only used if show_clusters is TRUE. Default: NULL (no clustering)
+
+\code{clustering_method}: Character string specifying hierarchical clustering method. Accepted values: "complete", "average", "single", "ward.D", "ward.D2". Default: "complete"
+
+\code{collapse_by_factor}: Character. Name of the factor to collapse samples by (average within each factor level). Default: NULL (no collapsing). If specified, samples are grouped by factor level and averaged before plotting.
 }
 \value{
 A ggplot/cowplot object containing the heatmap visualization (with optional dendrogram and cluster sidebar).
 Clustering results are attached as attributes (accessible via attr(plot, "clustering_results")).
-}
-\description{
-Creates an interactive heatmap visualization from a romics object with hierarchical clustering and optional statistical filtering
 }
 \details{
 The function creates an interactive heatmap with the following features:

@@ -1171,7 +1171,7 @@ romicsComplexHeatmap <- function(romics_object,
 
 
 
-#' heatmapFeatures()
+#' @title Create Interactive Heatmap Visualization
 #' @description Creates an interactive heatmap visualization from a romics object with hierarchical clustering and optional statistical filtering
 #' @param romics_object A romics object containing $data, $statistics, and $metadata layers
 #' @param factor Character string specifying the factor to use for grouping samples. Default: "main" uses the main factor. Use romicsFactorNames() to see available factors
@@ -1188,6 +1188,7 @@ romicsComplexHeatmap <- function(romics_object,
 #' @param show_cluster_legend TRUE or FALSE, if TRUE displays the cluster legend. Only used if show_clusters is TRUE. Default: FALSE
 #' @param n_clusters Integer specifying the number of clusters to cut the dendrogram into. Only used if show_clusters is TRUE. Default: NULL (no clustering)
 #' @param clustering_method Character string specifying hierarchical clustering method. Accepted values: "complete", "average", "single", "ward.D", "ward.D2". Default: "complete"
+#' @param collapse_by_factor Character. Name of the factor to collapse samples by (average within each factor level). Default: NULL (no collapsing). If specified, samples are grouped by factor level and averaged before plotting.
 #' @details
 #' The function creates an interactive heatmap with the following features:
 #' - Features are automatically ordered by hierarchical clustering on an imputed dataset

@@ -2,7 +2,7 @@
 % Please edit documentation in R/19_metadata_plots_and_operations.R
 \name{romicsFactorFromFeature}
 \alias{romicsFactorFromFeature}
-\title{romicsFactorFromFeature}
+\title{Create Metadata Factor from Feature}
 \usage{
 romicsFactorFromFeature(
   romics_object,
@@ -20,38 +20,39 @@ romicsFactorFromFeature(
   verbose = TRUE
 )
 }
-\arguments{
-\item{romics_object}{A romics_object created using romicsCreateObject().}
+\description{
+Creates a new factor in the metadata based on a feature's intensity using various classification methods.
 
-\item{feature}{A character string specifying the name of the feature to use. Must be present in rownames of the data layer.}
+\strong{Parameters:}
 
-\item{method}{Classification method: "presence" (present/absent), "value" (above/below a fixed value), "percentage" (above/below a percentile). Default: "presence".}
+\code{romics_object}: A romics_object created using romicsCreateObject().
 
-\item{value}{Numeric value for splitting when method = "value", Required when method = "value".}
+\code{feature}: A character string specifying the name of the feature to use. Must be present in rownames of the data layer.
 
-\item{percentage}{Numeric between 0 and 100 for percentage method (e.g., 75 for top 25% vs bottom 75%). Default: 50.}
+\code{method}: Classification method: "presence" (present/absent), "value" (above/below a fixed value), "percentage" (above/below a percentile). Default: "presence".
 
-\item{n_groups}{Integer for number of groups when using percentage method with equal splits (2, 3, or 4). Default: 2. When > 2, overrides percentage parameter.}
+\code{value}: Numeric value for splitting when method = "value", Required when method = "value".
 
-\item{factor_name}{Character string for the name of the new factor. If NULL, auto-generated based on method. Default: NULL.}
+\code{percentage}: Numeric between 0 and 100 for percentage method (e.g., 75 for top 25% vs bottom 75%). Default: 50.
 
-\item{labels}{Character vector of custom labels. Length depends on n_groups. If NULL, auto-generated. For binary splits, order is c(high, low). Default: NULL.}
+\code{n_groups}: Integer for number of groups when using percentage method with equal splits (2, 3, or 4). Default: 2. When > 2, overrides percentage parameter.
 
-\item{na_label}{Character string for samples where the feature is NA/not detected. Default: "absent".}
+\code{factor_name}: Character string for the name of the new factor. If NULL, auto-generated based on method. Default: NULL.
 
-\item{na_as_low}{Logical. For binary methods, should NA values be treated as "low" rather than a separate category? Default: FALSE.}
+\code{labels}: Character vector of custom labels. Length depends on n_groups. If NULL, auto-generated. For binary splits, order is c(high, low). Default: NULL.
 
-\item{strict_inequality}{Logical. Use strict inequality (>) or >= for high group. Default: FALSE (uses >).}
+\code{na_label}: Character string for samples where the feature is NA/not detected. Default: "absent".
 
-\item{include_value_in_name}{Logical. Include value/percentage in auto-generated factor name. Default: TRUE.}
+\code{na_as_low}: Logical. For binary methods, should NA values be treated as "low" rather than a separate category? Default: FALSE.
 
-\item{verbose}{Logical. Print detailed summary. Default: TRUE.}
+\code{strict_inequality}: Logical. Use strict inequality (>) or >= for high group. Default: FALSE (uses >).
+
+\code{include_value_in_name}: Logical. Include value/percentage in auto-generated factor name. Default: TRUE.
+
+\code{verbose}: Logical. Print detailed summary. Default: TRUE.
 }
 \value{
 Returns the romics_object with the newly created factor added to its metadata.
-}
-\description{
-Creates a new factor in the metadata based on a feature's intensity using various classification methods.
 }
 \author{
 Geremy Clair

@@ -214,7 +214,7 @@ factorCountLevels <- function(romics_object = romics_object,
 }
 
 
-#' romicsFactorStackedBarplot()
+#' @title Create Stacked Barplot of Factor Distribution
 #' @description Creates and displays stacked barplots showing the percentage distribution of one factor's levels across different levels of another factor from a romics_object
 #' @param romics_object A romics_object created using romicsCreateObject().
 #' @param split_by_factor A character vector (length=1) containing a factor of the romics_object that will define the x-axis categories. The list of factors can be identified by using the function romicsFactorNames()
@@ -801,7 +801,7 @@ romicsRemoveFactor <- function(romics_object,
   return(romics_object)
 }
 
-#' romicsFactorFromFeature
+#' @title Create Metadata Factor from Feature
 #' @description Creates a new factor in the metadata based on a feature's intensity using various classification methods.
 #' @param romics_object A romics_object created using romicsCreateObject().
 #' @param feature A character string specifying the name of the feature to use. Must be present in rownames of the data layer.
