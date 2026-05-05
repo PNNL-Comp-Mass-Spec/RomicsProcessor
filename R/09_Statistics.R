@@ -2028,9 +2028,19 @@ featureSignificanceToTests <- function(
       fc_cols <- grep(paste0("(log)?\\(", fc_pattern, "\\)"), stat_columns, value = TRUE)
 
       if (length(fc_cols) > 0) {
-        fc_val <- romics_object$statistics[feature, fc_cols[1]]
+        fc_col_name <- fc_cols[1]
+        fc_val <- romics_object$statistics[feature, fc_col_name]
         if (!is.na(fc_val)) {
-          direction <- if (fc_val > 0) "up" else if (fc_val < 0) "down" else NA_character_
+          # Determine if this is log-transformed based on column name
+          is_log_transformed <- grepl("^log\\(", fc_col_name)
+
+          if (is_log_transformed) {
+            # For log-transformed: > 0 is up, < 0 is down
+            direction <- if (fc_val > 0) "up" else if (fc_val < 0) "down" else NA_character_
+          } else {
+            # For raw ratio: > 1 is up, < 1 is down
+            direction <- if (fc_val > 1) "up" else if (fc_val < 1) "down" else NA_character_
+          }
         }
       }
     } else if (is_significant && test_type == "glmBinomialTest") {
