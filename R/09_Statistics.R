@@ -729,6 +729,20 @@ romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main")
   return(romics_object)
 }
 
+#' romicsGlmBinomial()
+#' @description Performs generalized linear model (GLM) binomial tests for statistical significance testing with support for pairwise and enrichment modes
+#' @param romics_object A romics_object with data and metadata layers
+#' @param factor Character string specifying which factor to use for grouping. Default: "main" uses the main factor
+#' @param cluster_factor Character string specifying an optional clustering factor for subset analysis. Default: "none"
+#' @param padj Logical indicating whether to calculate adjusted p-values. Default: TRUE
+#' @param padj_method Character string specifying p-value adjustment method ("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"). Default: "BH"
+#' @param mode Character string either "vs" for pairwise comparisons or "enrichment" for each group vs all others. Default: "vs"
+#' @param reverse_order Logical indicating whether to reverse comparison order. Default: FALSE
+#' @param suppress_warnings Logical indicating whether to suppress warning messages. Default: TRUE
+#' @details GLM binomial test compares proportions of significant features between groups. Results include p-values, adjusted p-values, and directionality (1=up, -1=down, 0=no change)
+#' @return romics_object with statistical test results added to the $statistics layer
+#' @author Geremy Clair
+#' @export
 romicsGlmBinomial <- function(romics_object,
                               factor = "main",
                               cluster_factor = "none",
