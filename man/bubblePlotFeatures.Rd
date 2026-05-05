@@ -9,7 +9,8 @@ bubblePlotFeatures(
   factor = "main",
   scale_feature = T,
   feature_list = c("a", "b"),
-  gradient_colors = c("#fff1ed", "#fc896a", "#69010e")
+  gradient_colors = c("#fff1ed", "#fc896a", "#69010e"),
+  cluster_features = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ bubblePlotFeatures(
 \item{feature_list}{A list of features contained in the Romics_object can be found using the function romicsFeatureNames()}
 
 \item{gradient_colors}{has to be a vector of lenght 3 containing three colors, they will be used for the low, med, and high values of the gradient respectively.}
+
+\item{cluster_features}{TRUE or FALSE to indicate if features should be hierarchically clustered and displayed with a dendrogram (default: TRUE)}
 }
 \value{
 A ggplot styled figure

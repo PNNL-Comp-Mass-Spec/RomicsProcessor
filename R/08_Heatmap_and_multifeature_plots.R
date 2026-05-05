@@ -956,8 +956,10 @@ romicsComplexHeatmap <- function(romics_object,
 
   # After collapsing, update sample_groups and col_annotation to match new data_matrix columns
   # When collapsed, columns are factor levels, so create a named factor from them
+  was_collapsed <- FALSE
   if (!all(colnames(data_matrix) %in% names(sample_groups))) {
     # Data was collapsed - columns are now factor levels
+    was_collapsed <- TRUE
     sample_groups <- factor(colnames(data_matrix), levels = unique(colnames(data_matrix)))
     names(sample_groups) <- colnames(data_matrix)
   } else {
@@ -971,15 +973,28 @@ romicsComplexHeatmap <- function(romics_object,
   if (length(group_levels) > 1) {
     if ("colors_romics" %in% rownames(romics_object$metadata)) {
       tryCatch({
-        metadata_cols <- intersect(colnames(data_matrix), colnames(romics_object$metadata))
-        sample_colors <- romics_object$metadata["colors_romics", metadata_cols, drop = TRUE]
+        # Get the original factor used for collapsing
+        original_factor <- if(was_collapsed) collapse_factor else factor_name
+        if(is.null(original_factor)) {
+          original_factor <- romics_object$main_factor
+        }
 
+        # Get mapping of original samples to factor levels
+        original_factor_values <- romicsExtractFactor(romics_object, factor = original_factor)
+
+        # Get all original sample colors
+        original_metadata_cols <- colnames(romics_object$metadata)
+        all_sample_colors <- romics_object$metadata["colors_romics", original_metadata_cols, drop = TRUE]
+
+        # For each group level (which is now a column in data_matrix after collapsing)
+        # find which original samples belong to it and get a representative color
         group_colors <- c()
         for (group in group_levels) {
-          group_samples <- names(sample_groups)[sample_groups == group]
-          group_samples_in_metadata <- intersect(group_samples, names(sample_colors))
+          # Find original samples in this group
+          group_samples <- names(original_factor_values)[original_factor_values == group]
+          group_samples_in_metadata <- intersect(group_samples, names(all_sample_colors))
           if (length(group_samples_in_metadata) > 0) {
-            group_color <- as.character(sample_colors[group_samples_in_metadata[1]])
+            group_color <- as.character(all_sample_colors[group_samples_in_metadata[1]])
             group_colors[group] <- group_color
           }
         }
@@ -987,7 +1002,7 @@ romicsComplexHeatmap <- function(romics_object,
         if (length(group_colors) == length(group_levels)) {
           message("Recreated column annotation with colors: ", paste(paste0(names(group_colors), " = ", group_colors), collapse = ", "))
         } else {
-          stop("Missing colors for some groups")
+          stop("Missing colors for some groups: ", paste(group_levels[!(group_levels %in% names(group_colors))], collapse = ", "))
         }
       }, error = function(e) {
         message("Error extracting colors from metadata: ", e$message)

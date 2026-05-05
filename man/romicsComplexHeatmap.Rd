@@ -14,9 +14,9 @@ romicsComplexHeatmap(
   scale_data = TRUE,
   cluster_rows = TRUE,
   cluster_cols = TRUE,
-  show_row_names = TRUE,
+  show_row_names = FALSE,
   show_column_names = TRUE,
-  heatmap_colors = c("blue", "white", "red"),
+  heatmap_colors = NULL,
   color_breaks = NULL,
   allow_missing = TRUE,
   missing_color = "grey",
@@ -47,7 +47,7 @@ romicsComplexHeatmap(
 
 \item{show_column_names}{TRUE or FALSE, if TRUE shows sample names on columns}
 
-\item{heatmap_colors}{Character vector of colors for the heatmap. Default: c("blue", "white", "red")}
+\item{heatmap_colors}{Character vector of colors for the heatmap. Default: viridis(100)}
 
 \item{color_breaks}{Numeric vector of breaks for color mapping. If NULL, uses automatic breaks}
 

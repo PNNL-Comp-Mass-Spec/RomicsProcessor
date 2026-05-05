@@ -858,17 +858,19 @@ multipleFeatureComparisonPlot <- function(romics_object, features, point_type = 
 #' @param feature_list A list of features contained in the Romics_object can be found using the function romicsFeatureNames()
 #' @param scale_feature has to be TRUE or FALSE to indicate if the calculated means have to be scaled by feature or not
 #' @param gradient_colors has to be a vector of lenght 3 containing three colors, they will be used for the low, med, and high values of the gradient respectively.
+#' @param cluster_features TRUE or FALSE to indicate if features should be hierarchically clustered and displayed with a dendrogram (default: TRUE)
 #' @details This function will generate a ggplot style figure.
 #' @return A ggplot styled figure
 #' @author Geremy Clair
 #' @export
-bubblePlotFeatures<-function(romics_object, factor="main", scale_feature=T, feature_list=c("a","b"), gradient_colors=c("#fff1ed","#fc896a","#69010e")){
+bubblePlotFeatures<-function(romics_object, factor="main", scale_feature=T, feature_list=c("a","b"), gradient_colors=c("#fff1ed","#fc896a","#69010e"), cluster_features=TRUE){
     arguments<-as.list(match.call())
 
     if(!is.romicsObject(romics_object) | missing(romics_object)) {stop("<romics_object> is missing or is not in the appropriate format.")}
     if(missing(factor)){factor="main"}
     if(!factor %in% c("main",romicsFactorNames(romics_object))){stop("The selected <factor> is not in the list of factors of the <romics_object>.")}
     if(!scale_feature %in% c(TRUE,FALSE)){stop("<scale_feature> has to be TRUE or FALSE")}
+    if(!cluster_features %in% c(TRUE,FALSE)){stop("<cluster_features> has to be TRUE or FALSE")}
     if(missing(feature_list)){feature_list<-rownames(romics_object$data)}
     if(factor !="main"){
     romics_object<-romicsChangeFactor(romics_object, main_factor = factor)
@@ -880,6 +882,8 @@ bubblePlotFeatures<-function(romics_object, factor="main", scale_feature=T, feat
     romics_object<-romicsPercentComplete(romics_object)
 
     df<-romics_object$statistics
+    # Preserve original feature_list order for later use when cluster_features=FALSE
+    original_feature_order <- feature_list
     feature_list<-feature_list[feature_list %in% rownames(df)]
     df<-df[rownames(df) %in% feature_list,]
     df$Feature<- rownames(df)
@@ -914,11 +918,17 @@ bubblePlotFeatures<-function(romics_object, factor="main", scale_feature=T, feat
 
     d_final<-as.data.frame(d_final)
 
-    #we will perform the hclust of the features
-    clust<- hclust(dist(mat))
-    dend<-ggtree::ggtree(clust,hang=-1,)
-    #We will order the genes by this clustering
-    d_final$Feature<-factor(d_final$Feature, levels=clust$labels[clust$order])
+    # Perform clustering if requested
+    if(cluster_features) {
+      clust<- hclust(dist(mat))
+      dend<-ggtree::ggtree(clust,hang=-1,)
+      # Order features by clustering
+      d_final$Feature<-factor(d_final$Feature, levels=clust$labels[clust$order])
+    } else {
+      # Order features by input order (filter to only features that exist in the data)
+      input_order <- original_feature_order[original_feature_order %in% unique(d_final$Feature)]
+      d_final$Feature<-factor(d_final$Feature, levels=input_order)
+    }
 
     p<-ggplot(d_final,aes(y=Feature,x=Group,size = Percentage_completeness,color=Mean))+
       geom_point()+
@@ -932,10 +942,12 @@ bubblePlotFeatures<-function(romics_object, factor="main", scale_feature=T, feat
         p<-p+scale_color_viridis_c(name = "mean abundance")}
     }
 
-
     p<-p+ theme(axis.line  = element_blank()) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
       ylab('') + theme(axis.ticks = element_blank()) +scale_y_discrete(position = "right")
 
-    p<-plot_grid(dend, p, nrow = 1, rel_widths = c(0.5,2), align = 'h')
+    # Add dendrogram only if clustering is enabled
+    if(cluster_features) {
+      p<-cowplot::plot_grid(dend, p, nrow = 1, rel_widths = c(0.5,2), align = 'h')
+    }
     p
   }

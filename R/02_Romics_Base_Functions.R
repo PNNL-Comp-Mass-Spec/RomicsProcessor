@@ -1,5 +1,6 @@
 #' createRomicsObject()
 #' @description Create a romics_object by combining a data and a metadata data frames
+#' @import ggplot2
 #' @param data A data frame corresponding to the data.
 #' @param metadata A data frame corresponding to the metadata, the columns must be the same as the data ones.
 #' @param IDs A data frame corresponding to the list of alternative IDs for the romics_object, this enables to use human readable ids for certain plots. The first column contains the same type of IDs as the imported data.

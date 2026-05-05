@@ -198,10 +198,10 @@ romicsPlotMissing<-function(romics_object,custom_colors= "colorlist"){
   Y_scale<- as.numeric(c(0,Y_scale))
   breaks<-function(x) unique(floor(pretty(seq(0, (max(as.numeric(percent_missing$Percent_missing)) + 1) * 1.1))))
   #plot the result
-  p<- ggplot(data=percent_missing,aes(x=Samples,y=Percent_missing))+
-    geom_bar(stat="identity",fill=color,alpha=.8)+
-    scale_y_continuous(name="Percent_missing", limits=c(0,round(max(percent_missing$Percent_missing),0)+5))+
-    ggtitle(paste("Missingness = ", overall_missing,"% of the values"))+
+  p<- ggplot2::ggplot(data=percent_missing,ggplot2::aes(x=Samples,y=Percent_missing))+
+    ggplot2::geom_bar(stat="identity",fill=color,alpha=.8)+
+    ggplot2::scale_y_continuous(name="Percent_missing", limits=c(0,round(max(percent_missing$Percent_missing),0)+5))+
+    ggplot2::ggtitle(paste("Missingness = ", overall_missing,"% of the values"))+
     theme_ROP()
   return(p)
   }
@@ -247,10 +247,10 @@ romicsPlotPresent<-function(romics_object, custom_colors="colorlist"){
   overall_present <- round(sum(percent_present$count) / (nrow(data_NA) * ncol(data_NA)) * 100, 2)
 
   # Plot the result
-  p <- ggplot(data = percent_present, aes(x = Samples, y = Percent_present)) +
-    geom_bar(stat = "identity", fill = color, alpha = 0.8) +
-    scale_y_continuous(name = "Percent_present", limits = c(0, round(max(percent_present$Percent_present), 0) + 5)) +
-    ggtitle(paste("Data Completeness = ", overall_present, "% of the values")) +
+  p <- ggplot2::ggplot(data = percent_present, ggplot2::aes(x = Samples, y = Percent_present)) +
+    ggplot2::geom_bar(stat = "identity", fill = color, alpha = 0.8) +
+    ggplot2::scale_y_continuous(name = "Percent_present", limits = c(0, round(max(percent_present$Percent_present), 0) + 5)) +
+    ggplot2::ggtitle(paste("Data Completeness = ", overall_present, "% of the values")) +
     theme_ROP()
 
   return(p)
@@ -415,12 +415,12 @@ imputeMissingEval <- function(romics_object, nb_stdev = 1.8, width_stdev = 0.5, 
   )
 
   # Create plot
-  p <- ggplot(combined_data, aes(x = combined, fill = data_type)) +
-    geom_histogram(position = "identity", alpha = 0.8, binwidth = bin) +
-    xlab("data distribution") +
+  p <- ggplot2::ggplot(combined_data, ggplot2::aes(x = combined, fill = data_type)) +
+    ggplot2::geom_histogram(position = "identity", alpha = 0.8, binwidth = bin) +
+    ggplot2::xlab("data distribution") +
     theme_ROP() +
-    scale_fill_manual(values = c("Data" = "gray", "Imputed values" = "goldenrod1")) +
-    theme(legend.position = "right")
+    ggplot2::scale_fill_manual(values = c("Data" = "gray", "Imputed values" = "goldenrod1")) +
+    ggplot2::theme(legend.position = "right")
 
   # Handle x-axis limits intelligently
   if (is.character(scale_x) && scale_x == "auto") {
@@ -432,11 +432,11 @@ imputeMissingEval <- function(romics_object, nb_stdev = 1.8, width_stdev = 0.5, 
     x_range <- x_max - x_min
     x_padding <- x_range * 0.05
 
-    p <- p + scale_x_continuous(limits = c(x_min - x_padding, x_max + x_padding))
+    p <- p + ggplot2::scale_x_continuous(limits = c(x_min - x_padding, x_max + x_padding))
 
   } else if (is.numeric(scale_x) && length(scale_x) == 2) {
     # Use custom limits
-    p <- p + scale_x_continuous(limits = scale_x)
+    p <- p + ggplot2::scale_x_continuous(limits = scale_x)
 
   } else if (!is.null(scale_x) && scale_x != "auto") {
     warning("scale_x should be 'auto' or a numeric vector of length 2. Using automatic limits.")
@@ -445,7 +445,7 @@ imputeMissingEval <- function(romics_object, nb_stdev = 1.8, width_stdev = 0.5, 
     x_max <- max(combined_data$combined, na.rm = TRUE)
     x_range <- x_max - x_min
     x_padding <- x_range * 0.05
-    p <- p + scale_x_continuous(limits = c(x_min - x_padding, x_max + x_padding))
+    p <- p + ggplot2::scale_x_continuous(limits = c(x_min - x_padding, x_max + x_padding))
   }
   # If scale_x is NULL, ggplot will use default automatic scaling
 

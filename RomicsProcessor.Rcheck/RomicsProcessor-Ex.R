@@ -1,0 +1,303 @@
+pkgname <- "RomicsProcessor"
+source(file.path(R.home("share"), "R", "examples-header.R"))
+options(warn = 1)
+library('RomicsProcessor')
+
+base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+cleanEx()
+nameEx("createRomicsObject")
+### * createRomicsObject
+
+flush(stderr()); flush(stdout())
+
+### Name: createRomicsObject
+### Title: createRomicsObject()
+### Aliases: createRomicsObject
+
+### ** Examples
+
+## Not run: 
+##D ROP_romics_object <-
+##D createRomicsObject(ROP_data, ROP_metadata, main_factor="growth_media")
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("distribFeature")
+### * distribFeature
+
+flush(stderr()); flush(stdout())
+
+### Name: distribFeature
+### Title: distribFeature()
+### Aliases: distribFeature
+
+### ** Examples
+
+## Not run: 
+##D # Basic feature distribution
+##D distribFeature(romics_obj, feature_name = "Gene1")
+##D 
+##D # With threshold line at value 5
+##D distribFeature(romics_obj, feature_name = "Gene1", threshold_value = 5)
+##D 
+##D # Custom styling with no quartiles
+##D distribFeature(romics_obj, feature_name = "Gene1",
+##D                show_quantiles = FALSE, fill_color = "blue",
+##D                threshold_value = 2.5, threshold_color = "green")
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("extractScils")
+### * extractScils
+
+flush(stderr()); flush(stdout())
+
+### Name: extractScils
+### Title: extractScils()
+### Aliases: extractScils
+
+### ** Examples
+
+## Not run: 
+##D # Basic usage with default parameters
+##D scils_data <- extractScils("path/to/your/file.slx")
+##D 
+##D # Custom parameters
+##D scils_data <- extractScils(
+##D   file = "path/to/your/file.slx",
+##D   scils_executable = "C:/Custom/Path/scilsMsServer.exe",
+##D   port = 8083,
+##D   feature_list = "My Custom Feature List",
+##D   normId = "TIC"
+##D )
+##D 
+##D # Access the components
+##D data <- scils_data$data
+##D metadata <- scils_data$metadata
+##D feature_ids <- scils_data$IDs
+## End(Not run)
+
+
+
+
+cleanEx()
+nameEx("extractScilsOLD")
+### * extractScilsOLD
+
+flush(stderr()); flush(stdout())
+
+### Name: extractScilsOLD
+### Title: extractScilsOLD()
+### Aliases: extractScilsOLD
+
+### ** Examples
+
+## Not run: 
+##D # Basic usage with default parameters
+##D scils_data <- extractScils("path/to/your/file.slx")
+##D 
+##D # Custom parameters
+##D scils_data <- extractScils(
+##D   file = "path/to/your/file.slx",
+##D   scils_executable = "C:/Custom/Path/scilsMsServer.exe",
+##D   port = 8083,
+##D   feature_list = "My Custom Feature List",
+##D   normId = "TIC"
+##D )
+##D 
+##D # Access the components
+##D data <- scils_data$data
+##D metadata <- scils_data$metadata
+##D feature_ids <- scils_data$IDs
+## End(Not run)
+
+
+
+
+cleanEx()
+nameEx("factorCountLevels")
+### * factorCountLevels
+
+flush(stderr()); flush(stdout())
+
+### Name: factorCountLevels
+### Title: factorCountLevels()
+### Aliases: factorCountLevels
+
+### ** Examples
+
+## Not run: 
+##D # Get counts as a named vector
+##D counts <- factorCountLevels(romics_object = my_romics, factor = "Treatment")
+##D 
+##D # Generate a plot
+##D factorCountLevels(romics_object = my_romics, factor = "Treatment", plot = TRUE)
+##D 
+##D # Customize the plot
+##D factorCountLevels(romics_object = my_romics, factor = "Sex",
+##D                   plot = TRUE, textsize = 4, fill_color = "gray50", order = TRUE)
+##D 
+##D # Access specific level count
+##D counts <- factorCountLevels(romics_object = my_romics, factor = "Sex")
+##D counts["Male"]
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("romicsAttributeUUID")
+### * romicsAttributeUUID
+
+flush(stderr()); flush(stdout())
+
+### Name: romicsAttributeUUID
+### Title: romicsAttributeUUID()
+### Aliases: romicsAttributeUUID
+
+### ** Examples
+
+## Not run: 
+##D # Add UUID to existing romics_object
+##D romics_object <- romicsAttributeUUID(romics_object)
+##D 
+##D # Force generation of new UUID
+##D romics_object <- romicsAttributeUUID(romics_object, force_new = TRUE)
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("romicsCreateROIsFromFactor")
+### * romicsCreateROIsFromFactor
+
+flush(stderr()); flush(stdout())
+
+### Name: romicsCreateROIsFromFactor
+### Title: romicsCreateROIsFromFactor()
+### Aliases: romicsCreateROIsFromFactor
+
+### ** Examples
+
+## Not run: 
+##D # Create ROIs from main factor
+##D roi_list <- romicsCreateROIsFromFactor(romics_obj)
+##D 
+##D # Create ROIs from specific factor with padding
+##D roi_list <- romicsCreateROIsFromFactor(romics_obj,
+##D                                        factor_name = "tissue_regions",
+##D                                        padding = 5)
+##D 
+##D # Create rectangular ROIs without overlap checking
+##D roi_list <- romicsCreateROIsFromFactor(romics_obj,
+##D                                        factor_name = "cell_types",
+##D                                        square_rois = FALSE,
+##D                                        check_overlap = FALSE)
+##D 
+##D # Use the generated ROIs to create a new factor
+##D romics_obj <- romicsCreateFactorFromROIs(romics_obj, list_ROI = roi_list)
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("romicsLeidenSamples_old")
+### * romicsLeidenSamples_old
+
+flush(stderr()); flush(stdout())
+
+### Name: romicsLeidenSamples_old
+### Title: romicsLeidenSamples()
+### Aliases: romicsLeidenSamples_old
+
+### ** Examples
+
+## Not run: 
+##D # Basic usage
+##D romics_obj <- romicsLeidenSamples(romics_obj)
+##D 
+##D # Target specific number of clusters
+##D romics_obj <- romicsLeidenSamples(romics_obj, target_clusters = 5)
+##D 
+##D # For large datasets, use PCA embeddings with reduced k
+##D romics_obj <- romicsLeidenSamples(romics_obj,
+##D                                   cluster_using = "pca",
+##D                                   k = 10,
+##D                                   target_clusters = 8)
+##D 
+##D # Custom factor name and resolution with CPM objective
+##D romics_obj <- romicsLeidenSamples(romics_obj,
+##D                                   cluster_using = "umap",
+##D                                   resolution = 1.5,
+##D                                   factor_name = "UMAP_Leiden",
+##D                                   objective_function = "CPM")
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("romicsRemoveFactor")
+### * romicsRemoveFactor
+
+flush(stderr()); flush(stdout())
+
+### Name: romicsRemoveFactor
+### Title: romicsRemoveFactor
+### Aliases: romicsRemoveFactor
+
+### ** Examples
+
+## Not run: 
+##D # Remove a single factor
+##D romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = "old_factor")
+##D 
+##D # Remove multiple factors
+##D romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = c("factor1", "factor2"))
+##D 
+##D # Remove main factor (use with caution!)
+##D romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = "condition", force = TRUE)
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("romicsValidFeatures")
+### * romicsValidFeatures
+
+flush(stderr()); flush(stdout())
+
+### Name: romicsValidFeatures
+### Title: romicsValidFeatures()
+### Aliases: romicsValidFeatures
+
+### ** Examples
+
+## Not run: 
+##D # Get a table of valid features per sample
+##D valid_table <- romicsValidFeatures(romics_object)
+##D 
+##D # Get a vector of valid features per sample
+##D valid_vector <- romicsValidFeatures(romics_object, return_type = "vector")
+##D 
+##D # Plot the valid features per sample
+##D romicsValidFeatures(romics_object, return_type = "plot")
+## End(Not run)
+
+
+
+### * <FOOTER>
+###
+cleanEx()
+options(digits = 7L)
+base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+grDevices::dev.off()
+###
+### Local variables: ***
+### mode: outline-minor ***
+### outline-regexp: "\\(> \\)?### [*]+" ***
+### End: ***
+quit('no')

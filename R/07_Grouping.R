@@ -449,9 +449,13 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
     }
 
     # Add common elements
+    # Use user-provided limits if available, otherwise use automatic scaling
+    x_limits <- if(is.null(xlim)) c(-pca_plot_scale, pca_plot_scale) else xlim
+    y_limits <- if(is.null(ylim)) c(-pca_plot_scale, pca_plot_scale) else ylim
+
     pca_indiv_plot <- pca_indiv_plot +
-      ggplot2::scale_y_continuous(limits = c(-pca_plot_scale, pca_plot_scale)) +
-      ggplot2::scale_x_continuous(limits = c(-pca_plot_scale, pca_plot_scale)) +
+      ggplot2::scale_y_continuous(limits = y_limits) +
+      ggplot2::scale_x_continuous(limits = x_limits) +
       ggplot2::xlab(x_label) +
       ggplot2::ylab(y_label) +
       ggplot2::ggtitle("Principal Component Analysis") +

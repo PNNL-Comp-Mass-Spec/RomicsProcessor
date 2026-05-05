@@ -1,0 +1,59 @@
+* installing *source* package ‘RomicsProcessor’ ...
+** this is package ‘RomicsProcessor’ version ‘1.11.0’
+** using staged installation
+** R
+** data
+*** moving datasets to lazyload DB
+** byte-compile and prepare package for lazy loading
+** help
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:44: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:46: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:48: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:50: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:52: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:54: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:56: unexpected section header '\value'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:60: unexpected section header '\description'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:63: unexpected section header '\details'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:81: unexpected section header '\author'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/heatmapFeatures.Rd:84: unexpected END_OF_INPUT '
+'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:34: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:36: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:38: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:40: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:42: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:44: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:46: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:48: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:50: unexpected section header '\value'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:53: unexpected section header '\description'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:56: unexpected section header '\author'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorFromFeature.Rd:59: unexpected END_OF_INPUT '
+'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:37: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:39: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:41: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:43: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:45: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:47: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:49: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:51: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:53: unexpected section header '\value'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:56: unexpected section header '\description'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:59: unexpected section header '\details'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:62: unexpected section header '\author'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsFactorStackedBarplot.Rd:65: unexpected END_OF_INPUT '
+'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsValidFeaturesPercent.Rd:21: unknown macro '\item'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsValidFeaturesPercent.Rd:23: unexpected section header '\description'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsValidFeaturesPercent.Rd:26: unexpected section header '\details'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsValidFeaturesPercent.Rd:29: unexpected section header '\author'
+Warning: /Users/clai036/Library/CloudStorage/OneDrive-PNNL/Documents/GitHub/RomicsProcessor/man/romicsValidFeaturesPercent.Rd:32: unexpected END_OF_INPUT '
+'
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (RomicsProcessor)

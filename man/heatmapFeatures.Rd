@@ -15,7 +15,7 @@ heatmapFeatures(
   viridis_option = "viridis",
   show_completeness = TRUE,
   show_dendrogram = TRUE,
-  show_feature_names = TRUE,
+  show_feature_names = FALSE,
   show_clusters = FALSE,
   show_cluster_legend = FALSE,
   n_clusters = NULL,

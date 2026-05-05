@@ -477,104 +477,6 @@ romicsWilcoxTest<-function(romics_object, alternative="two.sided", paired = FALS
 
 }
 
-#' romicsGlmBinomial()
-#' @description uses the function glm() to perform a glm binomial test to identify if the missingness of the values in the different groups is at random or not (performs all the paired tests between the groups of the selected factor). Results are recorded in the statistics layer of the outputted romics_object.
-#' @param romics_object has to be an romics_object created with the function romicsCreateObject(),
-#' @param factor a character string indicating the factor to use for the test, the list of the available factor can be obtained by using the function romics_factors(), if missing the function will use the main factor of the object
-#' @param padj a logical variable indincating wheter to perform or not adjustment of pvalues
-#' @param padj_method correction method. Must be in  {"holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr","none"}
-#' @param reverse_order a boolean to indicate if the order of the factors needs to be reversed (this will make the calculated fold changes values A/B become B/A or log2(A/B) become log2(B/A))
-#' @details This function performs a generalized linear model with binomial family to test whether missingness patterns differ significantly between groups. It tests all pairwise combinations of factor levels. Results include p-values, adjusted p-values, and directionality indicators.
-#' @return an romics_object with the statistical layer containing the newly generated glm binomial test results
-#' @author Geremy Clair
-#' @export
-#'
-romicsGlmBinomial<-function(romics_object, factor = "main", padj=TRUE, padj_method="BH",reverse_order=FALSE){
-  arguments<-as.list(match.call())
-  if(!is.romicsObject(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
-  if(missing(factor)){factor="main"}
-  if(!factor %in% c("main",romicsFactorNames(romics_object))){
-    warning("The selected factor is not in the list of factors of the romics_object")
-    warning(romicsFactorNames(romics_object))
-  }
-  if(missing(reverse_order)){reverse_order<-FALSE}
-  if(missing(padj)){padj<-TRUE}
-  if(missing(padj_method)){padj_method<-"BH"}
-  if(!padj_method %in% c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY","fdr", "none")){stop("padj_method has to be in the following list: holm, hochberg, hommel, bonferroni, BH, BY,fdr, none")}
-
-  #load missingdata
-  data<-romics_object$missingdata
-
-  #check if the $statistic object already is a part of the Romics_object (if not create it)
-  if(is.null(romics_object$statistics)){
-    print("The Statistics layer was added to your object")
-    romics_object$statistics<-data.frame(matrix(nrow=nrow(data),ncol=0))
-    rownames(romics_object$statistics)<-rownames(data)
-  }
-
-  #if the statistics object does not have the same number of rows as the data replace it by a null statistics object
-  if(!is.null(romics_object$statistics)&&nrow(romics_object$statistics)!=nrow(data)){
-    warning("The Statistics layer was not containing the same number of rows as your data, it was replaced by an empty statistics layer")
-    romics_object$statistics<-data.frame(matrix(nrow=nrow(data),ncol=0))
-    rownames(romics_object$statistics)<-rownames(data)
-  }
-
-  #if factor is main extract the factor from the romics_object$main_factor
-  if(factor=="main"){factor<-romics_object$main_factor}
-  #extract the factor from the metadata
-  factor<-as.factor(as.character(t(romics_object$metadata[romicsFactorNames(romics_object)==factor,])))
-  factor<-as.factor(t(factor))
-
-  #extract the levels to be considered
-  levels_factor<-levels(factor)
-
-  #create t_results and direction
-  t_result <- vector(mode="numeric",length=nrow(data))
-  direction <- vector(mode="numeric",length=nrow(data))
-  t_padj<- vector(mode="numeric",length=nrow(data))
-
-  #Create a t_table
-  t_table<- data.frame(matrix(nrow=nrow(data),ncol=0))
-
-  #determine the list of combinations to consider
-  by2combinations<- data.frame(t(combn(levels_factor,2)))
-  if(reverse_order==TRUE){by2combinations<-by2combinations[,2:1]}
-
-    #loop calculating pval, directionality
-    for(i in 1:nrow(by2combinations)){
-      for(j in 1:nrow(data)){
-        g2<-data.frame(pop="f1",missing=as.numeric(data[j,factor==by2combinations[i,2]]))
-        g1<-data.frame(pop="f2",missing=as.numeric(data[j,factor==by2combinations[i,1]]))
-        g<-rbind(g1,g2)
-        t<-anova(glm(missing~pop,family = "binomial",data = g),test = "Chisq")
-        t_result[j] <- t$`Pr(>Chi)`[2]
-        if(sum(data[j,factor==by2combinations[i,2]])/length(data[j,factor==by2combinations[i,2]])>sum(data[j,factor==by2combinations[i,1]])/length(data[j,factor==by2combinations[i,1]])){
-          direction[j] <- -1 }else{direction[j] <- 1 }
-      }
-      #add glmBionmial.test p to t_table
-      t_table[,paste(by2combinations[i,2],"_vs_",by2combinations[i,1],"_glmBionomialTest_p",sep="")]<- t_result
-
-      ##add the adjusted p if padj=TRUE
-      if(padj==TRUE){
-        t_padj<-p.adjust(t_result, method=padj_method)
-        t_table[,paste(by2combinations[i,2],"_vs_",by2combinations[i,1],"_glmBionomialTest_padj",sep="")]<- t_padj
-      }
-      ##add the directional
-      t_table[,paste(by2combinations[i,2],"_vs_",by2combinations[i,1],"_directionality",sep="")]<- direction
-    }
-
-  romics_object$statistics <- cbind(romics_object$statistics,t_table)
-
-  #print info
-  print("glmBionomialTest columns were added to the statistics")
-
-  #update steps
-  romics_object<-romicsUpdateSteps(romics_object,arguments)
-
-  #return romics_object
-  return(romics_object)
-
-}
 
 #' romicsMean()
 #' @description Calculates the means of each variable within each level of the selected factor and add the generated columns in the statistics layer of the romics_object.
@@ -981,26 +883,26 @@ romicsGlmBinomial <- function(romics_object,
 
     # Calculate the stats for each factor combination
     for (i in 1:nrow(by2combinations)) {
-      # Extract data for first group
-      if (as.character(by2combinations[i, 1]) != "other") {
-        df1 <- as.data.frame(subset_data[, as.character(subset_factor) == as.character(by2combinations[i, 1])])
-        f1 <- as.character(subset_factor)[subset_factor == as.character(by2combinations[i, 1])]
+      # Extract data for first group (now by2combinations[i,2] since we renamed to i,2 vs i,1)
+      if (as.character(by2combinations[i, 2]) != "other") {
+        df1 <- as.data.frame(subset_data[, as.character(subset_factor) == as.character(by2combinations[i, 2])])
+        f1 <- as.character(subset_factor)[subset_factor == as.character(by2combinations[i, 2])]
       } else {
-        df1 <- subset_data[, as.character(subset_factor) != as.character(by2combinations[i, 2])]
+        df1 <- subset_data[, as.character(subset_factor) != as.character(by2combinations[i, 1])]
         f1 <- rep("other", ncol(df1))
       }
 
-      # Extract data for second group
-      if (as.character(by2combinations[i, 2]) != "other") {
-        df2 <- as.data.frame(subset_data[, as.character(subset_factor) == as.character(by2combinations[i, 2])])
-        f2 <- as.character(subset_factor)[subset_factor == as.character(by2combinations[i, 2])]
+      # Extract data for second group (now by2combinations[i,1])
+      if (as.character(by2combinations[i, 1]) != "other") {
+        df2 <- as.data.frame(subset_data[, as.character(subset_factor) == as.character(by2combinations[i, 1])])
+        f2 <- as.character(subset_factor)[subset_factor == as.character(by2combinations[i, 1])]
       } else {
-        df2 <- subset_data[, as.character(subset_factor) != as.character(by2combinations[i, 1])]
+        df2 <- subset_data[, as.character(subset_factor) != as.character(by2combinations[i, 2])]
         f2 <- rep("other", ncol(df2))
       }
 
       # Calculate directionality
-      # 1 = more present in group 2, -1 = more present in group 1, 0 = equal
+      # 1 = more present in second group (i,1), -1 = more present in first group (i,2), 0 = equal
       dir <- rep(0, nrow(subset_data))
       dir[rowSums(df2) / ncol(df2) > rowSums(df1) / ncol(df1)] <- 1
       dir[rowSums(df1) / ncol(df1) > rowSums(df2) / ncol(df2)] <- -1
@@ -1009,17 +911,17 @@ romicsGlmBinomial <- function(romics_object,
       if (ncol(df1) < 2 || ncol(df2) < 2) {
         p <- rep(NA, nrow(subset_data))
         if (ncol(df1) < 2) {
-          message(paste0("The level <", as.character(by2combinations[i, 1]),
-                         "> has less than 2 samples in cluster ", cluster_level,
-                         ", the GLM Binomial test will not be calculated for the comparison: ",
-                         as.character(by2combinations[i, 1]), "_vs_",
-                         as.character(by2combinations[i, 2])))
-        } else {
           message(paste0("The level <", as.character(by2combinations[i, 2]),
                          "> has less than 2 samples in cluster ", cluster_level,
                          ", the GLM Binomial test will not be calculated for the comparison: ",
-                         as.character(by2combinations[i, 1]), "_vs_",
-                         as.character(by2combinations[i, 2])))
+                         as.character(by2combinations[i, 2]), "_vs_",
+                         as.character(by2combinations[i, 1])))
+        } else {
+          message(paste0("The level <", as.character(by2combinations[i, 1]),
+                         "> has less than 2 samples in cluster ", cluster_level,
+                         ", the GLM Binomial test will not be calculated for the comparison: ",
+                         as.character(by2combinations[i, 2]), "_vs_",
+                         as.character(by2combinations[i, 1])))
         }
       } else {
         # Combine data and factor
@@ -1037,18 +939,18 @@ romicsGlmBinomial <- function(romics_object,
         r <- data.frame(p = p, dir = dir)
       }
 
-      # Create column names with cluster suffix - consistent with t-test and wilcox
+      # Create column names with cluster suffix - match t-test order (i,2 vs i,1)
       colnames(r)[colnames(r) == "p"] <- paste0(
-        as.character(by2combinations[i, 1]), "_vs_",
-        as.character(by2combinations[i, 2]), cluster_suffix, "_glmBinomialTest_p"
+        as.character(by2combinations[i, 2]), "_vs_",
+        as.character(by2combinations[i, 1]), cluster_suffix, "_glmBinomialTest_p"
       )
       colnames(r)[colnames(r) == "adj"] <- paste0(
-        as.character(by2combinations[i, 1]), "_vs_",
-        as.character(by2combinations[i, 2]), cluster_suffix, "_glmBinomialTest_padj"
+        as.character(by2combinations[i, 2]), "_vs_",
+        as.character(by2combinations[i, 1]), cluster_suffix, "_glmBinomialTest_padj"
       )
       colnames(r)[colnames(r) == "dir"] <- paste0(
-        as.character(by2combinations[i, 1]), "_vs_",
-        as.character(by2combinations[i, 2]), cluster_suffix, "_directionality"
+        as.character(by2combinations[i, 2]), "_vs_",
+        as.character(by2combinations[i, 1]), cluster_suffix, "_directionality"
       )
 
       cluster_results <- cbind(cluster_results, r)
@@ -1979,6 +1881,187 @@ romicsExtractSignificantFeatures <- function(romics_object,
   return(significant_features)
 }
 
+#' featureSignificanceToTests()
+#' @description Evaluate which statistical tests find a specific feature significant
+#' @param romics_object A romics_object with calculated statistics
+#' @param feature Character string of feature name (must match a rowname in romics_object$data)
+#' @param ptype Character string indicating which p-value type to use: "padj" for adjusted p-values or "p" for raw p-values. Default: "padj"
+#' @param p_threshold Numeric value for significance threshold. Default: 0.05
+#' @param test_types Character vector of test types to consider (e.g., c("Ttest", "Wilcox_test", "glmBinomialTest")). If NULL, considers all tests. Default: NULL
+#' @param specific_comparisons Character vector of specific comparisons to consider (e.g., "Alport_vs_Ctrl"). If NULL, considers all comparisons. Default: NULL
+#' @details Returns a data frame with one row per test, showing whether the feature is significant.
+#'          Directionality (up/down) is included for pairwise comparison tests (t-test, Wilcox, GLM binomial)
+#'          but not for multi-group tests (ANOVA). Direction is NA for non-significant results.
+#' @return Data frame with columns: test_name (character), significant (logical), direction (character: "up"/"down"/NA)
+#' @examples
+#' \dontrun{
+#'   # Get significance across all tests for a specific feature
+#'   results <- featureSignificanceToTests(romics_proteins, feature = "ProteinA")
+#'
+#'   # Get significance for t-tests only
+#'   results <- featureSignificanceToTests(romics_proteins, feature = "ProteinA", test_types = "Ttest")
+#'
+#'   # Use raw p-values instead of adjusted
+#'   results <- featureSignificanceToTests(romics_proteins, feature = "ProteinA", ptype = "p")
+#' }
+#' @author Geremy Clair
+#' @export
+featureSignificanceToTests <- function(
+  romics_object,
+  feature,
+  ptype = c("padj", "p"),
+  p_threshold = 0.05,
+  test_types = NULL,
+  specific_comparisons = NULL
+) {
+
+  # Validate romics_object
+  if (!is.romicsObject(romics_object)) {
+    stop("Input must be a valid romics_object")
+  }
+
+  # Match ptype argument
+  ptype <- match.arg(ptype)
+
+  # Check feature exists
+  if (!feature %in% rownames(romics_object$data)) {
+    stop("Feature '", feature, "' not found in romics_object. Available features: ",
+         paste(head(rownames(romics_object$data), 5), collapse = ", "), "...")
+  }
+
+  # Validate p_threshold
+  if (!is.numeric(p_threshold) || p_threshold < 0 || p_threshold > 1) {
+    stop("p_threshold must be a numeric value between 0 and 1")
+  }
+
+  # Check if statistics layer exists
+  if (is.null(romics_object$statistics) || nrow(romics_object$statistics) == 0) {
+    message("No statistical tests have been run on this romics_object")
+    return(data.frame(test_name = character(), significant = logical(), direction = character(),
+                      stringsAsFactors = FALSE))
+  }
+
+  stat_columns <- colnames(romics_object$statistics)
+
+  # Identify target p-value columns
+  if (ptype == "padj") {
+    target_columns <- grep("_padj$", stat_columns, value = TRUE)
+    if (length(target_columns) == 0) {
+      warning("No adjusted p-values found. Using raw p-values instead.")
+      target_columns <- grep("_p$", stat_columns, value = TRUE)
+    }
+  } else {
+    target_columns <- grep("_p$", stat_columns, value = TRUE)
+  }
+
+  if (length(target_columns) == 0) {
+    message("No p-value columns found in statistics layer")
+    return(data.frame(test_name = character(), significant = logical(), direction = character(),
+                      stringsAsFactors = FALSE))
+  }
+
+  # Filter by test_types if specified
+  if (!is.null(test_types)) {
+    test_patterns <- paste0("_(", paste(test_types, collapse = "|"), ")_")
+    target_columns <- target_columns[grepl(test_patterns, target_columns)]
+  }
+
+  # Filter by specific_comparisons if specified
+  if (!is.null(specific_comparisons)) {
+    target_columns <- target_columns[grepl(paste(specific_comparisons, collapse = "|"), target_columns)]
+  }
+
+  if (length(target_columns) == 0) {
+    message("No tests match the specified filters")
+    return(data.frame(test_name = character(), significant = logical(), direction = character(),
+                      stringsAsFactors = FALSE))
+  }
+
+  # Extract p-values for the feature as a named vector
+  feature_pvals <- as.numeric(romics_object$statistics[feature, target_columns])
+  names(feature_pvals) <- target_columns
+
+  # Initialize result data frame
+  results <- data.frame(
+    test_name = character(),
+    significant = logical(),
+    direction = character(),
+    stringsAsFactors = FALSE
+  )
+
+  # Process each test column
+  for (col in target_columns) {
+    pval <- feature_pvals[col]
+
+    # Determine test type
+    test_type <- if (grepl("_Ttest_", col)) {
+      "Ttest"
+    } else if (grepl("_Wilcox_test_", col)) {
+      "Wilcox_test"
+    } else if (grepl("_glmBinomialTest_", col)) {
+      "glmBinomialTest"
+    } else if (grepl("_ANOVA_", col)) {
+      "ANOVA"
+    } else {
+      "Other"
+    }
+
+    # Extract comparison name (remove test type and p/padj suffix)
+    comparison_name <- col
+    if (ptype == "padj") {
+      comparison_name <- sub("_padj$", "", comparison_name)
+    } else {
+      comparison_name <- sub("_p$", "", comparison_name)
+    }
+
+    # Determine if significant
+    is_significant <- !is.na(pval) && pval < p_threshold
+
+    # Determine direction (only for pairwise comparison tests and if significant)
+    direction <- NA_character_
+    if (is_significant && test_type %in% c("Ttest", "Wilcox_test")) {
+      # Extract comparison to find fold-change column
+      comparison_base <- sub(paste0("_", test_type, "$"), "", comparison_name)
+
+      # Look for fold-change column in format: log(A/B) or just numeric ratio
+      fc_cols <- grep(paste0("log\\(.*", gsub("_vs_", "/", comparison_base), "\\)"), stat_columns, value = TRUE)
+
+      if (length(fc_cols) > 0) {
+        fc_val <- romics_object$statistics[feature, fc_cols[1]]
+        if (!is.na(fc_val)) {
+          direction <- if (fc_val > 0) "up" else if (fc_val < 0) "down" else NA_character_
+        }
+      }
+    } else if (is_significant && test_type == "glmBinomialTest") {
+      # Extract directionality from {comparison}_directionality column
+      comparison_base <- sub("_glmBinomialTest", "", comparison_name)
+      dir_col <- paste0(comparison_base, "_directionality")
+
+      if (dir_col %in% stat_columns) {
+        dir_val <- romics_object$statistics[feature, dir_col]
+        if (!is.na(dir_val)) {
+          direction <- if (dir_val > 0) "up" else if (dir_val < 0) "down" else NA_character_
+        }
+      }
+    }
+    # For ANOVA and other multi-group tests, direction remains NA
+
+    # Add row to results
+    results <- rbind(results, data.frame(
+      test_name = comparison_name,
+      significant = is_significant,
+      direction = direction,
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  # Sort by test_name for readability
+  results <- results[order(results$test_name), ]
+  rownames(results) <- NULL
+
+  return(results)
+}
+
 #' romicsPlotSignificantFeatures()
 #' @description Create a barplot showing the number of significant features for each statistical test
 #' @param romics_object A romics_object with calculated statistics
@@ -2200,4 +2283,102 @@ romicsPlotSignificantFeatures <- function(romics_object,
   message(paste("  Tests included:", paste(gsub("_padj$|_p$", "", gsub("_", " ", p_columns)), collapse = ", ")))
 
   return(p)
+}
+
+#' romicsTransferStatistics()
+#' @description Transfers statistics columns from a source romics_object to a target romics_object, matching features by row name
+#' @param source_romics_object A romics_object containing the statistics to transfer
+#' @param target_romics_object A romics_object that will receive the statistics
+#' @param statistics Character vector specifying which statistics columns to transfer (default: NULL, transfers all)
+#' If NULL, all statistics columns from source will be transferred
+#' @details This function matches features between source and target romics_objects by their row names.
+#' Statistics columns are transferred for matching features. Features present in target but not in source will have NA values.
+#' If target_romics_object does not have a statistics layer, one will be created.
+#' @return Returns the target_romics_object with transferred statistics added/updated
+#' @author Geremy Clair
+#' @export
+#' @examples
+#' # Transfer all statistics from source to target
+#' target_obj <- romicsTransferStatistics(
+#'   source_romics_object = clustered_obj,
+#'   target_romics_object = original_obj
+#' )
+#'
+#' # Transfer specific statistics columns
+#' target_obj <- romicsTransferStatistics(
+#'   source_romics_object = clustered_obj,
+#'   target_romics_object = original_obj,
+#'   statistics = c("Cmeans_cluster", "Cmeans_membership_C1")
+#' )
+romicsTransferStatistics <- function(source_romics_object,
+                                   target_romics_object,
+                                   statistics = NULL) {
+  arguments <- as.list(match.call())
+
+  # Input validation
+  if(!is.romicsObject(source_romics_object) || missing(source_romics_object)) {
+    stop("source_romics_object is missing or is not in the appropriate format")
+  }
+
+  if(!is.romicsObject(target_romics_object) || missing(target_romics_object)) {
+    stop("target_romics_object is missing or is not in the appropriate format")
+  }
+
+  if(is.null(source_romics_object$statistics)) {
+    stop("source_romics_object does not have a statistics layer")
+  }
+
+  message("Transferring statistics from source to target romics_object...")
+  message("  Source features: ", nrow(source_romics_object$data))
+  message("  Target features: ", nrow(target_romics_object$data))
+
+  # Determine which statistics to transfer
+  if(is.null(statistics)) {
+    stats_to_transfer <- colnames(source_romics_object$statistics)
+    message("  Transferring all statistics (", length(stats_to_transfer), " columns)")
+  } else {
+    if(!is.character(statistics)) {
+      stop("statistics must be NULL or a character vector")
+    }
+    missing_stats <- setdiff(statistics, colnames(source_romics_object$statistics))
+    if(length(missing_stats) > 0) {
+      stop("The following statistics columns were not found in source_romics_object: ",
+           paste(missing_stats, collapse = ", "))
+    }
+    stats_to_transfer <- statistics
+    message("  Transferring ", length(stats_to_transfer), " statistics columns")
+  }
+
+  # Initialize statistics layer in target if needed
+  if(is.null(target_romics_object$statistics)) {
+    target_romics_object$statistics <- data.frame(matrix(nrow = nrow(target_romics_object$data), ncol = 0))
+    rownames(target_romics_object$statistics) <- rownames(target_romics_object$data)
+  }
+
+  # Get feature names
+  source_features <- rownames(source_romics_object$statistics)
+  target_features <- rownames(target_romics_object$data)
+
+  # Transfer statistics
+  for(stat_col in stats_to_transfer) {
+    target_romics_object$statistics[[stat_col]] <- NA
+
+    # Match features and transfer values
+    for(feat in target_features) {
+      source_idx <- which(source_features == feat)
+      if(length(source_idx) == 1) {
+        target_romics_object$statistics[feat, stat_col] <- source_romics_object$statistics[source_idx, stat_col]
+      }
+    }
+
+    # Count matches
+    n_matched <- sum(!is.na(target_romics_object$statistics[[stat_col]]))
+    message("  Transferred '", stat_col, "': ", n_matched, " of ", length(target_features), " features matched")
+  }
+
+  # Update processing steps
+  target_romics_object <- romicsUpdateSteps(target_romics_object, arguments)
+
+  message("Statistics transfer complete!")
+  return(target_romics_object)
 }
