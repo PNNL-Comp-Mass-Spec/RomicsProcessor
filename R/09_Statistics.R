@@ -1970,9 +1970,13 @@ featureSignificanceToTests <- function(
     if (length(target_columns) == 0) {
       warning("No adjusted p-values found. Using raw p-values instead.")
       target_columns <- grep("_p$", stat_columns, value = TRUE)
+      # Exclude _padj columns if they exist (they end in 'j' not 'p')
+      target_columns <- grep("_padj$", target_columns, value = TRUE, invert = TRUE)
     }
   } else {
     target_columns <- grep("_p$", stat_columns, value = TRUE)
+    # Exclude _padj columns
+    target_columns <- grep("_padj$", target_columns, value = TRUE, invert = TRUE)
   }
 
   if (length(target_columns) == 0) {
