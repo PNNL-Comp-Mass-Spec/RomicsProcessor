@@ -2070,13 +2070,15 @@ featureSignificanceToTests <- function(
       }
     } else if (is_significant && test_type == "glmBinomialTest") {
       # Extract directionality from {comparison}_directionality column
+      # Note: 1 = more in others (down), -1 = more in level (up), so signs are reversed
       comparison_base <- sub("_glmBinomialTest", "", comparison_name)
       dir_col <- paste0(comparison_base, "_directionality")
 
       if (dir_col %in% stat_columns) {
         dir_val <- romics_object$statistics[feature, dir_col]
         if (!is.na(dir_val)) {
-          direction <- if (dir_val > 0) "up" else if (dir_val < 0) "down" else NA_character_
+          # Reverse the interpretation: -1 (more in level) = "up", 1 (more in others) = "down"
+          direction <- if (dir_val < 0) "up" else if (dir_val > 0) "down" else NA_character_
         }
       }
     }
