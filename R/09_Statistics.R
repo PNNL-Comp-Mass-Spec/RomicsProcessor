@@ -953,17 +953,24 @@ romicsGlmBinomial <- function(romics_object,
         r <- data.frame(p = p, dir = dir)
       }
 
-      # Create column names with cluster suffix - match t-test order (i,2 vs i,1)
+      # Create column names with cluster suffix
+      # In enrichment mode, use the non-"other" level (level being tested)
+      if (mode == "enrichment" && as.character(by2combinations[i, 2]) == "other") {
+        level_name <- as.character(by2combinations[i, 1])
+      } else {
+        level_name <- as.character(by2combinations[i, 2])
+      }
+
       colnames(r)[colnames(r) == "p"] <- paste0(
-        as.character(by2combinations[i, 2]), "_vs_others",
+        level_name, "_vs_others",
         cluster_suffix, "_glmBinomialTest_p"
       )
       colnames(r)[colnames(r) == "adj"] <- paste0(
-        as.character(by2combinations[i, 2]), "_vs_others",
+        level_name, "_vs_others",
         cluster_suffix, "_glmBinomialTest_padj"
       )
       colnames(r)[colnames(r) == "dir"] <- paste0(
-        as.character(by2combinations[i, 2]), "_vs_others",
+        level_name, "_vs_others",
         cluster_suffix, "_directionality"
       )
 
