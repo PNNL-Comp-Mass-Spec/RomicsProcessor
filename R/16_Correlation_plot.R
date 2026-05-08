@@ -299,7 +299,7 @@ SampleCorrelationHclustPlot<-function(romics_object,corr_type="pearson",use="eve
 #' @param cluster_colors has to be a character vector containing the list of colors used for the clusters.
 #' @param heatmap_col has to be a color gradient (e.g.viridis(20), greenred(50))
 #' @param cellnote has to be TRUE or FALSE to indicate if the correlation numbers should be displayed onto the heatmap.
-#' @return This function will return a an heatmap generated with heatmap.2().
+#' @return This function will return a an heatmap generated with gplots::heatmap.2().
 #' @author Geremy Clair
 #' @export
 FeatureCorrelationHeatmap<-function(romics_object,corr_type="pearson",use="everything",number_of_clusters=0,cex=1,cluster_colors= c("c1","c2","c3","c4"), heatmap_col=viridis(20),dist_method="euclidean",hclust_method="ward.D",cellnote=F){
@@ -352,8 +352,8 @@ FeatureCorrelationHeatmap<-function(romics_object,corr_type="pearson",use="every
     dend<-color_labels(dend, k=number_of_clusters,col=ROP_colors[1:number_of_clusters])
   }
 
-  if(cellnote==T){heatmap.2(cor,Rowv = dend,Colv = dend,trace="none",cellnote = round(cor,2),notecol="gray50",col =heatmap_col)}else{
-    heatmap.2(cor,Rowv = dend,Colv = dend,col =heatmap_col,trace="none")
+  if(cellnote==T){gplots::heatmap.2(cor,Rowv = dend,Colv = dend,trace="none",cellnote = round(cor,2),notecol="gray50",col =heatmap_col)}else{
+    gplots::heatmap.2(cor,Rowv = dend,Colv = dend,col =heatmap_col,trace="none")
   }
 }
 
@@ -369,7 +369,7 @@ FeatureCorrelationHeatmap<-function(romics_object,corr_type="pearson",use="every
 #' @param cluster_colors has to be a character vector containing the list of colors used for the clusters.
 #' @param heatmap_col has to be a color gradient (e.g.viridis(20), greenred(50))
 #' @param cellnote has to be TRUE or FALSE to indicate if the correlation numbers should be displayed onto the heatmap.
-#' @return This function will return a an heatmap generated with heatmap.2().
+#' @return This function will return a an heatmap generated with gplots::heatmap.2().
 #' @author Geremy Clair
 #' @export
 SampleCorrelationHeatmap<-function(romics_object,corr_type="pearson",use="everything",number_of_clusters=0,cex=1,cluster_colors= c("c1","c2","c3","c4"), heatmap_col=viridis(20),dist_method="euclidean",hclust_method="ward.D",cellnote=F){
@@ -422,7 +422,7 @@ SampleCorrelationHeatmap<-function(romics_object,corr_type="pearson",use="everyt
     dend<-color_labels(dend, k=number_of_clusters,col=ROP_colors[1:number_of_clusters])
   }
 
-  if(cellnote==T){heatmap.2(cor,Rowv = dend,Colv = dend,trace="none",cellnote = round(cor,2),notecol="gray50",col =heatmap_col)}else{
-    heatmap.2(cor,Rowv = dend,Colv = dend,col =heatmap_col,trace="none")
+  if(cellnote==T){gplots::heatmap.2(cor,Rowv = dend,Colv = dend,trace="none",cellnote = round(cor,2),notecol="gray50",col =heatmap_col)}else{
+    gplots::heatmap.2(cor,Rowv = dend,Colv = dend,col =heatmap_col,trace="none")
   }
 }
