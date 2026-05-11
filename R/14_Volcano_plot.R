@@ -882,8 +882,8 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
 #' @param ylim Numeric vector of length 2 for y-axis limits. Default: NULL (auto)
 #' @param size Numeric. Point size. Default: 2
 #' @param alpha Numeric. Point transparency (0-1). Default: 0.5
-#' @param label_features Logical. Whether to label top background features. Default: FALSE
-#' @param label_pathway_features Logical. Whether to label all features in pathways. Default: FALSE
+#' @param label_features Logical. Whether to label pathway features with colors matching their pathway. Default: FALSE
+#' @param label_pathway_features Logical. Alias for label_features (both enable pathway feature labeling). Default: FALSE
 #' @param plotly Logical. Whether to return an interactive plotly plot (TRUE) or static ggplot (FALSE). Default: FALSE
 #' @details Creates a volcano plot where features are colored by membership in user-defined pathways. All pathways are plotted on the same axes with p-value and fold-change threshold lines shown as gray dotted lines.
 #' @return A ggplot2 object (if plotly=FALSE) or a plotly object (if plotly=TRUE)
@@ -1042,25 +1042,13 @@ romicsPathwayVolcano <- function(romics_object,
   }
 
   # Add feature labels if requested
-  if (label_pathway_features) {
-    # Label ALL pathway features (regardless of significance)
+  if (label_features || label_pathway_features) {
+    # Label pathway features colored by pathway
     pathway_features <- df[df$pathway != "Background", ]
     if (nrow(pathway_features) > 0) {
       p <- p + ggrepel::geom_text_repel(
         data = pathway_features,
-        ggplot2::aes(label = ID),
-        size = 3,
-        show.legend = FALSE,
-        color = "black"
-      )
-    }
-  } else if (label_features) {
-    # Label only significant background features
-    sig_background <- df[df$pathway == "Background" & df$p > -log10(p_threshold) & abs(df$fc) > min_fold_change, ]
-    if (nrow(sig_background) > 0) {
-      p <- p + ggrepel::geom_text_repel(
-        data = sig_background,
-        ggplot2::aes(label = ID),
+        ggplot2::aes(label = ID, color = pathway),
         size = 3,
         show.legend = FALSE
       )
