@@ -194,6 +194,10 @@ resetRomicsObject <- function(romics_object, main_factor = NULL) {
     }
   }
 
+  # Normalize column names: convert + to . to match what as.data.frame(lapply(...as.double)) does
+  # This is needed because createRomicsObject converts column names during numeric conversion
+  colnames(metadata_with_id) <- gsub("\\+", "\\.", colnames(metadata_with_id))
+
   # Recreate the object using createRomicsObject
   if(is.data.frame(IDs_to_use)) {
     reset_object <- createRomicsObject(
