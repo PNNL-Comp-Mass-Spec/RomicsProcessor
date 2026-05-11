@@ -865,3 +865,212 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
     }
   }
 }
+
+#' romicsPathwayVolcano()
+#' @description Generate pathway-colored volcano plots where features in user-defined lists are colored by pathway
+#' @param romics_object A romics_object containing statistical test results
+#' @param pathway_list A list of character vectors, each containing feature IDs. Names of list elements become pathway labels
+#' @param comparison Character string specifying which comparison to plot (must match a column in statistics layer)
+#' @param p_type Character. P-value type: "p" or "padj". Default: "p"
+#' @param p Numeric. P-value threshold for significance line. Default: 0.05
+#' @param min_fold_change Numeric. Fold-change threshold line. Default: 0
+#' @param pathway_colors Character vector of colors for pathways. If NULL or shorter than pathway_list length, colors are auto-generated. Default: NULL
+#' @param pathway_shapes Numeric vector of shapes for pathways (1=circle, 4=diamond, etc.). Default: 1 (circles)
+#' @param background_color Character. Color for features not in any pathway. Default: "gray60"
+#' @param background_shape Numeric. Shape for background features (1=circle). Default: 1
+#' @param xlim Numeric vector of length 2 for x-axis limits. Default: NULL (auto)
+#' @param ylim Numeric vector of length 2 for y-axis limits. Default: NULL (auto)
+#' @param size Numeric. Point size. Default: 2
+#' @param alpha Numeric. Point transparency (0-1). Default: 0.5
+#' @param label_features Logical. Whether to label top background features. Default: FALSE
+#' @param label_pathway_features Logical. Whether to label all features in pathways. Default: FALSE
+#' @param plotly Logical. Whether to return an interactive plotly plot (TRUE) or static ggplot (FALSE). Default: FALSE
+#' @details Creates a volcano plot where features are colored by membership in user-defined pathways. All pathways are plotted on the same axes with p-value and fold-change threshold lines shown as gray dotted lines.
+#' @return A ggplot2 object (if plotly=FALSE) or a plotly object (if plotly=TRUE)
+#' @author Geremy Clair
+#' @export
+romicsPathwayVolcano <- function(romics_object,
+                                pathway_list,
+                                comparison,
+                                p_type = "p",
+                                p = 0.05,
+                                min_fold_change = 0,
+                                pathway_colors = NULL,
+                                pathway_shapes = NULL,
+                                background_color = "gray60",
+                                background_shape = 1,
+                                xlim = NULL,
+                                ylim = NULL,
+                                size = 2,
+                                alpha = 0.8,
+                                label_features = FALSE,
+                                label_pathway_features = FALSE,
+                                plotly = FALSE) {
+
+  if (!is.romicsObject(romics_object)) {
+    stop("romics_object is missing or is not in the appropriate format")
+  }
+  if (!is.list(pathway_list) || length(pathway_list) == 0) {
+    stop("pathway_list must be a non-empty list of character vectors")
+  }
+  if (is.null(names(pathway_list))) {
+    stop("pathway_list elements must be named (pathway names)")
+  }
+  if (!is.character(comparison) || length(comparison) != 1) {
+    stop("comparison must be a single character string")
+  }
+  if (missing(plotly)) {
+    plotly <- FALSE
+  }
+  if (!is.logical(plotly)) {
+    warning("'plotly' should be logical (TRUE/FALSE). FALSE was used by default.")
+    plotly <- FALSE
+  }
+
+  stats <- romics_object$statistics
+
+  # Find p-value column matching comparison
+  if (p_type == "padj") {
+    p_col_pattern <- paste0("^", gsub("([.*+?^${}()|\\[\\]\\\\])", "\\\\\\1", comparison), "_.*_padj$")
+  } else {
+    p_col_pattern <- paste0("^", gsub("([.*+?^${}()|\\[\\]\\\\])", "\\\\\\1", comparison), "_.*_p$")
+  }
+  p_cols <- grep(p_col_pattern, colnames(stats), value = TRUE)
+
+  if (length(p_cols) == 0) {
+    stop(paste("No p-value columns found for comparison:", comparison))
+  }
+
+  p_col <- p_cols[1]
+
+  # Find fold-change column
+  # Convert _vs_ to / for matching fold-change column names
+  comparison_fc <- gsub("_vs_", "/", comparison)
+  # Escape special characters
+  comparison_fc_escaped <- gsub("([.*+?^${}()|\\[\\]\\\\])", "\\\\\\1", comparison_fc)
+  fc_col_pattern <- paste0("^log\\(", comparison_fc_escaped, "\\)$|^\\(", comparison_fc_escaped, "\\)$")
+  fc_cols <- grep(fc_col_pattern, colnames(stats), value = TRUE)
+
+  if (length(fc_cols) == 0) {
+    stop(paste("No fold-change columns found for comparison:", comparison))
+  }
+
+  fc_col <- fc_cols[1]
+
+  # Extract data
+  pvals <- suppressWarnings(as.numeric(stats[[p_col]]))
+  fc <- suppressWarnings(as.numeric(stats[[fc_col]]))
+
+  # Log transform fold-change if needed
+  if (!grepl("^log", fc_col)) {
+    fc <- log2(fc)
+    min_fold_change <- log2(min_fold_change)
+  }
+
+  # Store p threshold as p_threshold to avoid naming conflict with column
+  p_threshold <- p
+
+  # Create data frame
+  df <- data.frame(
+    ID = rownames(stats),
+    fc = fc,
+    p = -log10(pvals),
+    pathway = "Background",
+    stringsAsFactors = FALSE
+  )
+
+  # Assign pathways
+  for (pathway_name in names(pathway_list)) {
+    features_in_pathway <- pathway_list[[pathway_name]]
+    df$pathway[df$ID %in% features_in_pathway] <- pathway_name
+  }
+
+  # Calculate significance (above p-value threshold AND above fold-change threshold)
+  df$significant <- (df$p > -log10(p_threshold)) & (abs(df$fc) > min_fold_change)
+
+  # Set up colors
+  if (is.null(pathway_colors)) {
+    pathway_colors <- RColorBrewer::brewer.pal(n = min(max(3, length(pathway_list)), 12), name = "Set1")[1:length(pathway_list)]
+  } else if (length(pathway_colors) < length(pathway_list)) {
+    warning("pathway_colors shorter than pathway_list. Using provided colors and cycling.")
+    pathway_colors <- rep(pathway_colors, length.out = length(pathway_list))
+  }
+
+  # Set up shapes (convert to fillable shapes: 21=circle, 23=diamond, 22=square, 24=triangle)
+  if (is.null(pathway_shapes)) {
+    pathway_shapes <- rep(23, length(pathway_list))  # Diamond (23) by default for pathways
+  } else if (length(pathway_shapes) < length(pathway_list)) {
+    pathway_shapes <- rep(pathway_shapes, length.out = length(pathway_list))
+  }
+  # Convert to fillable shapes if needed (1->21 circle, 4->23 diamond, etc.)
+  pathway_shapes[pathway_shapes == 1] <- 21  # circle outline -> filled circle
+  pathway_shapes[pathway_shapes == 4] <- 23  # diamond outline -> filled diamond
+  background_shape_filled <- if (background_shape == 1) 21 else if (background_shape == 4) 23 else background_shape
+
+  # Create color and shape mappings
+  color_map <- c(Background = background_color, setNames(pathway_colors, names(pathway_list)))
+  shape_map <- c(Background = background_shape_filled, setNames(pathway_shapes, names(pathway_list)))
+
+  # Create plot with fill color and alpha based on significance
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = fc, y = p, fill = pathway, shape = pathway, alpha = significant, color = pathway)) +
+    ggplot2::geom_point(size = size, stroke = 0.1) +
+    ggplot2::scale_color_manual(values = color_map, guide = "none") +
+    ggplot2::geom_hline(yintercept = -log10(p_threshold), linetype = "dashed", color = "gray50", linewidth = 0.5) +
+    ggplot2::geom_vline(xintercept = c(-min_fold_change, min_fold_change), linetype = "dashed", color = "gray50", linewidth = 0.5) +
+    ggplot2::scale_fill_manual(values = color_map) +
+    ggplot2::scale_shape_manual(values = shape_map) +
+    ggplot2::scale_alpha_manual(values = c("TRUE" = alpha, "FALSE" = 0.4), guide = "none") +
+    ggplot2::labs(
+      title = paste("Pathway Volcano Plot:", comparison),
+      x = "log2(Fold Change)",
+      y = paste0("-log10(", p_type, ")"),
+      fill = "Pathway",
+      shape = "Pathway"
+    ) +
+    theme_ROP() +
+    ggplot2::theme(
+      legend.position = "right",
+      legend.box = "vertical"
+    )
+
+  # Apply axis limits if specified
+  if (!is.null(xlim)) {
+    p <- p + ggplot2::xlim(xlim)
+  }
+  if (!is.null(ylim)) {
+    p <- p + ggplot2::ylim(ylim)
+  }
+
+  # Add feature labels if requested
+  if (label_pathway_features) {
+    # Label ALL pathway features (regardless of significance)
+    pathway_features <- df[df$pathway != "Background", ]
+    if (nrow(pathway_features) > 0) {
+      p <- p + ggrepel::geom_text_repel(
+        data = pathway_features,
+        ggplot2::aes(label = ID),
+        size = 3,
+        show.legend = FALSE,
+        color = "black"
+      )
+    }
+  } else if (label_features) {
+    # Label only significant background features
+    sig_background <- df[df$pathway == "Background" & df$p > -log10(p_threshold) & abs(df$fc) > min_fold_change, ]
+    if (nrow(sig_background) > 0) {
+      p <- p + ggrepel::geom_text_repel(
+        data = sig_background,
+        ggplot2::aes(label = ID),
+        size = 3,
+        show.legend = FALSE
+      )
+    }
+  }
+
+  # Convert to plotly if requested
+  if (plotly) {
+    p <- plotly::ggplotly(p, tooltip = c("x", "y", "label", "colour", "shape"))
+  }
+
+  return(p)
+}
