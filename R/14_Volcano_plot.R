@@ -881,7 +881,8 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
 #' @param xlim Numeric vector of length 2 for x-axis limits. Default: NULL (auto)
 #' @param ylim Numeric vector of length 2 for y-axis limits. Default: NULL (auto)
 #' @param size Numeric. Point size. Default: 2
-#' @param alpha Numeric. Point transparency (0-1). Default: 0.5
+#' @param alpha Numeric. Point transparency for significant features (0-1). Default: 0.8
+#' @param alpha_nonsignificant Numeric. Point transparency for non-significant features (0-1). Default: 0.4
 #' @param label_features Logical. Whether to label pathway features with colors matching their pathway. Default: FALSE
 #' @param label_pathway_features Logical. Alias for label_features (both enable pathway feature labeling). Default: FALSE
 #' @param plotly Logical. Whether to return an interactive plotly plot (TRUE) or static ggplot (FALSE). Default: FALSE
@@ -903,6 +904,7 @@ romicsPathwayVolcano <- function(romics_object,
                                 ylim = NULL,
                                 size = 2,
                                 alpha = 0.8,
+                                alpha_nonsignificant = 0.4,
                                 label_features = FALSE,
                                 label_pathway_features = FALSE,
                                 plotly = FALSE) {
@@ -1019,7 +1021,7 @@ romicsPathwayVolcano <- function(romics_object,
     ggplot2::geom_vline(xintercept = c(-min_fold_change, min_fold_change), linetype = "dashed", color = "gray50", linewidth = 0.5) +
     ggplot2::scale_fill_manual(values = color_map) +
     ggplot2::scale_shape_manual(values = shape_map) +
-    ggplot2::scale_alpha_manual(values = c("TRUE" = alpha, "FALSE" = 0.4), guide = "none") +
+    ggplot2::scale_alpha_manual(values = c("TRUE" = alpha, "FALSE" = alpha_nonsignificant), guide = "none") +
     ggplot2::labs(
       title = paste("Pathway Volcano Plot:", comparison),
       x = "log2(Fold Change)",
