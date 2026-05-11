@@ -1014,7 +1014,7 @@ romicsPathwayVolcano <- function(romics_object,
   shape_map <- c(Background = background_shape_filled, setNames(pathway_shapes, names(pathway_list)))
 
   # Create plot with fill color and alpha based on significance
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = fc, y = p, fill = pathway, shape = pathway, alpha = significant, color = pathway)) +
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = fc, y = p, fill = pathway, shape = pathway, alpha = significant, color = pathway, text = ID)) +
     ggplot2::geom_point(size = size, stroke = 0.1) +
     ggplot2::scale_color_manual(values = color_map, guide = "none") +
     ggplot2::geom_hline(yintercept = -log10(p_threshold), linetype = "dashed", color = "gray50", linewidth = 0.5) +
@@ -1059,7 +1059,7 @@ romicsPathwayVolcano <- function(romics_object,
 
   # Convert to plotly if requested
   if (plotly) {
-    p <- plotly::ggplotly(p, tooltip = c("x", "y", "label", "colour", "shape"))
+    p <- plotly::ggplotly(p, tooltip = c("text", "x", "y"))
   }
 
   return(p)
