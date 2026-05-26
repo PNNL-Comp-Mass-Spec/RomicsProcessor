@@ -131,28 +131,33 @@ plotMap <- function(romics_object,
     if(suppressWarnings({sum(is.na(as.numeric(m_filtered[, colnames(m_filtered) == factor]))) > 0})){
       message(paste0("The factor ", factor, " is non-numerical, it will be considered categorical"))
 
-      # Extract colors from the romics_object (these are already consistent)
-      colors_romics <- as.character(t(romics_object$metadata["colors_romics", ]))
-
-      # Filter colors to match ROI if applied
-      if(!is.null(ROI)){
-        colors_filtered <- colors_romics[roi_filter]
-      } else {
-        colors_filtered <- colors_romics
-      }
-
       # Get factor values for the filtered data
       factor_values <- m_filtered[, colnames(m_filtered) == factor]
-
-      # Create color mapping from the romics object
       unique_factor_levels <- unique(factor_values)
 
-      # Create a proper color mapping
-      color_mapping <- c()
-      for(level in unique_factor_levels) {
-        # Get the color for the first occurrence of this level
-        level_color <- colors_filtered[factor_values == level][1]
-        color_mapping[level] <- level_color
+      # Use provided factor_colors, or fall back to romics_object colors
+      if(!identical(factor_colors, ROP_colors)) {
+        # User provided custom colors
+        color_mapping <- factor_colors[1:length(unique_factor_levels)]
+        names(color_mapping) <- unique_factor_levels
+      } else {
+        # Use colors from the romics_object
+        colors_romics <- as.character(t(romics_object$metadata["colors_romics", ]))
+
+        # Filter colors to match ROI if applied
+        if(!is.null(ROI)){
+          colors_filtered <- colors_romics[roi_filter]
+        } else {
+          colors_filtered <- colors_romics
+        }
+
+        # Create a proper color mapping
+        color_mapping <- c()
+        for(level in unique_factor_levels) {
+          # Get the color for the first occurrence of this level
+          level_color <- colors_filtered[factor_values == level][1]
+          color_mapping[level] <- level_color
+        }
       }
 
       p <- ggplot2::ggplot(m_filtered, ggplot2::aes(x = x, y = y, colour = factor(factor_values, levels = unique_factor_levels))) +
