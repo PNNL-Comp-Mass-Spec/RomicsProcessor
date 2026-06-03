@@ -7,6 +7,7 @@
 romicsChangeColors(romics_object, new_colors)
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{new_colors}{A character vector containing the new colors you want to use. The colors will be applied in the order of the main factor levels.}

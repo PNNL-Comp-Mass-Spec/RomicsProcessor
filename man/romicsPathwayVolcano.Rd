@@ -19,12 +19,14 @@ romicsPathwayVolcano(
   ylim = NULL,
   size = 2,
   alpha = 0.8,
+  alpha_nonsignificant = 0.4,
   label_features = FALSE,
   label_pathway_features = FALSE,
   plotly = FALSE
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object containing statistical test results}
 
 \item{pathway_list}{A list of character vectors, each containing feature IDs. Names of list elements become pathway labels}
@@ -51,11 +53,13 @@ romicsPathwayVolcano(
 
 \item{size}{Numeric. Point size. Default: 2}
 
-\item{alpha}{Numeric. Point transparency (0-1). Default: 0.5}
+\item{alpha}{Numeric. Point transparency for significant features (0-1). Default: 0.8}
 
-\item{label_features}{Logical. Whether to label top background features. Default: FALSE}
+\item{alpha_nonsignificant}{Numeric. Point transparency for non-significant features (0-1). Default: 0.4}
 
-\item{label_pathway_features}{Logical. Whether to label all features in pathways. Default: FALSE}
+\item{label_features}{Logical. Whether to label pathway features with colors matching their pathway. Default: FALSE}
+
+\item{label_pathway_features}{Logical. Alias for label_features (both enable pathway feature labeling). Default: FALSE}
 
 \item{plotly}{Logical. Whether to return an interactive plotly plot (TRUE) or static ggplot (FALSE). Default: FALSE}
 }

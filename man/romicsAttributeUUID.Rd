@@ -7,6 +7,7 @@
 romicsAttributeUUID(romics_object, force_new = FALSE)
 }
 \arguments{
+
 \item{romics_object}{A romics_object to which a UUID will be added or updated}
 
 \item{force_new}{Logical, if TRUE will generate a new UUID even if one already exists (default: FALSE)}

@@ -7,6 +7,7 @@
 romicsRemoveEmbeddings(romics_object, embeddings = NULL)
 }
 \arguments{
+
 \item{romics_object}{A romics_object containing embeddings to be removed}
 
 \item{embeddings}{Character vector of embedding names to remove. If NULL, removes all embeddings.}

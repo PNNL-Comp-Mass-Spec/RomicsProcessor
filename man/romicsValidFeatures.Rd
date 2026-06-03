@@ -11,6 +11,7 @@ romicsValidFeatures(
 )
 }
 \arguments{
+
 \item{romics_object}{has to be a romics_object created using romicsCreateObject()}
 
 \item{return_type}{Character string specifying the output format. Options are: "table" (default) returns a data frame with sample names and counts; "vector" returns a named numeric vector; "plot" returns a ggplot2 bar plot.}

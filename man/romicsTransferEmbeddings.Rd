@@ -17,6 +17,7 @@ romicsTransferEmbeddings(
 )
 }
 \arguments{
+
 \item{origin_romics_object}{has to be a romics_object created using romicsCreateObject()}
 
 \item{receiving_romics_object}{has to be a romics_object created using romicsCreateObject() and containing the same samples as the origin_romics_object.}

@@ -7,6 +7,7 @@
 romicsRemoveFactor(romics_object, factors_to_remove, force = FALSE)
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{factors_to_remove}{A character vector containing the name(s) of factor(s) to remove. The list of factor names can be identified by using the function romicsFactorNames().}

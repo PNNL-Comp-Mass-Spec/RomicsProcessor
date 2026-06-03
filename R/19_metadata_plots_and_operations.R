@@ -215,7 +215,8 @@ factorCountLevels <- function(romics_object = romics_object,
 
 
 #' @title Create Stacked Barplot of Factor Distribution
-#' @description Creates and displays stacked barplots showing the percentage distribution of one factor's levels across different levels of another factor from a romics_object
+#' @description Creates and displays stacked barplots showing the percentage distribution of one factor's levels across different levels of another factor from a romics_object.
+#'
 #' @param romics_object A romics_object created using romicsCreateObject().
 #' @param split_by_factor A character vector (length=1) containing a factor of the romics_object that will define the x-axis categories. The list of factors can be identified by using the function romicsFactorNames()
 #' @param frequency_for_factor A character vector (length=1) containing a factor of the romics_object that will be used to calculate frequency distributions within each level of split_by_factor. The list of factors can be identified by using the function romicsFactorNames()
@@ -249,6 +250,15 @@ romicsFactorStackedBarplot <- function(romics_object,
                                        export_summary_table = FALSE,
                                        name_summary_table = "summary_table_FactorStackedBarplot") {
 
+  # Check for required packages
+  if (!requireNamespace("dplyr", quietly = TRUE)) {
+    stop("The dplyr package is required for this function. Please install it with: install.packages('dplyr')")
+  }
+
+  if (!requireNamespace("tidyr", quietly = TRUE)) {
+    stop("The tidyr package is required for this function. Please install it with: install.packages('tidyr')")
+  }
+
   if (!is.romicsObject(romics_object)) stop("romics_object must be a romics object")
   if (missing(split_by_factor)      || !is.character(split_by_factor))      stop("split_by_factor must be a character string")
   if (missing(frequency_for_factor) || !is.character(frequency_for_factor)) stop("frequency_for_factor must be a character string")
@@ -276,12 +286,12 @@ romicsFactorStackedBarplot <- function(romics_object,
 
   # ── Summary table ─────────────────────────────────────────────────────────────
   summary_data <- plot_data %>%
-    group_by(split_by, frequency_for) %>%
-    summarise(count = n(), .groups = "drop") %>%
-    group_by(split_by) %>%
-    mutate(total = sum(count), percentage = (count / total) * 100) %>%
-    ungroup() %>%
-    arrange(split_by, frequency_for)
+    dplyr::group_by(split_by, frequency_for) %>%
+    dplyr::summarise(count = n(), .groups = "drop") %>%
+    dplyr::group_by(split_by) %>%
+    dplyr::mutate(total = sum(count), percentage = (count / total) * 100) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(split_by, frequency_for)
 
   summary_table <- as.data.frame(summary_data[, c("split_by", "frequency_for", "count", "percentage")])
   colnames(summary_table) <- c(split_by_factor, frequency_for_factor, "Count", "Percentage (%)")
@@ -324,20 +334,20 @@ romicsFactorStackedBarplot <- function(romics_object,
   # Use factor_levels_stack for the factor levels so bars stack in reversed order,
   # but color_map names still match because scale_fill_manual matches by name.
   plot_summary_data <- plot_data %>%
-    group_by(split_by, frequency_for) %>%
-    summarise(count = n(), .groups = "drop") %>%
-    group_by(split_by) %>%
-    mutate(total = sum(count), percentage = (count / total) * 100) %>%
-    ungroup() %>%
-    complete(split_by      = split_levels,
+    dplyr::group_by(split_by, frequency_for) %>%
+    dplyr::summarise(count = n(), .groups = "drop") %>%
+    dplyr::group_by(split_by) %>%
+    dplyr::mutate(total = sum(count), percentage = (count / total) * 100) %>%
+    dplyr::ungroup() %>%
+    tidyr::complete(split_by      = split_levels,
              frequency_for = factor_levels_stack,
              fill = list(count = 0L, total = 0, percentage = 0)) %>%
-    mutate(
+    dplyr::mutate(
       split_by      = factor(split_by,      levels = split_levels),
       frequency_for = factor(frequency_for, levels = factor_levels_stack)
     ) %>%
-    filter(percentage > 0) %>%
-    arrange(split_by, frequency_for)
+    dplyr::filter(percentage > 0) %>%
+    dplyr::arrange(split_by, frequency_for)
 
   # ── Plot ──────────────────────────────────────────────────────────────────────
   p <- ggplot(plot_summary_data,
@@ -366,16 +376,16 @@ romicsFactorStackedBarplot <- function(romics_object,
   # ── Percentage labels ─────────────────────────────────────────────────────────
   if (show_percentages) {
     label_data <- plot_summary_data %>%
-      arrange(split_by, frequency_for) %>%
-      group_by(split_by) %>%
-      mutate(
+      dplyr::arrange(split_by, frequency_for) %>%
+      dplyr::group_by(split_by) %>%
+      dplyr::mutate(
         stack_top    = cumsum(percentage),
         stack_bottom = stack_top - percentage,
         label_y      = stack_bottom + percentage / 2
       ) %>%
-      ungroup() %>%
-      filter(percentage > 3) %>%
-      mutate(label_text = paste0(round(percentage, 1), "%"))
+      dplyr::ungroup() %>%
+      dplyr::filter(percentage > 3) %>%
+      dplyr::mutate(label_text = paste0(round(percentage, 1), "%"))
 
     if (nrow(label_data) > 0) {
       p <- p + geom_text(
@@ -395,6 +405,9 @@ romicsFactorStackedBarplot <- function(romics_object,
   if (export_summary_table) {
     attr(p, "summary_table") <- summary_table_to_attach
     attr(p, "summary_table_name") <- name_summary_table
+    # Also assign to the global environment with the specified name
+    assign(name_summary_table, summary_table_to_attach, envir = .GlobalEnv)
+    message("Summary table '", name_summary_table, "' has been assigned to the global environment")
   }
 
   return(p)
@@ -1866,4 +1879,266 @@ romicsProportionHeatmap <- function(proportion_test_result,
   }
 
   return(p)
+}
+
+#' romicsImportFactor()
+#' @description Import factors from external objects (character vector, data frame, or transposed data frame)
+#' into a romics_object's metadata layer. Supports partial matching with "not_defined" for missing values.
+#' @param romics_object A romics_object created using romicsCreateObject().
+#' @param data_source A character vector, data frame, or transposed data frame containing factor values.
+#'        - Character vector: names must match colnames(romics_object$data)
+#'        - Data frame: colnames must match colnames(romics_object$data), rownames specify factor names
+#'        - Transposed data frame: rownames must match colnames(romics_object$data), colnames are factor names
+#' @param factor_name Character vector of factor names. Used when data_source is a character vector or
+#'        when rownames of data frame are numbered/non-informative. If NULL, extracts from rownames. Default: NULL
+#' @param allow_partial Logical. If TRUE, allows partial matching of samples with "not_defined" for missing values.
+#'        If FALSE, throws error if not all samples are covered. Default: TRUE
+#' @param overwrite Logical. If TRUE, allows overwriting existing factors with the same name.
+#'        If FALSE, throws error if factor already exists. Default: FALSE
+#' @param verbose Logical. Print messages about import progress. Default: TRUE
+#' @return A romics_object with new factors added to the metadata layer.
+#' @details This function is flexible and handles multiple input formats:
+#' - Single factor as named character vector: names are sample IDs, values are factor levels
+#' - Multiple factors as data frame: columns are samples, rows are factors
+#' - Multiple factors as transposed data frame: rows are samples, columns are factors
+#'
+#' Partial matching allows importing data with fewer samples than the romics_object. Unmatched
+#' samples receive "not_defined" values and are reported in the console.
+#' @examples \dontrun{
+#' # Import from named character vector
+#' factor_vector <- c(sample1 = "groupA", sample2 = "groupB", sample3 = "groupA")
+#' romics_obj <- romicsImportFactor(romics_obj, factor_vector, factor_name = "my_factor")
+#'
+#' # Import multiple factors from data frame (samples as columns)
+#' factor_df <- data.frame(sample1 = c("groupA", "typeX"),
+#'                         sample2 = c("groupB", "typeY"),
+#'                         sample3 = c("groupA", "typeX"),
+#'                         row.names = c("group", "type"))
+#' romics_obj <- romicsImportFactor(romics_obj, factor_df)
+#'
+#' # Import from transposed data frame (samples as rows)
+#' factor_df_t <- data.frame(group = c("groupA", "groupB", "groupA"),
+#'                           type = c("typeX", "typeY", "typeX"),
+#'                           row.names = c("sample1", "sample2", "sample3"))
+#' romics_obj <- romicsImportFactor(romics_obj, factor_df_t)
+#' }
+#' @author Geremy Clair
+#' @export
+romicsImportFactor <- function(romics_object,
+                               data_source,
+                               factor_name = NULL,
+                               allow_partial = TRUE,
+                               overwrite = FALSE,
+                               verbose = TRUE) {
+
+  arguments <- as.list(match.call())
+
+  # Input validation
+  if (!is.romicsObject(romics_object) || missing(romics_object)) {
+    stop("romics_object is missing or is not in the appropriate format")
+  }
+
+  if (missing(data_source)) {
+    stop("data_source is required")
+  }
+
+  sample_names <- colnames(romics_object$data)
+  n_samples <- length(sample_names)
+
+  # ── Handle character vector input ──────────────────────────────────────────
+  if (is.character(data_source) && !is.data.frame(data_source)) {
+    if (is.null(names(data_source))) {
+      stop("Character vector data_source must have names corresponding to sample names")
+    }
+
+    if (is.null(factor_name)) {
+      factor_name <- "imported_factor"
+    }
+
+    if (length(factor_name) != 1) {
+      stop("When data_source is a character vector, factor_name must be a single string")
+    }
+
+    # Match samples
+    matched_samples <- match(sample_names, names(data_source))
+    new_factor <- rep("not_defined", n_samples)
+    matched_idx <- !is.na(matched_samples)
+    new_factor[matched_idx] <- data_source[matched_samples[matched_idx]]
+
+    n_matched <- sum(!is.na(matched_samples))
+    n_missing <- n_samples - n_matched
+
+    if (n_missing > 0) {
+      if (!allow_partial) {
+        stop("Only ", n_matched, " out of ", n_samples, " samples were found in data_source.\n",
+             "Set allow_partial = TRUE to allow partial matching with 'not_defined' for missing samples.")
+      }
+      if (verbose) {
+        message("Imported factor '", factor_name, "': ", n_matched, " matched, ", n_missing, " set to 'not_defined'")
+      }
+    } else {
+      if (verbose) {
+        message("Imported factor '", factor_name, "': all ", n_samples, " samples matched")
+      }
+    }
+
+    # Check if factor already exists
+    if (factor_name %in% rownames(romics_object$metadata)) {
+      if (!overwrite) {
+        stop("Factor '", factor_name, "' already exists in metadata. Set overwrite = TRUE to replace it.")
+      }
+      if (verbose) {
+        message("Overwriting existing factor '", factor_name, "'")
+      }
+      # Remove the existing factor and add the new one
+      romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != factor_name, , drop = FALSE]
+    }
+
+    romics_object$metadata <- rbind(romics_object$metadata, factor_name = new_factor)
+
+  # ── Handle data frame input ────────────────────────────────────────────────
+  } else if (is.data.frame(data_source)) {
+    # Determine if data frame is transposed (rows=samples) or normal (columns=samples)
+
+    # Check if colnames match sample names (normal orientation: columns=samples)
+    colnames_match <- all(colnames(data_source) %in% sample_names)
+    rownames_match <- all(rownames(data_source) %in% sample_names)
+
+    if (colnames_match && !rownames_match) {
+      # Normal orientation: columns are samples, rows are factors
+      if (verbose) {
+        message("Detected normal orientation: columns=samples, rows=factors")
+      }
+
+      # Extract factor names from rownames
+      df_factor_names <- rownames(data_source)
+
+      # If factor_name is provided, use it to rename
+      if (!is.null(factor_name)) {
+        if (length(factor_name) != nrow(data_source)) {
+          stop("factor_name length (", length(factor_name), ") must match data_source rows (",
+               nrow(data_source), ")")
+        }
+        df_factor_names <- factor_name
+      }
+
+      # Match samples and import each factor
+      for (i in seq_along(df_factor_names)) {
+        factor_name_i <- df_factor_names[i]
+        factor_values_i <- as.character(data_source[i, ])
+
+        # Reorder to match romics_object samples
+        matched_samples <- match(sample_names, colnames(data_source))
+        new_factor <- rep("not_defined", n_samples)
+        matched_idx <- !is.na(matched_samples)
+        new_factor[matched_idx] <- factor_values_i[matched_samples[matched_idx]]
+
+        n_matched <- sum(!is.na(matched_samples))
+        n_missing <- n_samples - n_matched
+
+        if (n_missing > 0) {
+          if (!allow_partial) {
+            stop("Only ", n_matched, " out of ", n_samples, " samples were found for factor '",
+                 factor_name_i, "'")
+          }
+          if (verbose) {
+            message("  - Factor '", factor_name_i, "': ", n_matched, " matched, ", n_missing, " set to 'not_defined'")
+          }
+        } else {
+          if (verbose) {
+            message("  - Factor '", factor_name_i, "': all ", n_samples, " samples matched")
+          }
+        }
+
+        # Check if factor already exists
+        if (factor_name_i %in% rownames(romics_object$metadata)) {
+          if (!overwrite) {
+            stop("Factor '", factor_name_i, "' already exists in metadata. Set overwrite = TRUE to replace it.")
+          }
+          if (verbose) {
+            message("    Overwriting existing factor '", factor_name_i, "'")
+          }
+          # Remove the existing factor and add the new one
+          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != factor_name_i, , drop = FALSE]
+        }
+
+        romics_object$metadata <- rbind(romics_object$metadata, new_factor)
+        rownames(romics_object$metadata)[nrow(romics_object$metadata)] <- factor_name_i
+      }
+
+    } else if (rownames_match && !colnames_match) {
+      # Transposed orientation: rows are samples, columns are factors
+      if (verbose) {
+        message("Detected transposed orientation: rows=samples, columns=factors")
+      }
+
+      # Extract factor names from colnames
+      df_factor_names <- colnames(data_source)
+
+      # If factor_name is provided, use it to rename
+      if (!is.null(factor_name)) {
+        if (length(factor_name) != ncol(data_source)) {
+          stop("factor_name length (", length(factor_name), ") must match data_source columns (",
+               ncol(data_source), ")")
+        }
+        df_factor_names <- factor_name
+      }
+
+      # Match samples and import each factor
+      for (i in seq_along(df_factor_names)) {
+        factor_name_i <- df_factor_names[i]
+
+        # Reorder to match romics_object samples
+        matched_samples <- match(sample_names, rownames(data_source))
+        new_factor <- rep("not_defined", n_samples)
+        matched_idx <- !is.na(matched_samples)
+        new_factor[matched_idx] <- as.character(data_source[matched_samples[matched_idx], i])
+
+        n_matched <- sum(!is.na(matched_samples))
+        n_missing <- n_samples - n_matched
+
+        if (n_missing > 0) {
+          if (!allow_partial) {
+            stop("Only ", n_matched, " out of ", n_samples, " samples were found for factor '",
+                 factor_name_i, "'")
+          }
+          if (verbose) {
+            message("  - Factor '", factor_name_i, "': ", n_matched, " matched, ", n_missing, " set to 'not_defined'")
+          }
+        } else {
+          if (verbose) {
+            message("  - Factor '", factor_name_i, "': all ", n_samples, " samples matched")
+          }
+        }
+
+        # Check if factor already exists
+        if (factor_name_i %in% rownames(romics_object$metadata)) {
+          if (!overwrite) {
+            stop("Factor '", factor_name_i, "' already exists in metadata. Set overwrite = TRUE to replace it.")
+          }
+          if (verbose) {
+            message("    Overwriting existing factor '", factor_name_i, "'")
+          }
+          # Remove the existing factor and add the new one
+          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != factor_name_i, , drop = FALSE]
+        }
+
+        romics_object$metadata <- rbind(romics_object$metadata, new_factor)
+        rownames(romics_object$metadata)[nrow(romics_object$metadata)] <- factor_name_i
+      }
+
+    } else {
+      stop("Could not determine data frame orientation.\n",
+           "Either colnames or rownames must match the romics_object sample names (",
+           paste(sample_names[1:min(3, length(sample_names))], collapse = ", "), ", ...)")
+    }
+
+  } else {
+    stop("data_source must be a character vector or data frame")
+  }
+
+  # Update processing steps
+  romics_object <- romicsUpdateSteps(romics_object, arguments)
+
+  return(romics_object)
 }

@@ -4,16 +4,19 @@
 \alias{is.romicsObject}
 \title{is.romicsObject()}
 \usage{
-is.romicsObject(romics_object)
+is.romicsObject(romics_object, strict = TRUE)
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using createRomicsObject()}
+
+\item{strict}{logical (TRUE or FALSE) to indicate whether to check all required components (default: TRUE) or only basic structure}
 }
 \value{
 This function will return TRUE if the object is a valid romics_object, or stop execution with an error message
 }
 \description{
-Enables to check if the romics_object is in the appropriate format. Stops execution if UUID is missing.
+Enables to check if the romics_object is in the appropriate format. Validates UUID, steps layer, original data/metadata, and dependency layer.
 }
 \author{
 Geremy Clair

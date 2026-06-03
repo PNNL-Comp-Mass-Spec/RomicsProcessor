@@ -12,6 +12,7 @@ romicsFilterMissing(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{percentage_completeness}{Numerical vector indicating the minimum percentage of data to be considered}

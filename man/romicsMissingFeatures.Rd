@@ -10,6 +10,7 @@ romicsMissingFeatures(
 )
 }
 \arguments{
+
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{reorder}{has to be either empty (original order will be used), 'ascending', or 'descending' to indicate in what order the features should be displayed on the plot.}

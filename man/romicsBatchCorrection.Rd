@@ -13,6 +13,7 @@ romicsBatchCorrection(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{batch_factor}{A character string specifying the factor contained in the romics_object that will serve as batch covariate. To obtain the list of factors, use romicsFactorNames()}

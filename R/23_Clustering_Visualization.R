@@ -350,12 +350,14 @@ romicsClusteringLinePlot <- function(romics_object,
 #' @param hclust_dist_method Character indicating distance method for hierarchical clustering: "euclidean", "manhattan", "correlation" (default: "euclidean")
 #' @param hclust_agglom_method Character indicating agglomeration method for hierarchical clustering: "ward.D2", "complete", "average", "single" (default: "ward.D2")
 #' @param color_palette Character indicating color palette name (default: "viridis"). Supported palettes:
-#' "viridis" (sequential), "RdBu" (diverging, good for scaled data), "RdYlBu" (diverging),
-#' "RdYlGn" (diverging), "Spectral" (diverging). Other palette names default to viridis.
+#' "viridis" (sequential blue-yellow), "viridis_rev" (reversed, yellow-blue),
+#' "RdBu" (diverging red-white-blue), "BuRd" (diverging blue-white-red),
+#' "RdYlBu" (diverging), "RdYlGn" (diverging), "Spectral" (diverging). Other palette names default to viridis.
 #' @details Creates a ComplexHeatmap showing feature abundances arranged by clusters. When aggregated, shows averaged values across samples within each factor level.
 #' Features are annotated with their cluster ID. Optional within-cluster hierarchical clustering organizes features by similarity.
 #' Optional column clustering groups similar samples/conditions together.
 #' For scaled data, diverging palettes like "RdBu" help distinguish positive and negative deviations from the mean.
+#' Use "viridis_rev" or "BuRd" for the opposite color direction (blue to red).
 #' @return Returns a ComplexHeatmap object
 #' @author Geremy Clair
 #' @export
@@ -385,6 +387,15 @@ romicsClusteringLinePlot <- function(romics_object,
 #'   aggregate_by_factor = "condition",
 #'   aggregate_order = c(1, 3, 2),
 #'   color_palette = "RdBu"
+#' )
+#' hm
+#'
+#' # With blue-to-red reversed palette (opposite direction)
+#' hm <- romicsClusteringHeatmap(
+#'   romics_object,
+#'   cluster_column = "Cmeans_cluster",
+#'   aggregate_by_factor = "condition",
+#'   color_palette = "BuRd"
 #' )
 #' hm
 romicsClusteringHeatmap <- function(romics_object,
@@ -540,6 +551,18 @@ romicsClusteringHeatmap <- function(romics_object,
   cluster_colors <- NULL
   if(color_palette == "viridis") {
     cluster_colors <- viridis::viridis(n_clusters, end = 0.9)
+  } else if(color_palette == "viridis_rev") {
+    cluster_colors <- rev(viridis::viridis(n_clusters, end = 0.9))
+  } else if(color_palette == "BuRd") {
+    # Blue to Red
+    if(requireNamespace("RColorBrewer", quietly = TRUE)) {
+      cluster_colors <- rev(RColorBrewer::brewer.pal(min(n_clusters, 11), "RdBu"))
+      if(n_clusters > length(cluster_colors)) {
+        cluster_colors <- colorRampPalette(cluster_colors)(n_clusters)
+      }
+    } else {
+      cluster_colors <- rev(viridis::viridis(n_clusters, end = 0.9))
+    }
   } else if(color_palette %in% c("RdBu", "RdYlBu", "RdYlGn", "Spectral")) {
     # Use RColorBrewer palettes
     if(requireNamespace("RColorBrewer", quietly = TRUE)) {
@@ -568,6 +591,17 @@ romicsClusteringHeatmap <- function(romics_object,
   # Determine heatmap colors based on palette parameter
   if(color_palette == "viridis") {
     hm_colors <- viridis::viridis(256)
+  } else if(color_palette == "viridis_rev") {
+    # Reversed viridis (blue to yellow/red)
+    hm_colors <- rev(viridis::viridis(256))
+  } else if(color_palette == "BuRd") {
+    # Blue to Red diverging palette (opposite of RdBu)
+    if(requireNamespace("RColorBrewer", quietly = TRUE)) {
+      pal <- rev(RColorBrewer::brewer.pal(11, "RdBu"))
+      hm_colors <- circlize::colorRamp2(seq(-2, 2, length.out = 11), pal)
+    } else {
+      hm_colors <- rev(viridis::viridis(256))
+    }
   } else if(color_palette %in% c("RdBu", "RdYlBu", "RdYlGn", "Spectral")) {
     # Use RColorBrewer palettes for diverging colors (useful when scaled)
     if(requireNamespace("RColorBrewer", quietly = TRUE)) {

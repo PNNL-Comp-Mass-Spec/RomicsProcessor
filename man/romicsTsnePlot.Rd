@@ -43,6 +43,7 @@ romicsTsnePlot(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object that has t-SNE embeddings in its embeddings layer (generated using romicsTsne)}
 
 \item{Xcomp}{numerical/double. Indicate the component to plot on the X axis (default: 1)}

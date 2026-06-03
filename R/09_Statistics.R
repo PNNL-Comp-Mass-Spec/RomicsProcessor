@@ -954,23 +954,32 @@ romicsGlmBinomial <- function(romics_object,
       }
 
       # Create column names with cluster suffix
-      # In enrichment mode, use the non-"other" level (level being tested)
-      if (mode == "enrichment" && as.character(by2combinations[i, 2]) == "other") {
-        level_name <- as.character(by2combinations[i, 1])
+      if (mode == "enrichment") {
+        # In enrichment mode, use the non-"other" level (level being tested)
+        if (as.character(by2combinations[i, 2]) == "other") {
+          level_name <- as.character(by2combinations[i, 1])
+        } else {
+          level_name <- as.character(by2combinations[i, 2])
+        }
+        comparison_name <- paste0(level_name, "_vs_others")
       } else {
-        level_name <- as.character(by2combinations[i, 2])
+        # In vs mode, use pairwise naming: [i,2]_vs_[i,1]
+        comparison_name <- paste0(
+          as.character(by2combinations[i, 2]), "_vs_",
+          as.character(by2combinations[i, 1])
+        )
       }
 
       colnames(r)[colnames(r) == "p"] <- paste0(
-        level_name, "_vs_others",
+        comparison_name,
         cluster_suffix, "_glmBinomialTest_p"
       )
       colnames(r)[colnames(r) == "adj"] <- paste0(
-        level_name, "_vs_others",
+        comparison_name,
         cluster_suffix, "_glmBinomialTest_padj"
       )
       colnames(r)[colnames(r) == "dir"] <- paste0(
-        level_name, "_vs_others",
+        comparison_name,
         cluster_suffix, "_directionality"
       )
 
@@ -2419,4 +2428,270 @@ romicsTransferStatistics <- function(source_romics_object,
 
   message("Statistics transfer complete!")
   return(target_romics_object)
+}
+
+#' romicsSignificantFeatures()
+#' @description Creates a significance table with p-values and directionality for statistical tests.
+#' @param romics_object A romics_object containing a statistics layer.
+#' @param test_types Character vector of test types to consider (e.g., "Ttest", "WilcoxTest", "glmBinomialTest", "lmmTest"). Default: all available tests.
+#' @param p_type Character. P-value type to use: "p" (unadjusted) or "padj" (adjusted). Default: "padj".
+#' @param threshold Numeric. P-value threshold for significance. Default: 0.05.
+#' @details For each test and comparison, this function creates two columns: one indicating significance (TRUE/FALSE) and one showing directionality (up/down/unclear). Directionality is determined from either explicit directionality columns or inferred from log fold-change columns.
+#' @return A data.frame with columns alternating between significance and directionality for each test-comparison pair.
+#' @author Geremy Clair
+#' @export
+romicsSignificantFeatures <- function(
+    romics_object,
+    test_types = c("Ttest", "WilcoxTest", "glmBinomialTest", "lmmTest"),
+    p_type     = c("p", "padj"),
+    threshold  = 0.05
+) {
+  p_type <- match.arg(p_type)
+  stats  <- romics_object$statistics
+
+  suffix_pattern <- paste0(
+    "_(", paste(test_types, collapse = "|"), ")_", p_type, "$"
+  )
+  p_cols <- grep(suffix_pattern, colnames(stats), value = TRUE)
+
+  if (length(p_cols) == 0) {
+    message("No columns found matching test_types: ",
+            paste(test_types, collapse = ", "),
+            " with p_type = ", p_type)
+    return(invisible(NULL))
+  }
+
+  out <- data.frame(row.names = rownames(stats))
+
+  for (pcol in p_cols) {
+    test_type  <- sub(paste0(".*(", paste(test_types, collapse = "|"), ").*"), "\\1", pcol)
+    comparison <- sub(paste0("_", test_type, "_", p_type, "$"), "", pcol)
+    sig_col    <- paste0(test_type, "_sig_",       comparison)
+    dir_col    <- paste0(test_type, "_direction_", comparison)
+
+    pvals          <- suppressWarnings(as.numeric(stats[[pcol]]))
+    out[[sig_col]] <- !is.na(pvals) & pvals < threshold
+
+    # Try explicit directionality first, then fold-change as fallback
+    dir_val <- NA_character_
+
+    # Method 1: Check explicit directionality column
+    dir_explicit <- paste0(comparison, "_directionality")
+    if (dir_explicit %in% colnames(stats)) {
+      d <- suppressWarnings(as.numeric(stats[[dir_explicit]]))
+      dir_val <- ifelse(d > 0, "up", ifelse(d < 0, "down", NA_character_))
+    }
+
+    # Method 2: If no direction or all unclear, try fold-change columns
+    grps <- strsplit(comparison, "_vs_")[[1]]
+    if (length(grps) == 2) {
+      logcol_fwd <- paste0("log(", grps[1], "/", grps[2], ")")
+      logcol_rev <- paste0("log(", grps[2], "/", grps[1], ")")
+
+      if (logcol_fwd %in% colnames(stats)) {
+        lfc <- suppressWarnings(as.numeric(stats[[logcol_fwd]]))
+        fc_dir <- ifelse(lfc > 0, "up", ifelse(lfc < 0, "down", NA_character_))
+        dir_val <- ifelse(is.na(dir_val), fc_dir, dir_val)
+      } else if (logcol_rev %in% colnames(stats)) {
+        lfc <- suppressWarnings(as.numeric(stats[[logcol_rev]]))
+        fc_dir <- ifelse(lfc < 0, "up", ifelse(lfc > 0, "down", NA_character_))
+        dir_val <- ifelse(is.na(dir_val), fc_dir, dir_val)
+      }
+    }
+
+    # Assign final direction, use "unclear" only if truly no direction info
+    out[[dir_col]] <- ifelse(!out[[sig_col]], NA_character_,
+                        ifelse(is.na(dir_val), "unclear", dir_val))
+  }
+
+  sig_cols <- grep("_sig_",       colnames(out), value = TRUE)
+  dir_cols <- grep("_direction_", colnames(out), value = TRUE)
+  out[, as.vector(rbind(sig_cols, dir_cols)), drop = FALSE]
+}
+
+#' romicsExtractSignificantFeatures()
+#' @description Extracts significant features from a romics_object with flexible filtering and directionality handling.
+#' @param romics_object A romics_object containing a statistics layer.
+#' @param comparisons Character vector of specific comparisons to include (e.g., "Chronic_BPD_vs_Chronic_Ctrl"). If NULL, all comparisons are included. Default: NULL.
+#' @param test_types Character vector of test types to consider. If NULL, all available tests are considered. Default: NULL.
+#' @param directionality Character. Filter by directionality: "both" (include up and down), "up" (only upregulated), or "down" (only downregulated). Default: "both".
+#' @param manage_discrepant_directionality Character. How to handle features with conflicting directions across tests: "remove" (exclude them) or "union" (keep them, mark as "discrepant"). Default: "remove".
+#' @param p_type Character. P-value type: "p" (unadjusted) or "padj" (adjusted). Default: "padj".
+#' @param threshold Numeric. P-value threshold. Default: 0.05.
+#' @param id_col Character. Column name for feature IDs or "rownames" to use row names. Default: "rownames".
+#' @param gene_col Character. Column name for gene names in statistics layer. Default: "Gene_Name".
+#' @param features_only Logical. If TRUE, returns only feature IDs as a character vector. If FALSE, returns full data.frame. Default: FALSE.
+#' @details This function identifies features that are significant under specified conditions and optionally handles discrepancies in directionality across multiple tests. It returns a filtered list of significant features with their metadata.
+#' @return If features_only=FALSE: A data.frame with columns: feature_id, Gene_Name, consensus_direction, and test-specific significance/direction columns. If features_only=TRUE: A character vector of feature IDs. Returns invisible(NULL) if no significant features are found.
+#' @author Geremy Clair
+#' @export
+romicsExtractSignificantFeatures <- function(
+    romics_object,
+    comparisons                      = NULL,
+    test_types                       = NULL,
+    directionality                   = c("both", "up", "down"),
+    manage_discrepant_directionality = c("remove", "union"),
+    p_type                           = c("p", "padj"),
+    threshold                        = 0.05,
+    id_col                           = "rownames",
+    gene_col                         = "Gene_Name",
+    features_only                    = FALSE
+) {
+  directionality                   <- match.arg(directionality)
+  manage_discrepant_directionality <- match.arg(manage_discrepant_directionality)
+  p_type                           <- match.arg(p_type)
+
+  all_tests <- c("Ttest", "WilcoxTest", "glmBinomialTest", "lmmTest")
+  if (is.null(test_types)) test_types <- all_tests
+
+  sig_table <- romicsSignificantFeatures(
+    romics_object,
+    test_types = test_types,
+    p_type     = p_type,
+    threshold  = threshold
+  )
+  if (is.null(sig_table)) return(invisible(NULL))
+
+  sig_cols <- grep("_sig_",       colnames(sig_table), value = TRUE)
+  dir_cols <- grep("_direction_", colnames(sig_table), value = TRUE)
+
+  if (!is.null(comparisons)) {
+    keep_sig <- sig_cols[Reduce(`|`, lapply(comparisons, function(cmp) grepl(cmp, sig_cols, fixed = TRUE)))]
+    keep_dir <- dir_cols[Reduce(`|`, lapply(comparisons, function(cmp) grepl(cmp, dir_cols, fixed = TRUE)))]
+  } else {
+    keep_sig <- sig_cols
+    keep_dir <- dir_cols
+  }
+
+  if (length(keep_sig) == 0) {
+    message("No columns matched the requested comparisons.")
+    return(invisible(NULL))
+  }
+
+  sig_matrix <- sig_table[, keep_sig, drop = FALSE]
+  any_sig    <- rowSums(sig_matrix, na.rm = TRUE) > 0
+
+  dir_matrix <- sig_table[, keep_dir, drop = FALSE]
+
+  consensus_direction <- rep(NA_character_, nrow(sig_table))
+  sig_indices <- which(any_sig)
+
+  consensus_direction[sig_indices] <- sapply(sig_indices, function(i) {
+    # Only get directions from SIGNIFICANT tests
+    sig_mask <- unlist(sig_matrix[i, ])
+    num_sig_tests <- sum(sig_mask)
+    sig_dirs <- unlist(dir_matrix[i, sig_mask])
+
+    # Filter out NA and "unclear" values
+    sig_dirs <- sig_dirs[!is.na(sig_dirs) & sig_dirs != "unclear"]
+
+    # If only ONE test is significant: use its direction directly
+    if (num_sig_tests == 1) {
+      if (length(sig_dirs) == 0) return("unclear")
+      return(sig_dirs[1])
+    }
+
+    # If TWO OR MORE tests are significant: check for agreement
+    if (length(sig_dirs) == 0) return("unclear")
+    unique_dirs <- unique(sig_dirs)
+    if (length(unique_dirs) == 1) {
+      # All significant tests agree on direction
+      return(unique_dirs[1])
+    } else {
+      # Significant tests disagree on direction
+      return("discrepant")
+    }
+  })
+
+  discrepant_idx <- which(consensus_direction == "discrepant")
+
+  if (length(discrepant_idx) > 0) {
+    feat_ids   <- if (id_col == "rownames") rownames(sig_table) else romics_object$statistics[[id_col]]
+    disc_names <- feat_ids[discrepant_idx]
+
+    warning(
+      length(discrepant_idx), " feature(s) have discrepant directions across tests ",
+      "and were ", if (manage_discrepant_directionality == "remove") "REMOVED" else "KEPT",
+      " (manage_discrepant_directionality = \"", manage_discrepant_directionality, "\"):\n  ",
+      paste(disc_names, collapse = ", "),
+      call. = FALSE
+    )
+
+    if (manage_discrepant_directionality == "remove") {
+      any_sig[discrepant_idx]              <- FALSE
+      consensus_direction[discrepant_idx]  <- NA_character_
+    } else {
+      consensus_direction[discrepant_idx]  <- "discrepant"
+    }
+  }
+
+  if (directionality != "both") {
+    dir_ok  <- !is.na(consensus_direction) & consensus_direction == directionality
+    any_sig <- any_sig & dir_ok
+  }
+
+  if (sum(any_sig) == 0) {
+    message("No significant features found for the given filters.")
+    return(invisible(NULL))
+  }
+
+  stats      <- romics_object$statistics
+  feature_id <- if (id_col == "rownames") rownames(stats) else stats[[id_col]]
+  gene_name  <- if (gene_col %in% colnames(stats)) {
+    gsub(" .*", "", stats[[gene_col]])
+  } else {
+    rep(NA_character_, nrow(stats))
+  }
+
+  # Return only feature IDs if requested
+  if (features_only) {
+    return(feature_id[any_sig])
+  }
+
+  data.frame(
+    feature_id          = feature_id[any_sig],
+    Gene_Name           = gene_name[any_sig],
+    consensus_direction = consensus_direction[any_sig],
+    sig_table[any_sig, as.vector(rbind(keep_sig, keep_dir)), drop = FALSE],
+    row.names           = NULL
+  )
+}
+
+#' romicsCountSignificant()
+#' @description Counts the number of significant features meeting specified criteria.
+#' @param romics_object A romics_object containing a statistics layer.
+#' @param comparisons Character vector of specific comparisons to include. If NULL, all comparisons are included. Default: NULL.
+#' @param test_types Character vector of test types to consider. If NULL, all available tests are considered. Default: NULL.
+#' @param directionality Character. Filter: "both", "up", or "down". Default: "both".
+#' @param manage_discrepant_directionality Character. "remove" or "union". Default: "remove".
+#' @param p_type Character. P-value type: "p" or "padj". Default: "padj".
+#' @param threshold Numeric. P-value threshold. Default: 0.05.
+#' @details This is a convenient wrapper around romicsExtractSignificantFeatures that returns only the count of significant features.
+#' @return Integer. The number of significant features meeting the criteria.
+#' @author Geremy Clair
+#' @export
+romicsCountSignificant <- function(
+    romics_object,
+    comparisons                      = NULL,
+    test_types                       = NULL,
+    directionality                   = c("both", "up", "down"),
+    manage_discrepant_directionality = c("remove", "union"),
+    p_type                           = c("p", "padj"),
+    threshold                        = 0.05
+) {
+  directionality                   <- match.arg(directionality)
+  manage_discrepant_directionality <- match.arg(manage_discrepant_directionality)
+  p_type                           <- match.arg(p_type)
+
+  sig_df <- romicsExtractSignificantFeatures(
+    romics_object,
+    comparisons                      = comparisons,
+    test_types                       = test_types,
+    directionality                   = directionality,
+    manage_discrepant_directionality = manage_discrepant_directionality,
+    p_type                           = p_type,
+    threshold                        = threshold
+  )
+  if (is.null(sig_df)) return(0L)
+  nrow(sig_df)
 }

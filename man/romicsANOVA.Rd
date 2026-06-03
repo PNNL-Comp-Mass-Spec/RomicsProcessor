@@ -7,6 +7,7 @@
 romicsANOVA(romics_object, padj = TRUE, padj_method = "BH", factor = "main")
 }
 \arguments{
+
 \item{romics_object}{A romics_object created with the function romicsCreateObject(),}
 
 \item{padj}{Boolean indincating wheter to perform or not adjustment of pvalues}

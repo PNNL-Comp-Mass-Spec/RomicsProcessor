@@ -7,6 +7,7 @@
 romicsChangeLevelName(romics_object, factor_name, old_names, new_names)
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{factor_name}{Character string. The name of the factor whose level names should be changed.}

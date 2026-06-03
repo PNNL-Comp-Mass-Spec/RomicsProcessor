@@ -29,6 +29,7 @@ romicsKmeansSamples(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{centers}{Either the number of clusters, or a set of initial (distinct) cluster centers.

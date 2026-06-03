@@ -11,6 +11,7 @@ romicsTransferStatistics(
 )
 }
 \arguments{
+
 \item{source_romics_object}{A romics_object containing the statistics to transfer}
 
 \item{target_romics_object}{A romics_object that will receive the statistics}

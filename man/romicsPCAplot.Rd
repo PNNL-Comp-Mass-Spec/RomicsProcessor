@@ -45,6 +45,7 @@ romicsPCAplot(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object that has PCA embeddings in its embeddings layer (generated using romicsPCA)}
 
 \item{Xcomp}{numerical/double. Indicate the component to plot on the X axis (default: 1)}

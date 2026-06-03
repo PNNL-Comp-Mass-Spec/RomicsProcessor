@@ -21,41 +21,41 @@ romicsFactorStackedBarplot(
   name_summary_table = "summary_table_FactorStackedBarplot"
 )
 }
-\description{
-Creates and displays stacked barplots showing the percentage distribution of one factor's levels across different levels of another factor from a romics_object
+\arguments{
 
-\strong{Parameters:}
+\item{romics_object}{A romics_object created using romicsCreateObject().}
 
-\code{romics_object}: A romics_object created using romicsCreateObject().
+\item{split_by_factor}{A character vector (length=1) containing a factor of the romics_object that will define the x-axis categories. The list of factors can be identified by using the function romicsFactorNames()}
 
-\code{split_by_factor}: A character vector (length=1) containing a factor of the romics_object that will define the x-axis categories. The list of factors can be identified by using the function romicsFactorNames()
+\item{frequency_for_factor}{A character vector (length=1) containing a factor of the romics_object that will be used to calculate frequency distributions within each level of split_by_factor. The list of factors can be identified by using the function romicsFactorNames()}
 
-\code{frequency_for_factor}: A character vector (length=1) containing a factor of the romics_object that will be used to calculate frequency distributions within each level of split_by_factor. The list of factors can be identified by using the function romicsFactorNames()
+\item{title}{A character string specifying the plot title. If NULL (default), an automatic title will be generated.}
 
-\code{title}: A character string specifying the plot title. If NULL (default), an automatic title will be generated.
+\item{xlab}{A character string specifying the x-axis label. If NULL (default), the split_by_factor name will be used.}
 
-\code{xlab}: A character string specifying the x-axis label. If NULL (default), the split_by_factor name will be used.
+\item{ylab}{A character string specifying the y-axis label. Default is "Percentage (%)".}
 
-\code{ylab}: A character string specifying the y-axis label. Default is "Percentage (%)".
+\item{colors}{A character vector of colors for the different levels of frequency_for_factor. If NULL (default), ROP_colors will be used when available, otherwise rainbow colors will be used.}
 
-\code{colors}: A character vector of colors for the different levels of frequency_for_factor. If NULL (default), ROP_colors will be used when available, otherwise rainbow colors will be used.
+\item{legend_title}{A character string specifying the legend title. If NULL (default), the frequency_for_factor name will be used.}
 
-\code{legend_title}: A character string specifying the legend title. If NULL (default), the frequency_for_factor name will be used.
+\item{show_percentages}{A logical value indicating whether to display percentage labels on the bars. Default is TRUE.}
 
-\code{show_percentages}: A logical value indicating whether to display percentage labels on the bars. Default is TRUE.
+\item{text_size}{A numeric value specifying the size of percentage labels on the bars. Default is 3.}
 
-\code{text_size}: A numeric value specifying the size of percentage labels on the bars. Default is 3.
+\item{text_color}{A character string specifying the color of percentage labels. Default is "black".}
 
-\code{text_color}: A character string specifying the color of percentage labels. Default is "black".
+\item{show_summary_table}{A logical value indicating whether to print the summary table. Default is TRUE.}
 
-\code{show_summary_table}: A logical value indicating whether to print the summary table. Default is TRUE.
+\item{export_summary_table}{A logical value indicating whether to export the summary table to the main environment. Default is FALSE.}
 
-\code{export_summary_table}: A logical value indicating whether to export the summary table to the main environment. Default is FALSE.
-
-\code{name_summary_table}: A character string specifying the name of the exported summary table. Default is "summary_table_FactorStackedBarplot".
+\item{name_summary_table}{A character string specifying the name of the exported summary table. Default is "summary_table_FactorStackedBarplot".}
 }
 \value{
 A ggplot object representing the stacked barplot. If export_summary_table is TRUE, the summary table is attached as an attribute (accessible via attr(plot, "summary_table")).
+}
+\description{
+Creates and displays stacked barplots showing the percentage distribution of one factor's levels across different levels of another factor from a romics_object.
 }
 \details{
 This function generates stacked barplots where each bar represents a level of the split_by_factor, and the stacked segments show the percentage distribution of the frequency_for_factor levels within each category. The function automatically converts extracted factors to factor type using as.factor(romicsExtractFactor()). Only complete cases (non-NA values) are included in the analysis. Colors are taken from ROP_colors by default when sufficient colors are available.

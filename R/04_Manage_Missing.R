@@ -709,6 +709,7 @@ romicsValidFeatures <- function(romics_object, return_type = "table", custom_col
 
 #' @title Calculate Percentage of Valid Features
 #' @description Calculates and returns the percentage of samples that have valid (non-missing) values for each feature in the romics_object.
+#'
 #' @param romics_object has to be a romics_object created using romicsCreateObject()
 #' @param return_type Character string specifying the output format. Options are: "table" (default) returns a data frame with feature names and percentages; "vector" returns a named numeric vector; "plot" returns a ggplot2 bar plot.
 #' @param reorder Character string indicating how to order features in the output. Options are: NULL (original order), "ascending" (lowest to highest valid %), "descending" (highest to lowest valid %). Only applicable for "table" and "plot" return types.

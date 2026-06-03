@@ -7,6 +7,7 @@
 combineRomicsObjects(...)
 }
 \arguments{
+
 \item{...}{A succession of romics_objects the object should have the exact same <sample> names (data column names).}
 }
 \value{

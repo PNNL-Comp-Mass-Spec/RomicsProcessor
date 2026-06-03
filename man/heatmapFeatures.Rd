@@ -2,7 +2,7 @@
 % Please edit documentation in R/08_Heatmap_and_multifeature_plots.R
 \name{heatmapFeatures}
 \alias{heatmapFeatures}
-\title{Create Interactive Heatmap Visualization}
+\title{Create an Interactive Heatmap of Features Grouped by Samples}
 \usage{
 heatmapFeatures(
   romics_object,
@@ -23,64 +23,45 @@ heatmapFeatures(
   collapse_by_factor = NULL
 )
 }
-\description{
-Creates an interactive heatmap visualization from a romics object with hierarchical clustering and optional statistical filtering
+\arguments{
 
-\strong{Parameters:}
+\item{romics_object}{A romics_object created using romicsCreateObject()}
 
-\code{romics_object}: A romics object containing $data, $statistics, and $metadata layers
+\item{factor}{Character string specifying the factor for grouping samples. Default: "main" uses the main factor. Use romicsFactorNames() to see available factors}
 
-\code{factor}: Character string specifying the factor to use for grouping samples. Default: "main" uses the main factor. Use romicsFactorNames() to see available factors
+\item{scale_feature}{Logical. If TRUE, scales features by rows (z-score normalization). Default: TRUE}
 
-\code{scale_feature}: TRUE or FALSE, if TRUE scales features by rows (z-score normalization). Default: TRUE
+\item{feature_list}{Character vector of specific features to include. If NULL, uses all features. Default: NULL}
 
-\code{feature_list}: Character vector of features to include in heatmap. If NULL, uses all features. Default: NULL
+\item{filter_by_stat_column}{Character string specifying a statistics column for filtering features. If NULL, no filtering. Example: "Healthy_vs_Disease_Ttest_padj". Default: NULL}
 
-\code{filter_by_stat_column}: Character string specifying the statistics column to filter features. If NULL, no filtering applied. Example: "Healthy_vs_Disease_Ttest_padj". Default: NULL
+\item{stat_column_filter}{Character string with filter expression using <, >, <=, >=, ==, !=. Example: "<0.05" or ">1.5". Only used if filter_by_stat_column is specified. Default: NULL}
 
-\code{stat_column_filter}: Character string specifying the filter expression using operators <, >, <=, >=, ==, !=. Example: "<0.05" or ">1.5". Only used if filter_by_stat_column is specified. Default: NULL
+\item{gradient_colors}{Character vector of colors for heatmap gradient. If NULL, uses viridis color scale. For 3 colors: c(low, mid, high). For 2 colors: c(low, high). Default: NULL}
 
-\code{gradient_colors}: Character vector of colors for the heatmap gradient. If NULL, uses viridis color scale. For 3 colors: c(low, mid, high). For 2 colors: c(low, high). Default: NULL
+\item{viridis_option}{Character string specifying viridis color palette: "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "mako", "turbo". Only used if gradient_colors is NULL. Default: "viridis"}
 
-\code{viridis_option}: Character string specifying the viridis color scale option. Only used if gradient_colors is NULL. Accepted values: "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "mako", "turbo". Default: "viridis"
+\item{show_completeness}{Logical. If TRUE, shows data completeness as tile transparency (alpha). If FALSE, completely missing data (0% completeness) shown as black tiles. Default: TRUE}
 
-\code{show_completeness}: TRUE or FALSE, if TRUE shows data completeness as tile transparency (alpha). If FALSE, completely missing data (0% completeness) is shown as black tiles. Default: TRUE
+\item{show_dendrogram}{Logical. If TRUE, displays hierarchical clustering dendrogram on left side of heatmap. Requires ggdendro package. Default: TRUE}
 
-\code{show_dendrogram}: TRUE or FALSE, if TRUE displays hierarchical clustering dendrogram on the left side of the heatmap. Requires ggdendro package. Default: TRUE
+\item{show_feature_names}{Logical. If TRUE, displays feature names on right side of heatmap. Default: FALSE}
 
-\code{show_feature_names}: TRUE or FALSE, if TRUE displays feature names on the right side of the heatmap. Default: TRUE
+\item{show_clusters}{Logical. If TRUE, displays cluster assignments as colored sidebar. Default: FALSE}
 
-\code{show_clusters}: TRUE or FALSE, if TRUE displays cluster assignments as a sidebar. Default: FALSE
+\item{show_cluster_legend}{Logical. If TRUE, displays cluster color legend. Only used if show_clusters=TRUE. Default: FALSE}
 
-\code{show_cluster_legend}: TRUE or FALSE, if TRUE displays the cluster legend. Only used if show_clusters is TRUE. Default: FALSE
+\item{n_clusters}{Integer specifying number of clusters to cut dendrogram into. Only used if show_clusters=TRUE. Must be >= 2. Default: NULL}
 
-\code{n_clusters}: Integer specifying the number of clusters to cut the dendrogram into. Only used if show_clusters is TRUE. Default: NULL (no clustering)
+\item{clustering_method}{Character string specifying hierarchical clustering method: "complete", "average", "single", "ward.D", "ward.D2". Default: "ward.D"}
 
-\code{clustering_method}: Character string specifying hierarchical clustering method. Accepted values: "complete", "average", "single", "ward.D", "ward.D2". Default: "complete"
-
-\code{collapse_by_factor}: Character. Name of the factor to collapse samples by (average within each factor level). Default: NULL (no collapsing). If specified, samples are grouped by factor level and averaged before plotting.
+\item{collapse_by_factor}{Character or logical. If specified, collapses data by this factor level before plotting (calculates mean within each level). If TRUE, uses the same factor specified in 'factor' parameter. Default: NULL}
 }
 \value{
-A ggplot/cowplot object containing the heatmap visualization (with optional dendrogram and cluster sidebar).
-Clustering results are attached as attributes (accessible via attr(plot, "clustering_results")).
+A ggplot/cowplot object containing the heatmap visualization. Clustering results attached as attributes via attr(plot, "clustering_results") containing: clusters (list of features per cluster), cluster_assignments (feature-cluster mapping), dendrogram (hierarchical clustering object), n_clusters (number of clusters), method (clustering method used).
 }
-\details{
-The function creates an interactive heatmap with the following features:
-- Features are automatically ordered by hierarchical clustering on an imputed dataset
-- Imputation uses values 2 standard deviations below the minimum observed value, ensuring robust clustering
-- The displayed heatmap shows only real data (no imputation artifacts)
-- Tiles can be colored by mean expression with optional row/column scaling
-- Data completeness can be visualized via transparency or as black tiles for missing data
-- Optional statistical filtering reduces features to significant results
-- Interactive tooltips show exact values on hover
-- Dendrogram provides visual representation of feature relationships
-- Viridis color scale can be customized with different options (viridis, plasma, inferno, magma, cividis, rocket, mako, turbo)
-- Optionally cut dendrogram into clusters and display cluster assignments
-
-If feature_list is provided, the heatmap will only display those features.
-If filter_by_stat_column and stat_column_filter are both specified, features are filtered before visualization.
-If gradient_colors is provided, viridis_option is ignored.
-If show_clusters is TRUE and n_clusters is specified, the dendrogram is cut into clusters and a sidebar shows cluster assignments.
+\description{
+Generates an interactive heatmap visualization showing feature intensities across sample groups from a romics_object. Features are automatically ordered using hierarchical clustering on imputed data, and the displayed heatmap shows only real data values.
 }
 \author{
 Geremy Clair

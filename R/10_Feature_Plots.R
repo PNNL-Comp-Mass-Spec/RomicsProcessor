@@ -291,13 +291,11 @@ multipleFeaturePlot <- function(romics_object, features, plot_type = "jb", facto
                                 feature_titles = TRUE, legend_position = "bottom") {
   # Load required libraries
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("ggplot2 package is required for this function")
+    stop("ggplot2 package is required for this function. Install with: install.packages('ggplot2')")
   }
   if (!requireNamespace("patchwork", quietly = TRUE)) {
-    stop("patchwork package is required for this function")
+    stop("patchwork package is required for this function. Install with: install.packages('patchwork')")
   }
-  library(ggplot2)
-  library(patchwork)
 
   # Input validation
   if (!is.romicsObject(romics_object) || missing(romics_object)) {
@@ -341,46 +339,51 @@ multipleFeaturePlot <- function(romics_object, features, plot_type = "jb", facto
     plot_title <- if (feature_titles) feature else ""
 
     # Create single feature plot
-    single_plot <- singleFeaturePlot(
-      romics_object = romics_object,
-      feature = feature,
-      plot_type = plot_type,
-      factor = factor,
-      ylim = if (limits != "free") limits else NULL,
-      title = plot_title,
-      pval = pval,
-      y_bracket_pos = y_bracket_pos,
-      test_priority = test_priority,
-      significance_threshold = significance_threshold
-    )
+    single_plot <- tryCatch({
+      singleFeaturePlot(
+        romics_object = romics_object,
+        feature = feature,
+        plot_type = plot_type,
+        factor = factor,
+        ylim = if (limits != "free") limits else NULL,
+        title = plot_title,
+        pval = pval,
+        y_bracket_pos = y_bracket_pos,
+        test_priority = test_priority,
+        significance_threshold = significance_threshold
+      )
+    }, error = function(e) {
+      message("Error creating plot for feature ", feature, ": ", e$message)
+      NULL
+    })
+
+    if (is.null(single_plot)) {
+      next
+    }
 
     # Remove legend from individual plots (will add a combined one later)
-    single_plot <- single_plot + theme(legend.position = "none")
+    single_plot <- single_plot + ggplot2::theme(legend.position = "none")
 
     # Store the plot
     plot_list[[i]] <- single_plot
   }
 
+  # Check if any plots were created
+  if (length(plot_list) == 0) {
+    stop("No valid plots could be created for the specified features")
+  }
+
   # Combine plots using patchwork
-  combined_plot <- wrap_plots(plot_list, ncol = ncol)
+  combined_plot <- patchwork::wrap_plots(plot_list, ncol = ncol)
 
-  # Add a shared legend if requested
-  if (legend_position != "none") {
-    # Extract legend from a temporary plot
-    temp_plot <- singleFeaturePlot(
-      romics_object = romics_object,
-      feature = features[1],
-      plot_type = plot_type,
-      factor = factor
-    )
-
-    # Apply shared legend and customize layout
+  # Add title and layout customization
+  if (!is.null(title) || legend_position != "none") {
     combined_plot <- combined_plot +
-      plot_layout(guides = "collect") +
-      plot_annotation(
+      patchwork::plot_layout(guides = "collect") +
+      patchwork::plot_annotation(
         title = title,
-        theme = theme(
-          plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        theme = ggplot2::theme(
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"),
           legend.position = legend_position
         )
       )
@@ -430,10 +433,11 @@ multipleFeatureComparisonPlot <- function(romics_object, features, point_type = 
                                        divider_linetype = "dashed",group_order = NULL) {
   # Load required libraries
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("ggplot2 package is required for this function")
+    stop("ggplot2 package is required for this function. Install with: install.packages('ggplot2')")
   }
-  library(ggplot2)
-  library(reshape2)  # For data reshaping
+  if (!requireNamespace("reshape2", quietly = TRUE)) {
+    stop("reshape2 package is required for this function. Install with: install.packages('reshape2')")
+  }
 
   # Input validation
   if (!is.romicsObject(romics_object) || missing(romics_object)) {
@@ -785,11 +789,19 @@ multipleFeatureComparisonPlot <- function(romics_object, features, point_type = 
     formula_str <- paste("intensity ~", primary_group, "+", secondary_group)
     summary_formula <- as.formula(formula_str)
 
-    summary_data <- aggregate(summary_formula, data = plot_data_long,
-                              FUN = function(x) c(mean = mean(x, na.rm = TRUE),
-                                                  se = sd(x, na.rm = TRUE)/sqrt(length(x))))
+    summary_data <- stats::aggregate(summary_formula, data = plot_data_long,
+                              FUN = function(x) {
+                                c(mean = mean(x, na.rm = TRUE),
+                                  se = stats::sd(x, na.rm = TRUE) / sqrt(length(x)))
+                              })
     summary_data <- do.call(data.frame, summary_data)
-    colnames(summary_data)[ncol(summary_data)-1:0] <- c("mean", "se")
+
+    # FIX: Correct column naming for mean and SE (aggregate creates intensity.mean and intensity.se)
+    intensity_cols <- grep("^intensity\\.", colnames(summary_data), value = TRUE)
+    if (length(intensity_cols) == 2) {
+      colnames(summary_data)[colnames(summary_data) == intensity_cols[1]] <- "mean"
+      colnames(summary_data)[colnames(summary_data) == intensity_cols[2]] <- "se"
+    }
 
     summary_data$primary_num <- match(summary_data[[primary_group]], primary_map[[primary_group]])
     summary_data$secondary_num <- match(summary_data[[secondary_group]], secondary_map[[secondary_group]])

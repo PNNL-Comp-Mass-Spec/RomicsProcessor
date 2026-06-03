@@ -7,6 +7,7 @@
 romicsCVs(romics_object, factor = "main", plot = "all")
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{factor}{A string indicating a factor from the romics_object. The factors usable for a given romics_object names can be obtain using the function romicsFactorNames(romics_object)}

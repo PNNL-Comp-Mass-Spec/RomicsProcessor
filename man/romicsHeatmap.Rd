@@ -40,6 +40,7 @@ romicsHeatmap(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{color_palette}{Character vector of colors. Default: viridis(20)}

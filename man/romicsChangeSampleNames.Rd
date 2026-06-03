@@ -12,6 +12,7 @@ romicsChangeSampleNames(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{factor_name}{A character string specifying the name of a factor contained in the metadata of the romics_object.

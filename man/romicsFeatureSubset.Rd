@@ -10,6 +10,7 @@ romicsFeatureSubset(
 )
 }
 \arguments{
+
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{feature_list}{has to be a character vector containing features to be extracted}

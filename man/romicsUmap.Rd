@@ -35,6 +35,7 @@ romicsUmap(
 )
 }
 \arguments{
+
 \item{romics_object}{has to be a romics_object created using romicsCreateObject() note that the data cannot contain missing values, missing values (e.g., NA) can be imputed using a RomicsProcessor::impute function. After performing the umap the imputation can be cancelled using the romicsRestoreMissing() function.}
 
 \item{verbose}{boolean. If TRUE, also assigns the complete UMAP model to UMAP_results in the global environment}

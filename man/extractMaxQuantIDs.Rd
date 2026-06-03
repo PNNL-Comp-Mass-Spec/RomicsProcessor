@@ -15,6 +15,7 @@ extractMaxQuantIDs(
 )
 }
 \arguments{
+
 \item{file}{This has to be the file path and file name of the maxQuant proteinGroup.txt file from which the information has to be extracted}
 
 \item{remove_contaminants}{has to be TRUE or FALSE, indicates if the contaminant have to be removed}

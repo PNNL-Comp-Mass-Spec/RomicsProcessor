@@ -12,6 +12,7 @@ romicsOutlierRemove(
 )
 }
 \arguments{
+
 \item{romics_object}{A log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
 
 \item{seed}{An integer of length 1, by default 42 will be used}

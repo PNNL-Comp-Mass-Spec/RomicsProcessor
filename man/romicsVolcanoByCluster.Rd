@@ -6,7 +6,8 @@
 \usage{
 romicsVolcanoByCluster(
   romics_object,
-  within,
+  within = NULL,
+  cluster_factor = NULL,
   multipanel = TRUE,
   stat_type = "auto",
   p_type = "p",
@@ -21,14 +22,18 @@ romicsVolcanoByCluster(
   return_plot = FALSE,
   xlim = NULL,
   ylim = NULL,
+  auto_ylim = TRUE,
   size = 2,
   alpha = 0.5
 )
 }
 \arguments{
+
 \item{romics_object}{a romics object containing statistics}
 
-\item{within}{character string specifying the cluster to filter (e.g., "Leiden_clust_01")}
+\item{within}{character string specifying the cluster to filter (e.g., "Leiden_clust_01"). If NULL, the first cluster matching cluster_factor is used.}
+
+\item{cluster_factor}{character string specifying the clustering factor to use (e.g., "Leiden_clust", "kmeans_clust"). If NULL, defaults to "Leiden_clust" if available.}
 
 \item{multipanel}{logical (TRUE or FALSE) to indicate whether to display all plots in a panel (TRUE) or one by one (FALSE)}
 
@@ -56,7 +61,9 @@ romicsVolcanoByCluster(
 
 \item{xlim}{numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.}
 
-\item{ylim}{numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)). If NULL, limits are determined automatically.}
+\item{ylim}{numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)), or a single numeric value to set max y-limit (min is set to 0). If NULL and auto_ylim=TRUE, limits are set based on data max.}
+
+\item{auto_ylim}{logical (TRUE or FALSE) to automatically set ylim based on the maximum -log10(p) value in the data (default: TRUE). Ignored if ylim is manually specified.}
 
 \item{size}{numeric value for point size in the plots. Default is 2.}
 

@@ -10,7 +10,8 @@
 #' @param top_features numeric value indicating the number of top upregulated and downregulated features to label (only those passing the filters).
 #' @param top_features_by 'abundance' or 'p' to indicate the criteria for selecting top features. 'abundance' selects by fold change magnitude, 'p' selects by p-value significance.
 #' @param xlim numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.
-#' @param ylim numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)). If NULL, limits are determined automatically.
+#' @param ylim numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)), or a single numeric value to set max y-limit (min is set to 0). If NULL and auto_ylim=TRUE, limits are set based on data max.
+#' @param auto_ylim logical (TRUE or FALSE) to automatically set ylim based on the maximum -log10(p) value in the data (default: TRUE). Ignored if ylim is manually specified.
 #' @param size numeric value for point size in the plots. Default is 2.
 #' @param alpha numeric value for point opacity in the plots (0-1). Default is 0.5.
 #' @details generate one or multiple volcano plots from t.test, wilcox.test, or LMM run using the functions romicsTtest(), romicsWilcoxTest(), or romicsLMM() respectively. Automatically detects whether data is clustered or not. If xlim or ylim are specified, a warning is issued if any data points fall outside these limits.
@@ -21,7 +22,7 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
                           colors = c("#2cbcb2", "#242021", "#d44e28"),
                           stat_type = "auto", plot = "all", plotly = FALSE,
                           label_features = FALSE, top_features = 10, top_features_by = "abundance",
-                          xlim = NULL, ylim = NULL, size = 2, alpha = 0.5) {
+                          xlim = NULL, ylim = NULL, auto_ylim = TRUE, size = 2, alpha = 0.5) {
 
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
     stop("romics_object is missing or is not in the appropriate format")
@@ -78,13 +79,21 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
   }
   if(missing(ylim)){ylim = NULL}
   if(!is.null(ylim)){
-    if(!is.numeric(ylim) | length(ylim) != 2){
-      warning("'ylim' should be a numeric vector of length 2 (e.g., c(0, 10)). NULL was used by default.")
+    if(is.numeric(ylim) & length(ylim) == 1){
+      # Allow single numeric value as max y-limit
+      ylim <- c(0, ylim)
+    } else if(!is.numeric(ylim) | length(ylim) != 2){
+      warning("'ylim' should be a numeric vector of length 2 (e.g., c(0, 10)) or a single numeric value for max. NULL was used by default.")
       ylim = NULL
     } else if(ylim[1] >= ylim[2]){
       warning("'ylim' should have ylim[1] < ylim[2]. NULL was used by default.")
       ylim = NULL
     }
+  }
+  if(missing(auto_ylim)){auto_ylim = TRUE}
+  if(!is.logical(auto_ylim)){
+    warning("'auto_ylim' was not logical (TRUE/FALSE). TRUE was used by default.")
+    auto_ylim = TRUE
   }
 
   # Extract stats
@@ -153,7 +162,12 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
   }
 
   # Transform the test columns to calculate the -log10(p(test))
+  # Replace any p-values <= 0 or >= 1 with valid boundaries before log transformation
+  test_col[test_col <= 0 | is.na(test_col)] <- 1e-320  # Smallest positive number R can represent
+  test_col[test_col >= 1] <- 1
   test_col <- log10(test_col) * -1
+  # Cap at 320 to avoid infinite values
+  test_col[test_col > 320 | is.infinite(test_col)] <- 320
 
   # Identify the fold_change columns
   if(stat_type == "LMM" | clustered_data){
@@ -228,6 +242,13 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
         stringsAsFactors = FALSE
       )
 
+      # Calculate ylim per comparison if auto_ylim is enabled and ylim not manually specified
+      ylim_current <- ylim
+      if(is.null(ylim_current) && auto_ylim){
+        max_p_value <- max(df$p, na.rm = TRUE)
+        ylim_current <- c(0, max_p_value * 1.1)
+      }
+
       # Extract comparison and cluster info from column name
       col_name <- colnames(fc_col_i)[1]
 
@@ -256,10 +277,10 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
           warning(paste0("For comparison '", comparison, "': ", n_out_x, " feature(s) have fold-change values outside xlim [", xlim[1], ", ", xlim[2], "]"))
         }
       }
-      if(!is.null(ylim)){
-        n_out_y <- sum(df$p < ylim[1] | df$p > ylim[2], na.rm=TRUE)
+      if(!is.null(ylim_current)){
+        n_out_y <- sum(df$p < ylim_current[1] | df$p > ylim_current[2], na.rm=TRUE)
         if(n_out_y > 0){
-          warning(paste0("For comparison '", comparison, "': ", n_out_y, " feature(s) have p-value(s) outside ylim [", ylim[1], ", ", ylim[2], "]"))
+          warning(paste0("For comparison '", comparison, "': ", n_out_y, " feature(s) have p-value(s) outside ylim [", ylim_current[1], ", ", ylim_current[2], "]"))
         }
       }
 
@@ -308,8 +329,8 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
           scale_colour_manual(values = colors)
 
         # Add axis limits if specified
-        if(!is.null(xlim) | !is.null(ylim)){
-          fig <- fig + coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)
+        if(!is.null(xlim) | !is.null(ylim_current)){
+          fig <- fig + coord_cartesian(xlim = xlim, ylim = ylim_current, expand = FALSE)
         }
 
         # Add labels if requested
@@ -335,8 +356,8 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
         }
         # Build yaxis list with optional range
         yaxis_list <- list(title = yaxis_title)
-        if(!is.null(ylim)){
-          yaxis_list$range <- ylim
+        if(!is.null(ylim_current)){
+          yaxis_list$range <- ylim_current
         }
 
         fig <- plotly::plot_ly(x = df$fc,
@@ -378,7 +399,8 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
 #' romicsVolcanoByCluster()
 #' @description generate volcano plots for all comparisons within a specific cluster
 #' @param romics_object a romics object containing statistics
-#' @param within character string specifying the cluster to filter (e.g., "Leiden_clust_01")
+#' @param within character string specifying the cluster to filter (e.g., "Leiden_clust_01"). If NULL, the first cluster matching cluster_factor is used.
+#' @param cluster_factor character string specifying the clustering factor to use (e.g., "Leiden_clust", "kmeans_clust"). If NULL, defaults to "Leiden_clust" if available.
 #' @param multipanel logical (TRUE or FALSE) to indicate whether to display all plots in a panel (TRUE) or one by one (FALSE)
 #' @param stat_type 't.test', 'wilcox.test', 'LMM' or 'auto' to indicate what statistics to use. If 'auto', will detect available tests.
 #' @param p_type 'p' or 'padj' to indicate the type of pvalue to consider for the volcano plots
@@ -392,25 +414,58 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
 #' @param n_cols numeric value indicating the number of columns in the multipanel layout (NULL for auto square-ish grid)
 #' @param return_plot logical (TRUE or FALSE) to indicate whether to return the plot object instead of printing it (default: FALSE)
 #' @param xlim numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.
-#' @param ylim numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)). If NULL, limits are determined automatically.
+#' @param ylim numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)), or a single numeric value to set max y-limit (min is set to 0). If NULL and auto_ylim=TRUE, limits are set based on data max.
+#' @param auto_ylim logical (TRUE or FALSE) to automatically set ylim based on the maximum -log10(p) value in the data (default: TRUE). Ignored if ylim is manually specified.
 #' @param size numeric value for point size in the plots. Default is 2.
 #' @param alpha numeric value for point opacity in the plots (0-1). Default is 0.5.
 #' @details generates volcano plots for all comparisons within a specific cluster from any statistical test (t.test, wilcox.test, or LMM). If xlim or ylim are specified, a warning is issued if any data points fall outside these limits.
 #' @return Returns plot list invisibly if return_plot=FALSE, or returns the combined plot object if return_plot=TRUE
 #' @author Geremy Clair
 #' @export
-romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, stat_type = "auto",
+romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor = NULL, multipanel = TRUE, stat_type = "auto",
                                    p_type = "p", p = 0.05, min_fold_change = 0.6,
                                    colors = c("#2cbcb2", "#242021", "#d44e28"),
                                    plotly = FALSE, label_features = FALSE, top_features = 10,
                                    top_features_by = "abundance", n_cols = NULL, return_plot = FALSE,
-                                   xlim = NULL, ylim = NULL, size = 2, alpha = 0.5) {
+                                   xlim = NULL, ylim = NULL, auto_ylim = TRUE, size = 2, alpha = 0.5) {
   # Input validation
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
     stop("romics_object is missing or is not in the appropriate format")
   }
-  if(missing(within)) {
-    stop("'within' parameter is required and should specify a cluster (e.g., 'Leiden_clust_01')")
+
+  # Determine cluster_factor if not specified
+  if(is.null(cluster_factor)) {
+    # Default to "Leiden_clust" if available in statistics
+    stats_cols <- colnames(romics_object$statistics)
+    if(any(grepl("_within_Leiden_clust_", stats_cols))) {
+      cluster_factor <- "Leiden_clust"
+    } else {
+      # Try to find the first available cluster factor
+      cluster_patterns <- unique(gsub(".*_within_([^_]+)_[0-9]+.*", "\\1",
+                                      stats_cols[grepl("_within_", stats_cols)]))
+      if(length(cluster_patterns) > 0) {
+        cluster_factor <- cluster_patterns[1]
+      } else {
+        stop("No clustered statistics found. Please run clustering analysis first.")
+      }
+    }
+  }
+  if(!is.character(cluster_factor)) {
+    stop("'cluster_factor' should be a character string")
+  }
+
+  # If within is not specified, find the first cluster matching cluster_factor
+  if(is.null(within)) {
+    stats_cols <- colnames(romics_object$statistics)
+    matching_clusters <- unique(gsub(paste0(".*_within_(", cluster_factor, "_[0-9]+).*"), "\\1",
+                                      stats_cols[grepl(paste0("_within_", cluster_factor, "_"), stats_cols)]))
+    if(length(matching_clusters) == 0) {
+      stop(paste0("No clusters found for cluster_factor '", cluster_factor,
+                  "'. Available factors may be: ", paste(unique(gsub(".*_within_([^_]+)_.*", "\\1",
+                                      stats_cols[grepl("_within_", stats_cols)])), collapse = ", ")))
+    }
+    within <- matching_clusters[1]
+    message(paste0("Using cluster: ", within))
   }
   if(!is.character(within)) {
     stop("'within' should be a character string")
@@ -486,13 +541,21 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
   }
   if(missing(ylim)){ylim = NULL}
   if(!is.null(ylim)){
-    if(!is.numeric(ylim) | length(ylim) != 2){
-      warning("'ylim' should be a numeric vector of length 2 (e.g., c(0, 10)). NULL was used by default.")
+    if(is.numeric(ylim) & length(ylim) == 1){
+      # Allow single numeric value as max y-limit
+      ylim <- c(0, ylim)
+    } else if(!is.numeric(ylim) | length(ylim) != 2){
+      warning("'ylim' should be a numeric vector of length 2 (e.g., c(0, 10)) or a single numeric value for max. NULL was used by default.")
       ylim = NULL
     } else if(ylim[1] >= ylim[2]){
       warning("'ylim' should have ylim[1] < ylim[2]. NULL was used by default.")
       ylim = NULL
     }
+  }
+  if(missing(auto_ylim)){auto_ylim = TRUE}
+  if(!is.logical(auto_ylim)){
+    warning("'auto_ylim' was not logical (TRUE/FALSE). TRUE was used by default.")
+    auto_ylim = TRUE
   }
 
   # Extract stats
@@ -528,14 +591,15 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
   }
 
   # Filter columns for the specified cluster based on stat_type
+  # The 'within' parameter specifies the actual cluster name to search for
   if(stat_type == "t.test"){
-    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within)
+    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within, "$|log\\(.*\\/.*\\)_within_", within, "_")
     test_pattern <- paste0("_within_", within, "_Ttest_")
   } else if(stat_type == "wilcox.test"){
-    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within)
+    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within, "$|log\\(.*\\/.*\\)_within_", within, "_")
     test_pattern <- paste0("_within_", within, "_Wilcox_test_")
   } else if(stat_type == "LMM"){
-    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within)
+    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within, "$|log\\(.*\\/.*\\)_within_", within, "_")
     test_pattern <- paste0("_within_", within, "_LMMtest_")
   }
 
@@ -547,9 +611,9 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
                 "'. Please check the cluster name and test type."))
   }
 
-  # Extract the filtered columns
-  fc_col   <- stats[, fc_cols,   drop = FALSE]
-  test_col <- stats[, test_cols, drop = FALSE]
+  # Extract the filtered columns and convert to matrix to avoid list issues
+  fc_col   <- as.matrix(stats[, fc_cols,   drop = FALSE])
+  test_col <- as.matrix(stats[, test_cols, drop = FALSE])
 
   # Process test columns based on stat_type — strip _within_<cluster>_<test>_... suffix
   if(stat_type == "t.test"){
@@ -560,7 +624,13 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
     colnames(test_col) <- sub(paste0("_within_", within, "_LMMtest_.*"),     "", colnames(test_col))
   }
   colnames(test_col) <- sub("_vs_", "\\/", colnames(test_col))
+
+  # Replace any p-values <= 0 or >= 1 with valid boundaries before log transformation
+  test_col[test_col <= 0 | is.na(test_col)] <- 1e-320  # Smallest positive number R can represent
+  test_col[test_col >= 1] <- 1
   test_col <- log10(test_col) * -1
+  # Cap at 320 to avoid infinite values
+  test_col[test_col > 320 | is.infinite(test_col)] <- 320
 
   # Check if fold changes are logged
   if(sum(grepl("log\\(", colnames(fc_col))) == ncol(fc_col)){
@@ -587,7 +657,10 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
     min_fold_change_adj <- min_fold_change
   }
 
-  # Format fold-change column names
+  # Format fold-change column names (convert back to data frame for consistency with rest of code)
+  fc_col <- as.data.frame(fc_col, stringsAsFactors = FALSE)
+  test_col <- as.data.frame(test_col, stringsAsFactors = FALSE)
+
   colnames(fc_col) <- sub("log\\(", "", colnames(fc_col))
   colnames(fc_col) <- sub("\\)_within_.*", "", colnames(fc_col))
   colnames(fc_col) <- sub("_vs_", "\\/", colnames(fc_col))
@@ -615,6 +688,13 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
       stringsAsFactors = FALSE
     )
 
+    # Calculate ylim per comparison if auto_ylim is enabled and ylim not manually specified
+    ylim_current <- ylim
+    if(is.null(ylim_current) && auto_ylim){
+      max_p_value <- max(df$p, na.rm = TRUE)
+      ylim_current <- c(0, max_p_value * 1.1)
+    }
+
     comparison <- colnames(fc_col_i)[1]
 
     class <- rep("non_significant", nrow(df))
@@ -630,10 +710,10 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
         warning(paste0("For comparison '", comparison, "' in cluster '", within, "': ", n_out_x, " feature(s) have fold-change values outside xlim [", xlim[1], ", ", xlim[2], "]"))
       }
     }
-    if(!is.null(ylim)){
-      n_out_y <- sum(df$p < ylim[1] | df$p > ylim[2], na.rm=TRUE)
+    if(!is.null(ylim_current)){
+      n_out_y <- sum(df$p < ylim_current[1] | df$p > ylim_current[2], na.rm=TRUE)
       if(n_out_y > 0){
-        warning(paste0("For comparison '", comparison, "' in cluster '", within, "': ", n_out_y, " feature(s) have p-value(s) outside ylim [", ylim[1], ", ", ylim[2], "]"))
+        warning(paste0("For comparison '", comparison, "' in cluster '", within, "': ", n_out_y, " feature(s) have p-value(s) outside ylim [", ylim_current[1], ", ", ylim_current[2], "]"))
       }
     }
 
@@ -683,8 +763,8 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
               axis.title  = element_text(size = 9))
 
       # Add axis limits if specified
-      if(!is.null(xlim) | !is.null(ylim)){
-        fig <- fig + coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)
+      if(!is.null(xlim) | !is.null(ylim_current)){
+        fig <- fig + coord_cartesian(xlim = xlim, ylim = ylim_current, expand = FALSE)
       }
 
       if(label_features && any(df$label != "")) {
@@ -710,8 +790,8 @@ romicsVolcanoByCluster <- function(romics_object, within, multipanel = TRUE, sta
       }
       # Build yaxis list with optional range
       yaxis_list <- list(title = yaxis_title)
-      if(!is.null(ylim)){
-        yaxis_list$range <- ylim
+      if(!is.null(ylim_current)){
+        yaxis_list$range <- ylim_current
       }
 
       fig <- plot_ly(x = df$fc,
@@ -972,11 +1052,17 @@ romicsPathwayVolcano <- function(romics_object,
   # Store p threshold as p_threshold to avoid naming conflict with column
   p_threshold <- p
 
+  # Handle extreme p-values before log transformation
+  pvals[pvals <= 0 | is.na(pvals)] <- 1e-320
+  pvals[pvals >= 1] <- 1
+  log_pvals <- -log10(pvals)
+  log_pvals[is.infinite(log_pvals)] <- 320
+
   # Create data frame
   df <- data.frame(
     ID = rownames(stats),
     fc = fc,
-    p = -log10(pvals),
+    p = log_pvals,
     pathway = "Background",
     stringsAsFactors = FALSE
   )

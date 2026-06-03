@@ -18,11 +18,13 @@ romicsVolcano(
   top_features_by = "abundance",
   xlim = NULL,
   ylim = NULL,
+  auto_ylim = TRUE,
   size = 2,
   alpha = 0.5
 )
 }
 \arguments{
+
 \item{p_type}{'p' or 'padj' to indicate the type of pvalue to consider for the volcano plots.}
 
 \item{p}{numeric value to indicate the maximum pvalue to use for the coloring of the volcano plot}
@@ -43,7 +45,9 @@ romicsVolcano(
 
 \item{xlim}{numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.}
 
-\item{ylim}{numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)). If NULL, limits are determined automatically.}
+\item{ylim}{numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)), or a single numeric value to set max y-limit (min is set to 0). If NULL and auto_ylim=TRUE, limits are set based on data max.}
+
+\item{auto_ylim}{logical (TRUE or FALSE) to automatically set ylim based on the maximum -log10(p) value in the data (default: TRUE). Ignored if ylim is manually specified.}
 
 \item{size}{numeric value for point size in the plots. Default is 2.}
 

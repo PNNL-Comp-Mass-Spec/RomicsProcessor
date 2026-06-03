@@ -7,6 +7,7 @@
 romicsFilterMissingSamples(romics_object, percentage_completeness = 50)
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{percentage_completeness}{Numerical value indicating the minimum percentage of completeness required for a sample to be kept.}

@@ -7,6 +7,7 @@
 romicsExtractFeature(romics_object, feature = "feature")
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{feature}{has to be either a feature contained in the romics_object, the list of features can be obtained using the function romicsFeatureNames()}

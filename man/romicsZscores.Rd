@@ -7,6 +7,7 @@
 romicsZscores(romics_object)
 }
 \arguments{
+
 \item{romics_object}{A romics_object created with the function romicsCreateObject(),}
 }
 \value{

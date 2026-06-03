@@ -20,6 +20,7 @@ plotMap(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject(), the metadata has to contain at least a 'x' and 'y' coordinate in the factor layer in order to plot the map}
 
 \item{factor}{The rowname of a metadata factor to be used for the plotting of regions associated with a given factor, if a factor is selected the feature map won't be shown.}

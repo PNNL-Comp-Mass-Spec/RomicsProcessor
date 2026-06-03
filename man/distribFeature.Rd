@@ -22,6 +22,7 @@ distribFeature(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{feature_name}{Character string. Name of the feature to plot. Must match a row name in the data exactly.}

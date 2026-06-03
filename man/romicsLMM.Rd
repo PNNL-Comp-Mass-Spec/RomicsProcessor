@@ -20,6 +20,7 @@ romicsLMM(
 )
 }
 \arguments{
+
 \item{romics_object}{An romics_object created with the function romicsCreateObject().}
 
 \item{fixed_effects}{A character string specifying the fixed effects formula (e.g., "condition" or "condition + treatment").}

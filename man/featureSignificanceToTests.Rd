@@ -14,6 +14,7 @@ featureSignificanceToTests(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object with calculated statistics}
 
 \item{feature}{Character string of feature name (must match a rowname in romics_object$data)}

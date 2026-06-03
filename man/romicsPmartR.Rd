@@ -7,6 +7,7 @@
 romicsPmartR(romics_object, type = "proData")
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using the function romicsCreateObject()}
 
 \item{type}{Has to be "lipidData","proData","pepData","metabData" to indicate what data type to use for the pmartR object}
@@ -15,10 +16,12 @@ romicsPmartR(romics_object, type = "proData")
 return the pmartR object
 }
 \description{
+DEPRECATED: Use romicsToPmartR() instead (moved to 24_Format_Conversion.R)
 Converts romics_object to pmartR object (requires the "pmartR' package to be installed).
 }
 \details{
-This function converts an romics_object to a pmartR object
+This function is deprecated. Use romicsToPmartR() instead, which has been moved to the Format_Conversion module.
+This wrapper maintains backward compatibility by calling the new function.
 }
 \author{
 Geremy Clair

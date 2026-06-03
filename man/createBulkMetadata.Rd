@@ -14,6 +14,7 @@ createBulkMetadata(
 )
 }
 \arguments{
+
 \item{romics_object}{Original romics object}
 
 \item{bulk_factor}{Factor values used for bulking (as factor or character vector)}

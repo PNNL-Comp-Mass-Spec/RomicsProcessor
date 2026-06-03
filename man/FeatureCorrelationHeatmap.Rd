@@ -18,6 +18,7 @@ FeatureCorrelationHeatmap(
 )
 }
 \arguments{
+
 \item{romics_object}{an object of type romics_object}
 
 \item{corr_type}{has to be either 'pearson', 'kendall',or 'spearman', indicates the type of correlation calculated.}
@@ -39,7 +40,7 @@ FeatureCorrelationHeatmap(
 \item{cellnote}{has to be TRUE or FALSE to indicate if the correlation numbers should be displayed onto the heatmap.}
 }
 \value{
-This function will return a an heatmap generated with heatmap.2().
+This function will return a an heatmap generated with gplots::heatmap.2().
 }
 \description{
 calculate the feature correlation matrix of an romics_object and hclust the results are displayed as an heatmap.

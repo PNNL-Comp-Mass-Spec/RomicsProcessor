@@ -14,6 +14,7 @@ romicsPseudoBulk(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{bulk_by}{Factor name to aggregate by}

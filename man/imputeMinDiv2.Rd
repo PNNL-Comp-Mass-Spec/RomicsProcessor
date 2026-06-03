@@ -7,6 +7,7 @@
 imputeMinDiv2(romics_object)
 }
 \arguments{
+
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 }
 \value{

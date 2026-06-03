@@ -7,6 +7,7 @@
 lmp(modelobject)
 }
 \arguments{
+
 \item{modelobject}{as to be an object of the class 'lm'}
 }
 \value{

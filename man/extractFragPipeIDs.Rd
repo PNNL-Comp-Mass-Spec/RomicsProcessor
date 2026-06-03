@@ -10,6 +10,7 @@ extractFragPipeIDs(
 )
 }
 \arguments{
+
 \item{file}{This has to be the file path and file name of the FragPipe combined_protein.csv file from which the information has to be extracted}
 
 \item{remove_contaminants}{has to be TRUE or FALSE, indicates if the contaminants have to be removed}

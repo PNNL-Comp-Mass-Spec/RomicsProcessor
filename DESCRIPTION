@@ -1,14 +1,13 @@
 Package: RomicsProcessor
 Type: Package
 Title: omics-oriented package for reproducible and sharable data processing pipelines
-Version: 1.14.0
+Version: 1.17.0
 Author: Geremy Clair <geremy.clair@pnnl.gov>
 Maintainer: Geremy Clair <geremy.clair@pnnl.gov>
 Description: This package enables processing omics datasets using an object type called romics_object, enabling FAIR-compatible science. The romics_object contains all the details to reprocess the data identically and to create processing pipelines.
 License: BSD 2-Clause License
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.3
 biocViews:
     ComplexHeatmap
 Imports:
@@ -46,9 +45,11 @@ Imports:
     FNN,
     matrixStats,
     ggsignif,
-    ggtree
+    ggtree,
+    data.table
 Depends:
     R (>= 4.0.0)
 Suggests:
     pmartR,
     sva
+Config/roxygen2/version: 8.0.0

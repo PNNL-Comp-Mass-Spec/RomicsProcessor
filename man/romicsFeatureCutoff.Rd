@@ -13,6 +13,7 @@ romicsFeatureCutoff(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{feature_name}{Character string or vector. Name(s) of the feature(s) to apply cutoffs to. Must match row names in the data exactly.}

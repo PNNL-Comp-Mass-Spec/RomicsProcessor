@@ -16,6 +16,7 @@ romicsCombineSpatialObjects(
 )
 }
 \arguments{
+
 \item{romics_objects}{A named list of romics_objects to be combined. All objects must have 'x' and 'y'
 coordinates in their metadata and should contain the same features (rows in data layer).
 Names will be used as prefixes for sample names.}

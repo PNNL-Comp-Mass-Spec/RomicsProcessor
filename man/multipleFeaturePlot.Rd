@@ -21,6 +21,7 @@ multipleFeaturePlot(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{features}{Character vector. Names of features to plot. Must match exactly (case-sensitive).}

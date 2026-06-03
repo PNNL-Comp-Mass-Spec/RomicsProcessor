@@ -7,6 +7,7 @@
 romicsMeanByLevel(romics_object, averaging_factor, main_factor)
 }
 \arguments{
+
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{averaging_factor}{as to be a factor of an romics_object factors can be identified using the function romicsFactorNames()}

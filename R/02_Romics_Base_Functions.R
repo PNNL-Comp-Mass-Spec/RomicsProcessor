@@ -279,22 +279,66 @@ romicsAttributeUUID <- function(romics_object, force_new = FALSE) {
 }
 
 #' is.romicsObject()
-#' @description Enables to check if the romics_object is in the appropriate format. Stops execution if UUID is missing.
+#' @description Enables to check if the romics_object is in the appropriate format. Validates UUID, steps layer, original data/metadata, and dependency layer.
 #' @param romics_object A romics_object created using createRomicsObject()
+#' @param strict logical (TRUE or FALSE) to indicate whether to check all required components (default: TRUE) or only basic structure
 #' @return This function will return TRUE if the object is a valid romics_object, or stop execution with an error message
 #' @author Geremy Clair
 #' @export
-is.romicsObject <- function(romics_object){
+is.romicsObject <- function(romics_object, strict = TRUE){
   if(!inherits(romics_object, "romics_object")){
     stop("Your romics_object was not created using the function createRomicsObject()")
   }
-  if(romics_object$steps[1] != "romics_object"){
-    stop("Your romics_object is not in the appropriate format")
+
+  # Check steps layer format
+  if(!is.character(romics_object$steps) || length(romics_object$steps) < 1){
+    stop("Your romics_object does not have a properly formed steps layer (should be a character vector)")
   }
+  if(romics_object$steps[1] != "romics_object"){
+    stop("Your romics_object is not in the appropriate format (first step should be 'romics_object')")
+  }
+
+  # Check UUID
   if(!"uuid" %in% names(romics_object)){
     stop("Your romics_object does not contain a UUID, which is required for FAIR compliance and reproducibility.\n",
          "Please add a UUID using: romics_object <- romicsAttributeUUID(romics_object)\n",
          "Or recreate the object using the updated createRomicsObject() function.")
+  }
+  if(!is.character(romics_object$uuid) || length(romics_object$uuid) != 1){
+    stop("Your romics_object UUID is not in the appropriate format (should be a single character string)")
+  }
+
+  # Strict mode: check additional required components
+  if(strict){
+    # Check original_data
+    if(!"original_data" %in% names(romics_object)){
+      stop("Your romics_object is missing the original_data layer.\n",
+           "This layer is required to preserve the original unmodified data.\n",
+           "Please recreate the object using createRomicsObject() or restore from a backup.")
+    }
+    if(!is.data.frame(romics_object$original_data) || nrow(romics_object$original_data) == 0){
+      stop("Your romics_object original_data layer is not properly formed (should be a non-empty data frame)")
+    }
+
+    # Check original_metadata
+    if(!"original_metadata" %in% names(romics_object)){
+      stop("Your romics_object is missing the original_metadata layer.\n",
+           "This layer is required to preserve the original unmodified metadata.\n",
+           "Please recreate the object using createRomicsObject() or restore from a backup.")
+    }
+    if(!is.data.frame(romics_object$original_metadata) || nrow(romics_object$original_metadata) == 0){
+      stop("Your romics_object original_metadata layer is not properly formed (should be a non-empty data frame)")
+    }
+
+    # Check dependencies layer
+    if(!"dependencies" %in% names(romics_object)){
+      stop("Your romics_object is missing the dependencies layer.\n",
+           "This layer is required to track data processing dependencies.\n",
+           "Please recreate the object using createRomicsObject() with an updated version.")
+    }
+    if(!is.list(romics_object$dependencies)){
+      stop("Your romics_object dependencies layer is not properly formed (should be a list)")
+    }
   }
 
   return(TRUE)
@@ -1511,4 +1555,198 @@ romicsExportData<-function(romics_object, data=TRUE, statistics = FALSE, missing
   }
 
   return(df)
+}
+
+#' romicsUpdateDependencies()
+#' @description Updates the dependencies layer of a romics_object with current package versions and session information
+#' @param romics_object A romics_object to update
+#' @details This function should be called before saving a romics_object to ensure all dependencies are current. It captures the versions of all loaded packages relevant to the analysis.
+#' @return The modified romics_object with updated dependencies layer
+#' @author Geremy Clair
+#' @export
+romicsUpdateDependencies <- function(romics_object) {
+  if(!is.romicsObject(romics_object, strict = FALSE)) {
+    stop("romics_object is missing or is not in the appropriate format")
+  }
+
+  # Create updated dependencies similar to romicsCreateDependencies
+  desc <- packageDescription("RomicsProcessor")
+  imports_str <- desc$Imports
+
+  if(!is.na(imports_str)) {
+    packages <- trimws(strsplit(imports_str, ",")[[1]])
+    packages <- gsub("\\s*\\(.*\\)$", "", packages)
+  } else {
+    packages <- character(0)
+  }
+
+  dependencies <- data.frame(Required = packages, Version_used = NA, stringsAsFactors = FALSE)
+
+  # Get versions of required packages
+  for(i in 1:nrow(dependencies)){
+    tryCatch({
+      dependencies$Version_used[i] <- as.character(packageVersion(dependencies$Required[i]))
+    }, error = function(e) {
+      dependencies$Version_used[i] <<- "unavailable"
+    })
+  }
+
+  dependencies[, 1] <- as.character(dependencies[, 1])
+  dependencies <- rbind(dependencies, c(Required = "r", Version_used = paste0(R.Version()$major, ".", R.Version()$minor)))
+  dependencies <- rbind(c(Required = "RomicsProcessor", Version_used = as.character(packageVersion("RomicsProcessor"))), dependencies)
+  rownames(dependencies) <- NULL
+
+  # Update the romics_object
+  romics_object$dependencies <- dependencies
+
+  # Add update to steps
+  romics_object$steps <- c(romics_object$steps, paste0("date|", gsub(" ", "_", format(Sys.time(), "%b_%d_%Y_%X")), "|romicsUpdateDependencies"))
+
+  return(romics_object)
+}
+
+#' saveRomicsObject()
+#' @description Save a romics_object to a file with automatic dependency updates
+#' @param romics_object A romics_object to save
+#' @param file Character string specifying the file path to save to (typically with .rdata or .rds extension)
+#' @param format Character string indicating save format: "rdata" (default) or "rds"
+#' @details This function updates dependencies before saving to ensure reproducibility. The .rdata format is used by default.
+#' @return Invisibly returns TRUE if successful
+#' @author Geremy Clair
+#' @export
+saveRomicsObject <- function(romics_object, file, format = "rdata") {
+  if(!is.romicsObject(romics_object, strict = FALSE)) {
+    stop("romics_object is missing or is not in the appropriate format")
+  }
+  if(missing(file)) {
+    stop("'file' parameter is required. Specify a path like 'my_analysis.rds'")
+  }
+  if(!is.character(file) || length(file) != 1) {
+    stop("'file' should be a single character string")
+  }
+  if(!format %in% c("rdata", "rds")) {
+    stop("'format' should be either 'rdata' or 'rds'")
+  }
+
+  # Update dependencies before saving
+  romics_object <- romicsUpdateDependencies(romics_object)
+
+  # Save based on format
+  if(format == "rdata") {
+    save(romics_object, file = file)
+  } else if(format == "rds") {
+    saveRDS(romics_object, file = file)
+  }
+
+  message(paste0("✓ romics_object saved to: ", file))
+  return(invisible(TRUE))
+}
+
+#' loadRomicsObject()
+#' @description Load a romics_object from a file and display summary information
+#' @param file Character string specifying the file path to load from (typically with .rds or .RData extension)
+#' @param silent Logical (TRUE or FALSE) to suppress the summary information display (default: FALSE)
+#' @details When a romics_object is loaded, it automatically displays:
+#' - Number of samples
+#' - Number of factors and their names
+#' - Which embeddings were calculated (UMAP, PCA, tSNE) and their dimensionality
+#' @return The loaded romics_object invisibly
+#' @author Geremy Clair
+#' @export
+loadRomicsObject <- function(file, silent = FALSE) {
+  if(missing(file)) {
+    stop("'file' parameter is required. Specify a path to your saved romics_object")
+  }
+  if(!is.character(file) || length(file) != 1) {
+    stop("'file' should be a single character string")
+  }
+  if(!file.exists(file)) {
+    stop(paste0("File does not exist: ", file))
+  }
+
+  # Load the object
+  if(grepl("\\.rds$", file, ignore.case = TRUE)) {
+    romics_object <- readRDS(file)
+  } else if(grepl("\\.(rdata|rda)$", file, ignore.case = TRUE)) {
+    # For .RData files, we need to load into environment and extract
+    env <- new.env()
+    load(file, envir = env)
+    # Get the first object (assuming it's the romics_object)
+    obj_names <- ls(envir = env)
+    if(length(obj_names) == 0) {
+      stop("No objects found in the .RData file")
+    }
+    romics_object <- get(obj_names[1], envir = env)
+  } else {
+    stop("File format not recognized. Use .rds or .RData extension")
+  }
+
+  # Verify it's a valid romics_object
+  if(!is.romicsObject(romics_object, strict = FALSE)) {
+    stop("Loaded object is not a valid romics_object")
+  }
+
+  # Display summary information if not silent
+  if(!silent) {
+    cat("\n")
+    cat("════════════════════════════════════════════\n")
+    cat("romics_object loaded from:", file, "\n")
+    cat("════════════════════════════════════════════\n")
+
+    # Number of samples
+    n_samples <- ncol(romics_object$data)
+    cat(sprintf("Samples: %d\n", n_samples))
+
+    # Number of factors and their names
+    n_factors <- nrow(romics_object$metadata)
+    factor_names <- rownames(romics_object$metadata)
+    cat(sprintf("Factors: %d\n", n_factors))
+    cat(sprintf("  └─ %s\n", paste(factor_names, collapse = ", ")))
+
+    # Main factor
+    main_factor_name <- names(romics_object$main_factor[1])
+    cat(sprintf("Main factor: %s\n", main_factor_name))
+
+    # Check for embeddings
+    embeddings_info <- character()
+
+    if(!is.null(romics_object$embeddings)) {
+      embeddings_list <- romics_object$embeddings
+
+      if(!is.null(embeddings_list$UMAP) && nrow(embeddings_list$UMAP) > 0) {
+        n_umap_dims <- ncol(embeddings_list$UMAP) - 1  # Subtract ID column
+        embeddings_info <- c(embeddings_info, sprintf("UMAP (%d dims)", n_umap_dims))
+      }
+
+      if(!is.null(embeddings_list$PCA) && nrow(embeddings_list$PCA) > 0) {
+        n_pca_dims <- ncol(embeddings_list$PCA) - 1
+        embeddings_info <- c(embeddings_info, sprintf("PCA (%d dims)", n_pca_dims))
+      }
+
+      if(!is.null(embeddings_list$tSNE) && nrow(embeddings_list$tSNE) > 0) {
+        n_tsne_dims <- ncol(embeddings_list$tSNE) - 1
+        embeddings_info <- c(embeddings_info, sprintf("tSNE (%d dims)", n_tsne_dims))
+      }
+    }
+
+    if(length(embeddings_info) > 0) {
+      cat(sprintf("Embeddings: %s\n", paste(embeddings_info, collapse = ", ")))
+    } else {
+      cat("Embeddings: None\n")
+    }
+
+    # Omics type
+    if(!is.null(romics_object$omics_type) && romics_object$omics_type != "unknown") {
+      cat(sprintf("Omics type: %s\n", romics_object$omics_type))
+    }
+
+    # Processing steps
+    n_steps <- length(romics_object$steps)
+    cat(sprintf("Processing steps: %d\n", n_steps))
+
+    cat("════════════════════════════════════════════\n")
+    cat("\n")
+  }
+
+  return(invisible(romics_object))
 }

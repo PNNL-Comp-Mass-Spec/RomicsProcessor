@@ -17,6 +17,7 @@ romicsUmapDensityPlot(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object that has UMAP embeddings in its embeddings layer}
 
 \item{Xcomp}{numerical/double. Component to plot on the X axis (default: 1)}

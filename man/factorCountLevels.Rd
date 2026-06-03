@@ -14,6 +14,7 @@ factorCountLevels(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{factor}{A character vector (length=1) containing a factor of the romics_object. The list of factors can be identified by using the function romicsFactorNames().}

@@ -13,6 +13,7 @@ romicsTrendHeatmap(
 )
 }
 \arguments{
+
 \item{romics_object}{has to be a romics_object created using the function romicsCreateObject() (see dedicated documentation) and has to be numeric.}
 
 \item{factor}{has to be a factor contained in the romics_object created, the list of factor can be extracted using the function romicsFactorNames() (see dedicated documentation)}

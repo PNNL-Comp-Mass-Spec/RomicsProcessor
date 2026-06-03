@@ -6,16 +6,51 @@
 \usage{
 romicsExtractSignificantFeatures(
   romics_object,
-  p_threshold = 0.05,
-  padj_type = "p",
-  specific_comparisons = NULL,
+  comparisons = NULL,
   test_types = NULL,
-  directionality = "all",
-  fc_threshold = 0
+  directionality = c("both", "up", "down"),
+  manage_discrepant_directionality = c("remove", "union"),
+  p_type = c("p", "padj"),
+  threshold = 0.05,
+  id_col = "rownames",
+  gene_col = "Gene_Name",
+  features_only = FALSE
+)
+
+romicsExtractSignificantFeatures(
+  romics_object,
+  comparisons = NULL,
+  test_types = NULL,
+  directionality = c("both", "up", "down"),
+  manage_discrepant_directionality = c("remove", "union"),
+  p_type = c("p", "padj"),
+  threshold = 0.05,
+  id_col = "rownames",
+  gene_col = "Gene_Name",
+  features_only = FALSE
 )
 }
 \arguments{
-\item{romics_object}{A romics_object with calculated statistics}
+
+\item{romics_object}{A romics_object containing a statistics layer.}
+
+\item{comparisons}{Character vector of specific comparisons to include (e.g., "Chronic_BPD_vs_Chronic_Ctrl"). If NULL, all comparisons are included. Default: NULL.}
+
+\item{test_types}{Character vector of test types to consider. If NULL, all available tests are considered. Default: NULL.}
+
+\item{directionality}{Character. Filter by directionality: "both" (include up and down), "up" (only upregulated), or "down" (only downregulated). Default: "both".}
+
+\item{manage_discrepant_directionality}{Character. How to handle features with conflicting directions across tests: "remove" (exclude them) or "union" (keep them, mark as "discrepant"). Default: "remove".}
+
+\item{p_type}{Character. P-value type: "p" (unadjusted) or "padj" (adjusted). Default: "padj".}
+
+\item{threshold}{Numeric. P-value threshold. Default: 0.05.}
+
+\item{id_col}{Character. Column name for feature IDs or "rownames" to use row names. Default: "rownames".}
+
+\item{gene_col}{Character. Column name for gene names in statistics layer. Default: "Gene_Name".}
+
+\item{features_only}{Logical. If TRUE, returns only feature IDs as a character vector. If FALSE, returns full data.frame. Default: FALSE.}
 
 \item{p_threshold}{Numeric value for significance threshold. Default: 0.05}
 
@@ -23,17 +58,17 @@ romicsExtractSignificantFeatures(
 
 \item{specific_comparisons}{Character vector of specific comparisons to consider (e.g., "Alport_vs_Ctrl"). If NULL, considers all comparisons. Default: NULL}
 
-\item{test_types}{Character vector of test types to consider (e.g., "Ttest", "Wilcox_test", "glmBinomialTest"). If NULL, considers all tests. Default: NULL}
-
-\item{directionality}{Character string indicating which direction of change to consider: "all" (both up and down), "up" (upregulated only), "down" (downregulated only). Default: "all"}
-
 \item{fc_threshold}{Numeric value for fold change threshold (used with directionality). For log-transformed data, this is the log fold change threshold. Default: 0 (no fold change filtering)}
 }
 \value{
 Character vector of significant feature names meeting the directionality criteria
+
+If features_only=FALSE: A data.frame with columns: feature_id, Gene_Name, consensus_direction, and test-specific significance/direction columns. If features_only=TRUE: A character vector of feature IDs. Returns invisible(NULL) if no significant features are found.
 }
 \description{
 Extract the names of features that are significant based on any statistical test in the statistics layer
+
+Extracts significant features from a romics_object with flexible filtering and directionality handling.
 }
 \details{
 This function searches through statistical test columns in the statistics layer and identifies
@@ -41,6 +76,8 @@ This function searches through statistical test columns in the statistics layer 
          For t-test and Wilcox test: up = log(FC) > 0 (or FC > 1), down = log(FC) < 0 (or FC < 1).
          For GLM binomial test: up = directionality = 1, down = directionality = -1.
          It automatically detects p-value columns based on the naming convention and the specified padj_type.
+
+This function identifies features that are significant under specified conditions and optionally handles discrepancies in directionality across multiple tests. It returns a filtered list of significant features with their metadata.
 }
 \author{
 Geremy Clair

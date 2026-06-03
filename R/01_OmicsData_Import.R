@@ -352,6 +352,7 @@ extractDIANNIDs<-function(file= "/filepath/report.pg_matrix.tsv"){
 #' extractScils()
 #' @description Extracts intensity data, metadata, and feature IDs from a SCiLS '.slx' file.
 #' The function efficiently processes large datasets common in mass spectrometry imaging.
+#' @import data.table
 #' @param file Character string. Path to the SCiLS '.slx' file.
 #' @param scils_executable Character string. Path to the SCiLS executable.
 #'        Default: 'C:/Program Files/SCiLS/SCiLS Lab/scilsMsServer.exe'
@@ -481,133 +482,63 @@ extractScils <- function(file, scils_executable, port, feature_list, normId, met
   # Get spot IDs
   spot_ids <- getRegionSpots(ScilsFileEnv, regionId = 'Regions')$spotId
 
-  # Import metadata using the more efficient approach
+  # Import metadata using a more efficient approach
   message(sprintf("Beginning metadata importation (%s).", Sys.time()))
   tryCatch({
-    # Get region tree for metadata extraction
     regionTree <- getRegionTree(ScilsFileEnv)
-
-    # Ensure regionTree is of the correct class
     if (!"RegionTree" %in% class(regionTree)) {
       stop("RegionTree argument is not of class 'RegionTree'")
     }
-
-    # Flatten the region tree
     allRegions <- flattenRegionTree(regionTree)
-
-    # Initialize spots data frame with coordinates
     spots_data <- allRegions[[1]]$spots
     base_fields <- c("spotId", "x", "y", "z")
     base_fields <- base_fields[base_fields %in% colnames(spots_data)]
+    return_df <- data.table::as.data.table(spots_data[, base_fields, drop = FALSE])
 
-    # Extract only base fields initially
-    return_df <- spots_data[, base_fields, drop = FALSE]
-
-    # Build attribute dictionary
-    attributes <- list()
-    for (region in allRegions) {
-      # Skip regions with no attributes or only single attributes
-      if (is.null(region$attributes) ||
-          (is.character(region$attributes$name) && length(region$attributes$name) <= 1)) {
+    # Build a compact lookup: store spotIds as a list to avoid row explosion in the loop
+    attr_list <- vector("list", length(allRegions))
+    for (i in seq_along(allRegions)) {
+      region <- allRegions[[i]]
+      atts <- region$attributes
+      if (is.null(atts) || nrow(atts) <= 1) {
+        next
+      }
+      atts <- atts[atts$name != "Date", , drop = FALSE]
+      if (!is.null(metadata_fields)) {
+        atts <- atts[atts$name %in% metadata_fields, , drop = FALSE]
+      }
+      if (nrow(atts) == 0) {
         next
       }
 
-      # Process each attribute in the region
-      for (att in seq_len(nrow(region$attributes))) {
-        attribute_name <- region$attributes[att, ]$name
-
-        # Skip "Date" attributes
-        if (attribute_name == "Date") {
-          next
-        }
-
-        attribute_level <- region$attributes[att, ]$value
-
-        # Handle "Class" attribute specially
-        if (attribute_name == "Class") {
-          attribute_name <- attribute_level
-          attribute_level <- attribute_name
-        }
-
-        # Skip if metadata_fields is specified and this attribute isn't in it
-        if (!is.null(metadata_fields) && !(attribute_name %in% metadata_fields)) {
-          next
-        }
-
-        # Initialize attribute_name and levels if not already in the list
-        if (!attribute_name %in% names(attributes)) {
-          attributes[[attribute_name]] <- list()
-        }
-
-        if (!attribute_level %in% names(attributes[[attribute_name]])) {
-          attributes[[attribute_name]][[attribute_level]] <- region$spots$spotId
-        } else {
-          # Append unique values using union
-          attributes[[attribute_name]][[attribute_level]] <- union(
-            attributes[[attribute_name]][[attribute_level]], region$spots$spotId
-          )
-        }
-      }
-    }
-
-    # If metadata_fields is NULL, use all attributes found
-    if (is.null(metadata_fields)) {
-      metadata_fields <- names(attributes)
-    } else {
-      # Ensure we only process fields that actually exist
-      metadata_fields <- intersect(metadata_fields, names(attributes))
-    }
-
-    # Vectorized function to determine attribute levels for a spot
-    get_region_levels <- function(spot_id, attr) {
-      levels <- names(attr)[sapply(attr, function(level_spots) {
-        spot_id %in% level_spots
-      })]
-      if (length(levels) == 0) {
-        return("absent")
-      } else {
-        return(paste(levels, collapse = ","))
-      }
-    }
-
-    # Process each metadata field
-    for (attribute_name in metadata_fields) {
-      if (!attribute_name %in% names(attributes)) {
-        # Add column of "absent" if attribute doesn't exist
-        return_df[[attribute_name]] <- "absent"
-        next
+      # Handle "Class" special case — rename the attribute to its value
+      is_class <- atts$name == "Class"
+      if (any(is_class)) {
+        atts$name[is_class] <- atts$value[is_class]
       }
 
-      attr <- attributes[[attribute_name]]
-
-      # Use vectorized apply for efficiency
-      return_df[[attribute_name]] <- vapply(
-        return_df$spotId,
-        FUN = get_region_levels,
-        FUN.VALUE = character(1),
-        attr = attr
+      # Store spotIds as a list column to avoid expanding millions of rows here
+      attr_list[[i]] <- data.table::data.table(
+        spotId = list(region$spots$spotId),
+        attribute = atts$name,
+        level = atts$value
       )
     }
-
-    # Clean up any NA values
-    return_df[is.na(return_df)] <- "absent"
-
-    # Clean up duplicate positive values
-    for (col in colnames(return_df)) {
-      if (!col %in% c("spotId", "x", "y", "z")) {  # Skip coordinate columns
-        # Remove duplicate values in comma-separated strings
-        return_df[[col]] <- sapply(return_df[[col]], function(x) {
-          if (is.na(x)) return(NA)
-          unique_vals <- unique(unlist(strsplit(as.character(x), ",")))
-          paste(unique_vals, collapse = ",")
-        })
+    if (length(attr_list) > 0) {
+      attr_dt <- data.table::rbindlist(Filter(Negate(is.null), attr_list))
+      # Now expand spotId lists once — far cheaper than doing it per-region
+      attr_dt <- attr_dt[, .(spotId = unlist(spotId)), by = .(attribute, level)]
+      # Collapse levels per spotId/attribute
+      attr_dt <- attr_dt[, .(value = paste(unique(level), collapse = ",")), by = .(spotId, attribute)]
+      attr_wide <- data.table::dcast(attr_dt, spotId ~ attribute, value.var = "value", fill = "absent")
+      return_df <- merge(return_df, attr_wide, by = "spotId", all.x = TRUE)
+      # Replace NA with "absent"
+      for (col in setdiff(names(return_df), base_fields)) {
+        data.table::set(return_df, which(is.na(return_df[[col]])), col, "absent")
       }
     }
-
-    # Format for consistency with the original function
-    metadata <- t(return_df)
-    rownames(metadata) <- c(base_fields, metadata_fields)
-
+    metadata <- t(as.data.frame(return_df))
+    rownames(metadata) <- colnames(return_df)
     message(sprintf("Metadata imported (%s).", Sys.time()))
   }, error = function(e) {
     stop(sprintf("Failed to import metadata: %s", e$message))

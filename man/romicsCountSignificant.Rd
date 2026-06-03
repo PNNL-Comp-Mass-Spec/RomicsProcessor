@@ -15,6 +15,7 @@ romicsCountSignificant(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object containing a statistics layer.}
 
 \item{comparisons}{Character vector of specific comparisons to include. If NULL, all comparisons are included. Default: NULL.}

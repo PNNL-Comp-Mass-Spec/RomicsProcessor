@@ -41,6 +41,7 @@ romicsLeidenSamples(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{cluster_using}{Character string specifying which data to use for clustering:
@@ -189,9 +190,6 @@ romics_obj <- romicsLeidenSamples(romics_obj,
 }
 }
 \seealso{
-\code{\link{romicsLouvainSamples}} for Louvain clustering,
-         \code{\link{romicsPCA}}, \code{\link{romicsUMAP}} for dimensionality reduction
-
 \code{\link{romicsLouvainSamples}} for Louvain clustering,
          \code{\link{romicsPCA}}, \code{\link{romicsUMAP}} for dimensionality reduction
 }

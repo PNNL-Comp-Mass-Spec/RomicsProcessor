@@ -7,6 +7,7 @@
 romicsExtractFactor(romics_object, factor = "main")
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{factor}{has to be either 'main' to indicate that the main factor has to be used (default) or a factor contained in the romics_object, the list of factors can be obtained using the function romicsFactorNames()}

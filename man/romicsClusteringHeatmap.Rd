@@ -19,6 +19,7 @@ romicsClusteringHeatmap(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{cluster_column}{Character indicating which clustering column to use from statistics layer
@@ -41,8 +42,9 @@ romicsClusteringHeatmap(
 \item{hclust_agglom_method}{Character indicating agglomeration method for hierarchical clustering: "ward.D2", "complete", "average", "single" (default: "ward.D2")}
 
 \item{color_palette}{Character indicating color palette name (default: "viridis"). Supported palettes:
-"viridis" (sequential), "RdBu" (diverging, good for scaled data), "RdYlBu" (diverging),
-"RdYlGn" (diverging), "Spectral" (diverging). Other palette names default to viridis.}
+"viridis" (sequential blue-yellow), "viridis_rev" (reversed, yellow-blue),
+"RdBu" (diverging red-white-blue), "BuRd" (diverging blue-white-red),
+"RdYlBu" (diverging), "RdYlGn" (diverging), "Spectral" (diverging). Other palette names default to viridis.}
 }
 \value{
 Returns a ComplexHeatmap object
@@ -55,6 +57,7 @@ Creates a ComplexHeatmap showing feature abundances arranged by clusters. When a
 Features are annotated with their cluster ID. Optional within-cluster hierarchical clustering organizes features by similarity.
 Optional column clustering groups similar samples/conditions together.
 For scaled data, diverging palettes like "RdBu" help distinguish positive and negative deviations from the mean.
+Use "viridis_rev" or "BuRd" for the opposite color direction (blue to red).
 }
 \examples{
 # Basic cluster heatmap with aggregation
@@ -82,6 +85,15 @@ hm <- romicsClusteringHeatmap(
   aggregate_by_factor = "condition",
   aggregate_order = c(1, 3, 2),
   color_palette = "RdBu"
+)
+hm
+
+# With blue-to-red reversed palette (opposite direction)
+hm <- romicsClusteringHeatmap(
+  romics_object,
+  cluster_column = "Cmeans_cluster",
+  aggregate_by_factor = "condition",
+  color_palette = "BuRd"
 )
 hm
 }

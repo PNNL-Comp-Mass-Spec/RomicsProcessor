@@ -15,6 +15,7 @@ createRomicsObject(
 )
 }
 \arguments{
+
 \item{data}{A data frame corresponding to the data.}
 
 \item{metadata}{A data frame corresponding to the metadata, the columns must be the same as the data ones.}

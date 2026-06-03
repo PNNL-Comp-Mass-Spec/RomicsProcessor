@@ -7,6 +7,7 @@
 getTrend(sData, m = NULL, p = 0.05, type = "both")
 }
 \arguments{
+
 \item{sData}{is a serie of data. It should be a vector of numerical values corresponding to the different points of the serie (e.g. time serie)}
 
 \item{m}{is the metadata associated to the serie (e.g. for a time-serie, it would be the time) if m is null a numeric sequence from 1:n will be used.}

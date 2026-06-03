@@ -16,6 +16,7 @@ extractMaxQuant(
 )
 }
 \arguments{
+
 \item{file}{This has to be the file path and file name of the maxQuant proteinGroup.txt file from which the information has to be extracted}
 
 \item{quantification_type}{has to be one of the following options : 'LFQ','Intensity','iBAQ','MS.MS', "TMT","TMT.corrected" Indicate what type of quantification needs to be extracted from the ProteinGroup table, can be either}

@@ -7,6 +7,7 @@
 romicsPlotPresent(romics_object, custom_colors = "colorlist")
 }
 \arguments{
+
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{custom_colors}{has to be either "colorlist" or a character vector containing the colors to be used for the plotting}

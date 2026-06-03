@@ -11,6 +11,7 @@ romicsSplitFactor(
 )
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{factor}{A character vector (lenght=1) containing a factors of the romics_object. the list of factors can be identified by using the function romicsFactorNames()}

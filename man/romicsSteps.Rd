@@ -7,6 +7,7 @@
 romicsSteps(romics_object, show_dates = TRUE, show_details = TRUE)
 }
 \arguments{
+
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{show_dates}{Boolean indicating if the dates have to be displayed}

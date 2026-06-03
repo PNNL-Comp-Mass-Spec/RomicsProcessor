@@ -11,6 +11,7 @@ extractFragPipeData(
 )
 }
 \arguments{
+
 \item{file}{This has to be the file path and file name of the FragPipe combined_protein.csv file from which the information has to be extracted}
 
 \item{quantification_type}{has to be one of the following options : 'MaxLFQ','Intensity','Total Spectral Count','Unique Spectral Count' Indicate what type of quantification needs to be extracted from the combined_protein.csv table}
