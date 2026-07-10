@@ -14,7 +14,6 @@ romicsCreateROIsFromFactor(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject() that contains 'x', 'y'
 coordinates and the specified factor in its metadata layer}
 

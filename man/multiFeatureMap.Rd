@@ -22,7 +22,6 @@ multiFeatureMap(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject(), the metadata must contain 'x' and 'y' coordinates.}
 
 \item{features}{A character vector containing the feature names to plot. Must match row names in the data.}

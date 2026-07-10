@@ -18,7 +18,6 @@ romicsFactorProportionTestPairwise(
 )
 }
 \arguments{
-
 \item{romics_object}{An romics_object created using romicsCreateObject().}
 
 \item{test_factor}{A character string indicating the factor whose level proportions

@@ -16,6 +16,7 @@ romicsVolcano(
   label_features = FALSE,
   top_features = 10,
   top_features_by = "abundance",
+  label_features_list = NULL,
   xlim = NULL,
   ylim = NULL,
   auto_ylim = TRUE,
@@ -24,7 +25,6 @@ romicsVolcano(
 )
 }
 \arguments{
-
 \item{p_type}{'p' or 'padj' to indicate the type of pvalue to consider for the volcano plots.}
 
 \item{p}{numeric value to indicate the maximum pvalue to use for the coloring of the volcano plot}
@@ -37,11 +37,13 @@ romicsVolcano(
 
 \item{plotly}{logical (TRUE or FALSE) to indicate whether to return interactive plotly plots (TRUE) or static ggplot plots (FALSE).}
 
-\item{label_features}{logical (TRUE or FALSE) to indicate whether to label top features on the plot.}
+\item{label_features}{logical (TRUE or FALSE) to indicate whether to label features on the plot.}
 
-\item{top_features}{numeric value indicating the number of top upregulated and downregulated features to label (only those passing the filters).}
+\item{top_features}{numeric value indicating the number of top upregulated and downregulated features to label (only those passing the filters). Ignored if label_features_list is specified.}
 
 \item{top_features_by}{'abundance' or 'p' to indicate the criteria for selecting top features. 'abundance' selects by fold change magnitude, 'p' selects by p-value significance.}
+
+\item{label_features_list}{character vector of feature IDs to label on the plot. If provided, overrides top_features and top_features_by.}
 
 \item{xlim}{numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.}
 

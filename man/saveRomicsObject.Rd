@@ -7,7 +7,6 @@
 saveRomicsObject(romics_object, file, format = "rdata")
 }
 \arguments{
-
 \item{romics_object}{A romics_object to save}
 
 \item{file}{Character string specifying the file path to save to (typically with .rdata or .rds extension)}

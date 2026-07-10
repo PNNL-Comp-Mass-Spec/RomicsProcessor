@@ -7,33 +7,20 @@
 romicsRemoveFactor(romics_object, factors_to_remove, force = FALSE)
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
-\item{factors_to_remove}{A character vector containing the name(s) of factor(s) to remove. The list of factor names can be identified by using the function romicsFactorNames().}
+\item{factors_to_remove}{A character vector containing the name of factor to remove. The list of factor names can be identified by using the function romicsFactorNames.}
 
 \item{force}{A logical indicating whether to allow removal of the main factor. Default: FALSE (prevents accidental removal of main factor).}
 }
 \value{
-A romics_object with the specified factor(s) removed from the metadata.
+A romics_object with the specified factor removed from the metadata.
 }
 \description{
 This function removes one or more factors from the metadata of a romics object.
 }
 \details{
 This function removes specified factors from the metadata layer of a romics object. By default, it prevents removal of the main factor to avoid breaking the object structure. Set force=TRUE to override this protection.
-}
-\examples{
-\dontrun{
-# Remove a single factor
-romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = "old_factor")
-
-# Remove multiple factors
-romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = c("factor1", "factor2"))
-
-# Remove main factor (use with caution!)
-romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = "condition", force = TRUE)
-}
 }
 \author{
 Geremy Clair

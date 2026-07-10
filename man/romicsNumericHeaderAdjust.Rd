@@ -12,7 +12,6 @@ romicsNumericHeaderAdjust(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{prefix}{A character string to be added as a prefix to all sample names. Default is "sample"}

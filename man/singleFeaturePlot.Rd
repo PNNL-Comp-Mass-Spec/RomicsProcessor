@@ -18,7 +18,6 @@ singleFeaturePlot(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{feature}{Character. Name of the feature to plot. Must match exactly (case-sensitive). Default: "feature"}

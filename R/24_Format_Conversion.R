@@ -894,7 +894,6 @@ romicsToPmartR <- function(romics_object, data_type = "proData") {
       fdata_cname = "SampleID",
       emeta_cname = "Mass_Tag_ID",
       data_scale = data_scale,
-      check.names = FALSE
     ),
     "proData" = pmartR::as.proData(
       e_data = e_data,
@@ -903,8 +902,7 @@ romicsToPmartR <- function(romics_object, data_type = "proData") {
       edata_cname = "Mass_Tag_ID",
       fdata_cname = "SampleID",
       emeta_cname = "Mass_Tag_ID",
-      data_scale = data_scale,
-      check.names = FALSE
+      data_scale = data_scale
     ),
     "lipidData" = pmartR::as.lipidData(
       e_data = e_data,
@@ -913,8 +911,7 @@ romicsToPmartR <- function(romics_object, data_type = "proData") {
       edata_cname = "Mass_Tag_ID",
       fdata_cname = "SampleID",
       emeta_cname = "Mass_Tag_ID",
-      data_scale = data_scale,
-      check.names = FALSE
+      data_scale = data_scale
     ),
     "metabData" = pmartR::as.metabData(
       e_data = e_data,
@@ -923,8 +920,7 @@ romicsToPmartR <- function(romics_object, data_type = "proData") {
       edata_cname = "Mass_Tag_ID",
       fdata_cname = "SampleID",
       emeta_cname = "Mass_Tag_ID",
-      data_scale = data_scale,
-      check.names = FALSE
+      data_scale = data_scale
     )
   )
 

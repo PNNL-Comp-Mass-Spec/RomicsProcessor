@@ -14,7 +14,6 @@ romicsImportFactor(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{data_source}{A character vector, data frame, or transposed data frame containing factor values.
@@ -41,33 +40,7 @@ Import factors from external objects (character vector, data frame, or transpose
 into a romics_object's metadata layer. Supports partial matching with "not_defined" for missing values.
 }
 \details{
-This function is flexible and handles multiple input formats:
-- Single factor as named character vector: names are sample IDs, values are factor levels
-- Multiple factors as data frame: columns are samples, rows are factors
-- Multiple factors as transposed data frame: rows are samples, columns are factors
-
-Partial matching allows importing data with fewer samples than the romics_object. Unmatched
-samples receive "not_defined" values and are reported in the console.
-}
-\examples{
-\dontrun{
-# Import from named character vector
-factor_vector <- c(sample1 = "groupA", sample2 = "groupB", sample3 = "groupA")
-romics_obj <- romicsImportFactor(romics_obj, factor_vector, factor_name = "my_factor")
-
-# Import multiple factors from data frame (samples as columns)
-factor_df <- data.frame(sample1 = c("groupA", "typeX"),
-                        sample2 = c("groupB", "typeY"),
-                        sample3 = c("groupA", "typeX"),
-                        row.names = c("group", "type"))
-romics_obj <- romicsImportFactor(romics_obj, factor_df)
-
-# Import from transposed data frame (samples as rows)
-factor_df_t <- data.frame(group = c("groupA", "groupB", "groupA"),
-                          type = c("typeX", "typeY", "typeX"),
-                          row.names = c("sample1", "sample2", "sample3"))
-romics_obj <- romicsImportFactor(romics_obj, factor_df_t)
-}
+This function is flexible and handles multiple input formats.
 }
 \author{
 Geremy Clair

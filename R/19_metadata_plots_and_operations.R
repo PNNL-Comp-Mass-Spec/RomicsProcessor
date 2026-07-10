@@ -8,7 +8,6 @@
 #' @return a ggplot
 #' @author Geremy Clair
 #' @export
-#'
 romicsMetadataRelations <- function(romics_object = romics_object,
                                     factors = c("factor1", "factor2", "factor3"),
                                     textsize = 3,
@@ -101,21 +100,6 @@ romicsMetadataRelations <- function(romics_object = romics_object,
 #' @param order Logical indicating whether to order bars by count (descending). Default is FALSE. Only used when plot=TRUE.
 #' @details Generates a count of how many times each level is seen in a factor. Can return either a named numeric vector or a ggplot bar chart.
 #' @return If plot=FALSE: A named numeric vector with counts for each factor level. If plot=TRUE: A ggplot object showing the counts as a bar chart.
-#' @examples \dontrun{
-#' # Get counts as a named vector
-#' counts <- factorCountLevels(romics_object = my_romics, factor = "Treatment")
-#'
-#' # Generate a plot
-#' factorCountLevels(romics_object = my_romics, factor = "Treatment", plot = TRUE)
-#'
-#' # Customize the plot
-#' factorCountLevels(romics_object = my_romics, factor = "Sex",
-#'                   plot = TRUE, textsize = 4, fill_color = "gray50", order = TRUE)
-#'
-#' # Access specific level count
-#' counts <- factorCountLevels(romics_object = my_romics, factor = "Sex")
-#' counts["Male"]
-#' }
 #' @author Geremy Clair
 #' @export
 factorCountLevels <- function(romics_object = romics_object,
@@ -213,26 +197,24 @@ factorCountLevels <- function(romics_object = romics_object,
   return(result)
 }
 
-
-#' @title Create Stacked Barplot of Factor Distribution
-#' @description Creates and displays stacked barplots showing the percentage distribution of one factor's levels across different levels of another factor from a romics_object.
-#'
-#' @param romics_object A romics_object created using romicsCreateObject().
-#' @param split_by_factor A character vector (length=1) containing a factor of the romics_object that will define the x-axis categories. The list of factors can be identified by using the function romicsFactorNames()
-#' @param frequency_for_factor A character vector (length=1) containing a factor of the romics_object that will be used to calculate frequency distributions within each level of split_by_factor. The list of factors can be identified by using the function romicsFactorNames()
-#' @param title A character string specifying the plot title. If NULL (default), an automatic title will be generated.
-#' @param xlab A character string specifying the x-axis label. If NULL (default), the split_by_factor name will be used.
-#' @param ylab A character string specifying the y-axis label. Default is "Percentage (%)".
-#' @param colors A character vector of colors for the different levels of frequency_for_factor. If NULL (default), ROP_colors will be used when available, otherwise rainbow colors will be used.
-#' @param legend_title A character string specifying the legend title. If NULL (default), the frequency_for_factor name will be used.
-#' @param show_percentages A logical value indicating whether to display percentage labels on the bars. Default is TRUE.
-#' @param text_size A numeric value specifying the size of percentage labels on the bars. Default is 3.
-#' @param text_color A character string specifying the color of percentage labels. Default is "black".
-#' @param show_summary_table A logical value indicating whether to print the summary table. Default is TRUE.
-#' @param export_summary_table A logical value indicating whether to export the summary table to the main environment. Default is FALSE.
-#' @param name_summary_table A character string specifying the name of the exported summary table. Default is "summary_table_FactorStackedBarplot".
-#' @details This function generates stacked barplots where each bar represents a level of the split_by_factor, and the stacked segments show the percentage distribution of the frequency_for_factor levels within each category. The function automatically converts extracted factors to factor type using as.factor(romicsExtractFactor()). Only complete cases (non-NA values) are included in the analysis. Colors are taken from ROP_colors by default when sufficient colors are available.
-#' @return A ggplot object representing the stacked barplot. If export_summary_table is TRUE, the summary table is attached as an attribute (accessible via attr(plot, "summary_table")).
+#' romicsFactorStackedBarplot()
+#' @description Creates a percentage stacked bar plot showing the distribution of one factor across levels of another factor, with a summary statistics table.
+#' @param romics_object A romics_object created with createRomicsObject()
+#' @param split_by_factor Character string specifying the factor name to use for the X-axis categories
+#' @param frequency_for_factor Character string specifying the factor name whose levels will be shown as stacked segments within each bar
+#' @param title Character string for the plot title. If NULL, defaults to "Distribution of <frequency_for_factor> by <split_by_factor>"
+#' @param xlab Character string for the X-axis label. If NULL, defaults to split_by_factor name
+#' @param ylab Character string for the Y-axis label (default: "Percentage")
+#' @param colors Character vector of colors for the stacked segments. If NULL, uses default RColorBrewer palette. Colors are assigned alphabetically to factor levels.
+#' @param legend_title Character string for the legend title. If NULL, defaults to frequency_for_factor name
+#' @param show_percentages Boolean indicating whether to display percentage values as text labels on the bars (default: TRUE)
+#' @param text_size Numeric value specifying the size of percentage text labels (default: 3)
+#' @param text_color Character string specifying the color of percentage text labels (default: "black")
+#' @param show_summary_table Boolean indicating whether to print the summary statistics table to console (default: TRUE)
+#' @param export_summary_table Boolean indicating whether to export the summary table to the global environment (default: FALSE)
+#' @param name_summary_table Character string specifying the name for the exported summary table (default: "summary_table_FactorStackedBarplot")
+#' @details This function creates a percentage stacked bar plot where each bar represents a level of split_by_factor, and segments within bars show the percentage of frequency_for_factor levels. The summary table displays counts and percentages for each combination of factors. Colors are assigned alphabetically to ensure consistent mapping between custom color vectors and factor levels.
+#' @return A ggplot2 object representing the percentage stacked bar plot. If export_summary_table=TRUE, also exports a data frame to the global environment with summary statistics.
 #' @author Geremy Clair
 #' @export
 romicsFactorStackedBarplot <- function(romics_object,
@@ -582,7 +564,6 @@ romicsFactorSummaryTable <- function(romics_object,
 #' @return a Romics_object with new factors
 #' @author Geremy Clair, Naina Beishembieva
 #' @export
-#'
 romicsSplitFactor<-function(romics_object=romics_object,factor=f,splitting_string=";"){
   arguments<-as.list(match.call())
   if(missing(splitting_string)){splitting_string<-";"}
@@ -701,22 +682,12 @@ romicsCombineFactors <- function(romics_object = romics_object,
 #' romicsRemoveFactor
 #' @description This function removes one or more factors from the metadata of a romics object.
 #' @param romics_object A romics_object created using romicsCreateObject().
-#' @param factors_to_remove A character vector containing the name(s) of factor(s) to remove. The list of factor names can be identified by using the function romicsFactorNames().
+#' @param factors_to_remove A character vector containing the name of factor to remove. The list of factor names can be identified by using the function romicsFactorNames.
 #' @param force A logical indicating whether to allow removal of the main factor. Default: FALSE (prevents accidental removal of main factor).
 #' @details This function removes specified factors from the metadata layer of a romics object. By default, it prevents removal of the main factor to avoid breaking the object structure. Set force=TRUE to override this protection.
-#' @return A romics_object with the specified factor(s) removed from the metadata.
+#' @return A romics_object with the specified factor removed from the metadata.
 #' @author Geremy Clair
 #' @export
-#' @examples \dontrun{
-#' # Remove a single factor
-#' romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = "old_factor")
-#'
-#' # Remove multiple factors
-#' romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = c("factor1", "factor2"))
-#'
-#' # Remove main factor (use with caution!)
-#' romics_object <- romicsRemoveFactor(romics_object, factors_to_remove = "condition", force = TRUE)
-#' }
 romicsRemoveFactor <- function(romics_object,
                                factors_to_remove,
                                force = FALSE) {
@@ -814,22 +785,26 @@ romicsRemoveFactor <- function(romics_object,
   return(romics_object)
 }
 
-#' @title Create Metadata Factor from Feature
-#' @description Creates a new factor in the metadata based on a feature's intensity using various classification methods.
-#' @param romics_object A romics_object created using romicsCreateObject().
-#' @param feature A character string specifying the name of the feature to use. Must be present in rownames of the data layer.
-#' @param method Classification method: "presence" (present/absent), "value" (above/below a fixed value), "percentage" (above/below a percentile). Default: "presence".
-#' @param value Numeric value for splitting when method = "value", Required when method = "value".
-#' @param percentage Numeric between 0 and 100 for percentage method (e.g., 75 for top 25% vs bottom 75%). Default: 50.
-#' @param n_groups Integer for number of groups when using percentage method with equal splits (2, 3, or 4). Default: 2. When > 2, overrides percentage parameter.
-#' @param factor_name Character string for the name of the new factor. If NULL, auto-generated based on method. Default: NULL.
-#' @param labels Character vector of custom labels. Length depends on n_groups. If NULL, auto-generated. For binary splits, order is c(high, low). Default: NULL.
-#' @param na_label Character string for samples where the feature is NA/not detected. Default: "absent".
-#' @param na_as_low Logical. For binary methods, should NA values be treated as "low" rather than a separate category? Default: FALSE.
-#' @param strict_inequality Logical. Use strict inequality (>) or >= for high group. Default: FALSE (uses >).
-#' @param include_value_in_name Logical. Include value/percentage in auto-generated factor name. Default: TRUE.
-#' @param verbose Logical. Print detailed summary. Default: TRUE.
-#' @return Returns the romics_object with the newly created factor added to its metadata.
+#' romicsFactorFromFeature()
+#' @description Creates a new factor in the metadata layer by classifying samples based on feature values using presence/absence, value-based, or percentage-based methods.
+#' @param romics_object A romics_object created with createRomicsObject()
+#' @param feature Character string specifying the name of the feature to classify samples by
+#' @param method Character string specifying the classification method: "presence" (default), "value", or "percentage"
+#'   - "presence": Classifies samples as present (has value) or absent (NA)
+#'   - "value": Classifies samples based on a fixed cutpoint value
+#'   - "percentage": Classifies samples into 2-4 groups based on percentile cutpoints
+#' @param value Numeric cutpoint value for method = "value". Required when method = "value".
+#' @param percentage Numeric value between 0 and 100 specifying the percentile cutpoint for method = "percentage" (default: 50 for median split)
+#' @param n_groups Numeric value (2, 3, or 4) specifying the number of groups to create for method = "percentage" (default: 2)
+#' @param factor_name Character string specifying the name for the new factor in metadata. If NULL, automatically generated based on method and feature name.
+#' @param labels Character vector specifying custom labels for factor levels. Length must match the number of groups created.
+#' @param na_label Character string specifying the label for missing values (default: "absent")
+#' @param na_as_low Boolean indicating whether to treat NA values as low values in percentage-based classification (default: FALSE)
+#' @param strict_inequality Boolean indicating whether to use strict inequality (< or >) versus non-strict (<= or >=) for cutpoints (default: FALSE)
+#' @param include_value_in_name Boolean indicating whether to include the cutpoint value in the factor name (default: TRUE)
+#' @param verbose Boolean indicating whether to display informative messages during execution (default: TRUE)
+#' @details This function creates a new factor by partitioning samples based on a single feature's values. The "percentage" method divides samples into n_groups based on equally spaced percentile cutpoints. For example, with n_groups=3 and percentage=50, samples are split at the 25th, 50th, and 75th percentiles.
+#' @return A modified romics_object with the new factor added to the metadata layer
 #' @author Geremy Clair
 #' @export
 romicsFactorFromFeature <- function(romics_object,
@@ -1251,7 +1226,6 @@ romicsTransferFactor <- function(source_romics_object, target_romics_object, fac
   message(paste(length(factors), "factor(s) transferred successfully."))
   return(target_romics_object)
 }
-
 
 #' romicsChangeLevelName()
 #' @description Changes the name(s) of one or more levels in a factor of the romics_object metadata layer.
@@ -1897,31 +1871,7 @@ romicsProportionHeatmap <- function(proportion_test_result,
 #'        If FALSE, throws error if factor already exists. Default: FALSE
 #' @param verbose Logical. Print messages about import progress. Default: TRUE
 #' @return A romics_object with new factors added to the metadata layer.
-#' @details This function is flexible and handles multiple input formats:
-#' - Single factor as named character vector: names are sample IDs, values are factor levels
-#' - Multiple factors as data frame: columns are samples, rows are factors
-#' - Multiple factors as transposed data frame: rows are samples, columns are factors
-#'
-#' Partial matching allows importing data with fewer samples than the romics_object. Unmatched
-#' samples receive "not_defined" values and are reported in the console.
-#' @examples \dontrun{
-#' # Import from named character vector
-#' factor_vector <- c(sample1 = "groupA", sample2 = "groupB", sample3 = "groupA")
-#' romics_obj <- romicsImportFactor(romics_obj, factor_vector, factor_name = "my_factor")
-#'
-#' # Import multiple factors from data frame (samples as columns)
-#' factor_df <- data.frame(sample1 = c("groupA", "typeX"),
-#'                         sample2 = c("groupB", "typeY"),
-#'                         sample3 = c("groupA", "typeX"),
-#'                         row.names = c("group", "type"))
-#' romics_obj <- romicsImportFactor(romics_obj, factor_df)
-#'
-#' # Import from transposed data frame (samples as rows)
-#' factor_df_t <- data.frame(group = c("groupA", "groupB", "groupA"),
-#'                           type = c("typeX", "typeY", "typeX"),
-#'                           row.names = c("sample1", "sample2", "sample3"))
-#' romics_obj <- romicsImportFactor(romics_obj, factor_df_t)
-#' }
+#' @details This function is flexible and handles multiple input formats.
 #' @author Geremy Clair
 #' @export
 romicsImportFactor <- function(romics_object,
@@ -2141,4 +2091,112 @@ romicsImportFactor <- function(romics_object,
   romics_object <- romicsUpdateSteps(romics_object, arguments)
 
   return(romics_object)
+}
+
+#' romicsFactorFrequencyBarplot()
+#' @description Generate a simple barplot showing the frequency (count) of samples for each level of a given factor
+#' @param romics_object A romics_object created using romicsCreateObject()
+#' @param factor A character vector (length=1) containing a factor name from the romics_object. Factor names can be identified using romicsFactorNames()
+#' @param title Character. Title for the plot. If NULL, defaults to "Frequency of [factor_name]"
+#' @param xlab Character. X-axis label. If NULL, defaults to the factor name
+#' @param ylab Character. Y-axis label. Default: "Count"
+#' @param factor_colors Character. Either "colorlist" (default) to use colors from romics_object$custom_colors, or a character vector of custom colors for the bars
+#' @param show_counts Logical. Whether to display count values on top of bars. Default: TRUE
+#' @param text_size Numeric. Size of count text labels. Default: 3
+#' @param text_color Character. Color of count text labels. Default: "black"
+#' @details Generates a barplot displaying the frequency distribution of a single factor variable, showing the number of samples in each level. Uses the theme_ROP() ggplot theme
+#' @return A ggplot2 object
+#' @author Geremy Clair
+#' @export
+romicsFactorFrequencyBarplot <- function(romics_object,
+                                         factor,
+                                         title = NULL,
+                                         xlab = NULL,
+                                         ylab = "Count",
+                                         factor_colors = "colorlist",
+                                         show_counts = TRUE,
+                                         text_size = 3,
+                                         text_color = "black") {
+
+  if (!is.romicsObject(romics_object)) {
+    stop("romics_object must be a romics object")
+  }
+  if (missing(factor) || !is.character(factor) || length(factor) != 1) {
+    stop("factor must be a single character string")
+  }
+
+  tryCatch({
+    factor_data <- romicsExtractFactor(romics_object, factor)
+  }, error = function(e) {
+    stop("Error extracting factor. Please verify that the factor name exists in the romics_object metadata.")
+  })
+
+  # Create data frame with frequency counts
+  plot_data <- data.frame(
+    level = factor_data,
+    stringsAsFactors = FALSE
+  )
+
+  # Remove NA values
+  plot_data <- plot_data[!is.na(plot_data$level), , drop = FALSE]
+  if (nrow(plot_data) == 0) {
+    stop("No valid data found after removing NA values")
+  }
+
+  # Calculate frequencies
+  freq_data <- as.data.frame(table(plot_data$level), stringsAsFactors = FALSE)
+  colnames(freq_data) <- c("level", "count")
+  freq_data$level <- factor(freq_data$level, levels = sort(unique(freq_data$level)))
+
+  # Set defaults for labels
+  if (is.null(title)) {
+    title <- paste("Frequency of", factor)
+  }
+  if (is.null(xlab)) {
+    xlab <- factor
+  }
+
+  # Get colors
+  n_levels <- nrow(freq_data)
+  if (length(factor_colors) == 1 && factor_colors == "colorlist") {
+    # Use colors from romics_object$custom_colors
+    colors <- romics_object$custom_colors
+    if (length(colors) < n_levels) {
+      warning(paste0("Not enough colors in romics_object$custom_colors (", length(colors), " given, ",
+                     n_levels, " needed). Cycling through available colors."))
+      colors <- rep(colors, length.out = n_levels)
+    } else {
+      colors <- colors[seq_len(n_levels)]
+    }
+  } else {
+    # Use provided colors
+    colors <- factor_colors
+    if (length(colors) < n_levels) {
+      warning(paste0("Not enough colors provided (", length(colors), " given, ",
+                     n_levels, " needed). Cycling through available colors."))
+      colors <- rep(colors, length.out = n_levels)
+    } else {
+      colors <- colors[seq_len(n_levels)]
+    }
+  }
+
+  # Create barplot with theme_ROP()
+  p <- ggplot(freq_data, aes(x = level, y = count, fill = level)) +
+    geom_bar(stat = "identity", color = "white", linewidth = 0.5) +
+    scale_fill_manual(values = colors, guide = "none") +
+    labs(title = title, x = xlab, y = ylab) +
+    theme_ROP()
+
+  # Add count labels on top of bars if requested
+  if (show_counts) {
+    p <- p + geom_text(
+      aes(label = count),
+      vjust = -0.5,
+      size = text_size,
+      color = text_color,
+      fontface = "bold"
+    )
+  }
+
+  return(p)
 }

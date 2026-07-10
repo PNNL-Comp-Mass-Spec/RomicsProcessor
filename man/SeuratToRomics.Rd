@@ -7,7 +7,6 @@
 SeuratToRomics(seurat_object, main_factor = NULL, omics_type = NULL)
 }
 \arguments{
-
 \item{seurat_object}{A Seurat object}
 
 \item{main_factor}{Character. Name of the metadata column to use as main factor.

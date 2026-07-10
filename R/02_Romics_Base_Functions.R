@@ -1544,14 +1544,18 @@ romicsExportData<-function(romics_object, data=TRUE, statistics = FALSE, missing
     }
 
   if(IDs==TRUE){
-    if("IDs" %in% names(romics_object)){
-      ids <- romics_object$IDs
-      ids <- cbind(original_ids=rownames(ids),ids)
-      df<-cbind(original_ids=rownames(df),df)
-      df<- merge(df,ids,by="original_ids")
-      rownames(df)<-df[,colnames(df)=="original_ids"]
-      df<-df[,colnames(df)!="original_ids"]
+    if(!("IDs" %in% names(romics_object))){
+      stop("The selected romics object does not contain an 'IDs' layer. Use IDs=FALSE or add an IDs layer to the romics_object.")
     }
+    if(is.null(romics_object$IDs) || nrow(romics_object$IDs) == 0){
+      stop("The 'IDs' layer exists but is empty or NULL.")
+    }
+    ids <- romics_object$IDs
+    ids <- cbind(original_ids=rownames(ids),ids)
+    df<-cbind(original_ids=rownames(df),df)
+    df<- merge(df,ids,by="original_ids")
+    rownames(df)<-df[,colnames(df)=="original_ids"]
+    df<-df[,colnames(df)!="original_ids"]
   }
 
   return(df)

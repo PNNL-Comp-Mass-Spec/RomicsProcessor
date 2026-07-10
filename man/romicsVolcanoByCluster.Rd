@@ -18,6 +18,7 @@ romicsVolcanoByCluster(
   label_features = FALSE,
   top_features = 10,
   top_features_by = "abundance",
+  label_features_list = NULL,
   n_cols = NULL,
   return_plot = FALSE,
   xlim = NULL,
@@ -28,7 +29,6 @@ romicsVolcanoByCluster(
 )
 }
 \arguments{
-
 \item{romics_object}{a romics object containing statistics}
 
 \item{within}{character string specifying the cluster to filter (e.g., "Leiden_clust_01"). If NULL, the first cluster matching cluster_factor is used.}
@@ -49,11 +49,13 @@ romicsVolcanoByCluster(
 
 \item{plotly}{logical (TRUE or FALSE) to indicate whether to return interactive plotly plots (TRUE) or static ggplot plots (FALSE)}
 
-\item{label_features}{logical (TRUE or FALSE) to indicate whether to label top features on the plot}
+\item{label_features}{logical (TRUE or FALSE) to indicate whether to label features on the plot}
 
-\item{top_features}{numeric value indicating the number of top upregulated and downregulated features to label}
+\item{top_features}{numeric value indicating the number of top upregulated and downregulated features to label. Ignored if label_features_list is specified.}
 
 \item{top_features_by}{'abundance' or 'p' to indicate the criteria for selecting top features}
+
+\item{label_features_list}{character vector of feature IDs to label on the plot. If provided, overrides top_features and top_features_by.}
 
 \item{n_cols}{numeric value indicating the number of columns in the multipanel layout (NULL for auto square-ish grid)}
 

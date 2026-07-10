@@ -31,7 +31,6 @@ romicsExtractSignificantFeatures(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object containing a statistics layer.}
 
 \item{comparisons}{Character vector of specific comparisons to include (e.g., "Chronic_BPD_vs_Chronic_Ctrl"). If NULL, all comparisons are included. Default: NULL.}

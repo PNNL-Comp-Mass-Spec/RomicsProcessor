@@ -7,7 +7,6 @@
 romicsToPmartR(romics_object, data_type = "proData")
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{data_type}{Character. The type of pmartR object to create: "proData" (proteomics),

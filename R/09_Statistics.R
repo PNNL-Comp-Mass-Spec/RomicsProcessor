@@ -21,6 +21,26 @@ romicsStatLayer<-function(romics_object=romics_object){
   return(romics_object)
 }
 
+#' romicsRemoveStatistics()
+#' @description Remove the statistics layer from a romics_object
+#' @param romics_object A romics_object containing a statistics layer
+#' @details Removes the statistics layer completely from the romics_object. This is useful when you want to clear calculated statistics and start fresh with different statistical tests.
+#' @return This function returns a modified romics object without the statistics layer
+#' @author Geremy Clair
+#' @export
+romicsRemoveStatistics<-function(romics_object=romics_object){
+  arguments<-as.list(match.call())
+  if(!is.romicsObject(romics_object) | missing(romics_object)) {stop("<romics_object> is missing or is not in the appropriate format.")}
+  if(is.null(romics_object$statistics)){
+    message("The <romics_object> does not contain a statistics layer.")
+  }else{
+    romics_object$statistics<-NULL
+    message("The statistics layer was removed from the <romics_object>.")
+  }
+  romics_object<-romicsUpdateSteps(romics_object,arguments)
+  return(romics_object)
+}
+
 #' pFrequencyPlot()
 #' @description makes a frequency plot of the pvalues and adjustedpvalues (columns of the statistics layer ending by '_p' and '_padj')
 #' @param romics_object A romics_object created with the function romicsCreateObject()
@@ -141,6 +161,8 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
 
   #extract the levels to be considered
   levels_factor<-levels(factor)
+  # Keep only levels that actually exist in the data
+  levels_factor<-levels_factor[levels_factor %in% factor]
 
   #create T_results and fold_change
   t_result <- vector(mode="numeric",length=nrow(data))
@@ -155,8 +177,13 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
 
   if(mode=="vs"){
     #determine the list of combinations to consider
+    if(length(levels_factor) < 2){
+      stop(paste("The selected factor must have at least 2 levels to perform t-tests in 'vs' mode. Found levels:", paste(levels_factor, collapse=", ")))
+    }
     by2combinations<- t(combn(levels_factor,2))
     if(reverse_order==TRUE){by2combinations<-by2combinations[,2:1]}
+    # Ensure by2combinations is always a matrix, even with 1 row (must be after subsetting)
+    if(!is.matrix(by2combinations)){by2combinations<-matrix(by2combinations,nrow=1)}
 
     #loop calculating pval,  fold changes
     for(i in 1:nrow(by2combinations)){
@@ -184,7 +211,16 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
           t_result[j] <- NA
           t_padj[j]<-NA
         }else{
-          t_result[j] <- t.test(as.numeric(data[j,factor==by2combinations[i,1]]),as.numeric(data[j,factor==by2combinations[i,2]]),alternative=alternative, paired = paired, var.equal=var.equal)$p.value
+          group1 <- as.numeric(data[j,factor==by2combinations[i,1]])
+          group2 <- as.numeric(data[j,factor==by2combinations[i,2]])
+          group1_n <- sum(!is.na(group1))
+          group2_n <- sum(!is.na(group2))
+          if(group1_n < 2 || group2_n < 2){
+            t_result[j] <- NA
+            t_padj[j] <- NA
+          }else{
+            t_result[j] <- t.test(group1,group2,alternative=alternative, paired = paired, var.equal=var.equal)$p.value
+          }
         }
       }
 
@@ -235,7 +271,16 @@ romicsTtest<-function(romics_object, alternative="two.sided", paired = FALSE, pa
           t_result[j] <- NA
           t_padj[j]<-NA
         }else{
-          t_result[j] <- t.test(x = as.numeric(data[j,factor==levels_factor[i]]),y=as.numeric(data[j,factor!=levels_factor[i]]),alternative=alternative, paired = paired, var.equal=var.equal,...)$p.value
+          group1 <- as.numeric(data[j,factor==levels_factor[i]])
+          group2 <- as.numeric(data[j,factor!=levels_factor[i]])
+          group1_n <- sum(!is.na(group1))
+          group2_n <- sum(!is.na(group2))
+          if(group1_n < 2 || group2_n < 2){
+            t_result[j] <- NA
+            t_padj[j] <- NA
+          }else{
+            t_result[j] <- t.test(x = group1,y=group2,alternative=alternative, paired = paired, var.equal=var.equal,...)$p.value
+          }
         }
       }
 
@@ -710,7 +755,12 @@ romicsANOVA<-function(romics_object, padj=TRUE, padj_method="BH", factor="main")
     return(p)
   }
   #run the tests
-  ANOVA_results <-data.frame(p=apply(df[2:ncol(df)], 2, anova_feature, factor = df$factor))
+  p_values <- apply(df[2:ncol(df)], 2, anova_feature, factor = df$factor)
+  # Ensure p_values is always a vector
+  if (!is.vector(p_values)) {
+    p_values <- as.numeric(p_values)
+  }
+  ANOVA_results <- data.frame(p=p_values)
   #adjust_the_colnames
   colnames(ANOVA_results)<-paste0("ANOVA_",factor_name,"_p")
   #if padj demanded calculate padj

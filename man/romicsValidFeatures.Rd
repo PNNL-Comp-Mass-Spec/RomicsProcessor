@@ -11,7 +11,6 @@ romicsValidFeatures(
 )
 }
 \arguments{
-
 \item{romics_object}{has to be a romics_object created using romicsCreateObject()}
 
 \item{return_type}{Character string specifying the output format. Options are: "table" (default) returns a data frame with sample names and counts; "vector" returns a named numeric vector; "plot" returns a ggplot2 bar plot.}
@@ -20,29 +19,12 @@ romicsValidFeatures(
 }
 \value{
 Depending on return_type:
-\itemize{
-  \item "table": A data frame with columns: Sample (sample names), Valid_features (count), Percent_valid (percentage)
-  \item "vector": A named numeric vector with sample names as names and counts as values
-  \item "plot": A ggplot2 bar plot showing valid features per sample, colored by the main factor
-}
 }
 \description{
 Calculates and returns the number of features with valid (non-missing) values for each sample in the romics_object.
 }
 \details{
 This function counts the number of non-missing values (valid features) for each sample (column) in the romics_object$data layer. The results can be returned as a table, vector, or plot depending on the return_type parameter.
-}
-\examples{
-\dontrun{
-# Get a table of valid features per sample
-valid_table <- romicsValidFeatures(romics_object)
-
-# Get a vector of valid features per sample
-valid_vector <- romicsValidFeatures(romics_object, return_type = "vector")
-
-# Plot the valid features per sample
-romicsValidFeatures(romics_object, return_type = "plot")
-}
 }
 \author{
 Geremy Clair

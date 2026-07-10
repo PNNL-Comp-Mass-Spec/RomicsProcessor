@@ -13,7 +13,6 @@ singleVariableTrend(
 )
 }
 \arguments{
-
 \item{romics_object}{has to be a romics_object created using the function romicsCreateObject() (see dedicated documentation) and has to be numeric.}
 
 \item{variable}{has to be a character vector. Romics will try to find an exact match or a partial match of the variable in the analytes names (colnames(romics_object$data))}

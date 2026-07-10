@@ -14,7 +14,6 @@ romicsTransferFactor(
 )
 }
 \arguments{
-
 \item{source_romics_object}{A romics_object containing the factors to be transferred}
 
 \item{target_romics_object}{A romics_object that will receive the transferred factors}

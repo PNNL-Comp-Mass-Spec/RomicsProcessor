@@ -13,7 +13,6 @@ romicsExportData(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{statistics}{boolean, has to be TRUE or FALSE. Indicates if the statistics should be exported along with the data (FALSE by default).}

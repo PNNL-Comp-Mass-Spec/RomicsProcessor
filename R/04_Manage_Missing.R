@@ -615,24 +615,8 @@ romicsRestoreMissing<-function(romics_object){
 #' @param custom_colors Character string or vector. If "colorlist" (default), uses the colors from romics_object. If a vector of colors is provided, it will be used for the plot (only applicable when return_type = "plot").
 #' @details This function counts the number of non-missing values (valid features) for each sample (column) in the romics_object$data layer. The results can be returned as a table, vector, or plot depending on the return_type parameter.
 #' @return Depending on return_type:
-#' \itemize{
-#'   \item "table": A data frame with columns: Sample (sample names), Valid_features (count), Percent_valid (percentage)
-#'   \item "vector": A named numeric vector with sample names as names and counts as values
-#'   \item "plot": A ggplot2 bar plot showing valid features per sample, colored by the main factor
-#' }
 #' @author Geremy Clair
 #' @export
-#' @examples
-#' \dontrun{
-#' # Get a table of valid features per sample
-#' valid_table <- romicsValidFeatures(romics_object)
-#'
-#' # Get a vector of valid features per sample
-#' valid_vector <- romicsValidFeatures(romics_object, return_type = "vector")
-#'
-#' # Plot the valid features per sample
-#' romicsValidFeatures(romics_object, return_type = "plot")
-#' }
 romicsValidFeatures <- function(romics_object, return_type = "table", custom_colors = "colorlist") {
   # Input validation
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
@@ -707,14 +691,17 @@ romicsValidFeatures <- function(romics_object, return_type = "table", custom_col
   }
 }
 
-#' @title Calculate Percentage of Valid Features
-#' @description Calculates and returns the percentage of samples that have valid (non-missing) values for each feature in the romics_object.
-#'
-#' @param romics_object has to be a romics_object created using romicsCreateObject()
-#' @param return_type Character string specifying the output format. Options are: "table" (default) returns a data frame with feature names and percentages; "vector" returns a named numeric vector; "plot" returns a ggplot2 bar plot.
-#' @param reorder Character string indicating how to order features in the output. Options are: NULL (original order), "ascending" (lowest to highest valid %), "descending" (highest to lowest valid %). Only applicable for "table" and "plot" return types.
-#' @param features Character vector containing a list of specific features to analyze. If NULL (default), all features are included.
-#' @details This function calculates the percentage of samples (columns) that have valid (non-missing) values for each feature (row) in the romics_object$data layer. This is complementary to romicsValidFeatures() which counts valid features per sample.
+#' romicsValidFeaturesPercent()
+#' @description Calculates and displays the percentage of valid (non-missing) samples for each feature in a romics_object.
+#' @param romics_object A romics_object created with createRomicsObject()
+#' @param return_type Character string specifying the format for the output: "table" (default), "vector", or "plot"
+#'   - "table": Returns a data frame with Feature, Valid_samples, and Percent_valid columns
+#'   - "vector": Returns a named numeric vector with feature names and their completeness percentages
+#'   - "plot": Returns a ggplot2 bar plot visualization of feature completeness
+#' @param reorder Character string or NULL specifying whether to sort by completeness percentage: NULL (original order, default), "ascending", or "descending"
+#' @param features Character vector of specific feature names to include in the analysis. If NULL, all features are analyzed.
+#' @details This function calculates the percentage of samples with valid (non-missing) values for each feature using the missingdata layer. Results can be returned as a summary table, a named vector, or a visualization. Useful for identifying features with varying levels of data completeness.
+#' @return Depends on return_type: data frame (table), named numeric vector (vector), or ggplot2 object (plot)
 #' @author Geremy Clair
 #' @export
 romicsValidFeaturesPercent <- function(romics_object, return_type = "table", reorder = NULL, features = NULL) {

@@ -346,7 +346,7 @@ FeatureCorrelationHeatmap<-function(romics_object,corr_type="pearson",use="every
   #generate dend
   dend <- hclust_Feature %>%
     as.dendrogram() %>%
-    set("labels_cex",cex)
+    dendextend::set("labels_cex",cex)
   if(number_of_clusters>0){
     dend<- color_branches(dend, k=number_of_clusters,col=ROP_colors[1:number_of_clusters])
     dend<-color_labels(dend, k=number_of_clusters,col=ROP_colors[1:number_of_clusters])
@@ -416,7 +416,7 @@ SampleCorrelationHeatmap<-function(romics_object,corr_type="pearson",use="everyt
   #generate dend
   dend <- hclust_Sample %>%
     as.dendrogram() %>%
-    set("labels_cex",cex)
+    dendextend::set("labels_cex",cex)
   if(number_of_clusters>0){
     dend<- color_branches(dend, k=number_of_clusters,col=ROP_colors[1:number_of_clusters])
     dend<-color_labels(dend, k=number_of_clusters,col=ROP_colors[1:number_of_clusters])

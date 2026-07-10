@@ -12,7 +12,6 @@ romicsToSeurat(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject().}
 
 \item{assay_name}{Character. Name for the Seurat assay. Default: "RNA"}

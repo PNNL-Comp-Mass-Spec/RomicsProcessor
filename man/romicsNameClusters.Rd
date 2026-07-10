@@ -21,7 +21,6 @@ romicsNameClusters(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{cluster_factor}{Character string specifying the name of an existing factor in metadata containing the clusters to rename.

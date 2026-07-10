@@ -16,7 +16,6 @@ imputeMissingEval(
 )
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{nb_stdev}{number of standard deviations away from the median to place the missingness. Default: 1.8}

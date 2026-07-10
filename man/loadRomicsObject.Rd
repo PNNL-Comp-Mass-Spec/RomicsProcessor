@@ -7,7 +7,6 @@
 loadRomicsObject(file, silent = FALSE)
 }
 \arguments{
-
 \item{file}{Character string specifying the file path to load from (typically with .rds or .RData extension)}
 
 \item{silent}{Logical (TRUE or FALSE) to suppress the summary information display (default: FALSE)}

@@ -25,7 +25,6 @@ romicsComplexHeatmap(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics object containing $data, $statistics, and $metadata layers}
 
 \item{comparison_prefix}{Character string of the comparison prefix (e.g., "Alveoli_pleura_vs_Bronchi_bronchiole"). If NULL, auto-detects from statistics columns}

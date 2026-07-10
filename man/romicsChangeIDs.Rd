@@ -7,7 +7,6 @@
 romicsChangeIDs(romics_object, newIDs)
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{newIDs}{Character string. Must match exactly one of the column names of the 'IDs' layer}

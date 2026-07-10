@@ -23,7 +23,6 @@ extractScils(
 )
 }
 \arguments{
-
 \item{file}{Character string. Path to the SCiLS '.slx' file.}
 
 \item{scils_executable}{Character string. Path to the SCiLS executable.

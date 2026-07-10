@@ -17,7 +17,6 @@ romicsTransferEmbeddings(
 )
 }
 \arguments{
-
 \item{origin_romics_object}{has to be a romics_object created using romicsCreateObject()}
 
 \item{receiving_romics_object}{has to be a romics_object created using romicsCreateObject() and containing the same samples as the origin_romics_object.}
@@ -27,7 +26,7 @@ romicsTransferEmbeddings(
 \value{
 Returns the receiving_romics_object with the transferred embeddings.
 
-Returns the receiving_romics_object with the transferred embeddings.
+Returns the receiving_romics_object with the transferred embeddings and enhanced step tracking for complete traceability.
 }
 \description{
 This function enables to transfer PCA, UMAP, and t-SNE coordinates/embeddings from one romics_object
@@ -37,6 +36,19 @@ have to contain the same <samples> (data columns).
 This function enables to transfer PCA, UMAP, and t-SNE coordinates/embeddings from one romics_object
 to another one providing added flexibility in embeddings generation. The origin and receiving object
 have to contain the same <samples> (data columns).
+
+The function captures complete analytical traceability by recording divergent steps from the origin object,
+enabling full understanding of how embeddings were derived and how the objects differ.
+}
+\details{
+This function automatically analyzes the relationship between the two objects using checkRelationRomicsObjects()
+and records divergent steps from the origin object in the receiving object's steps layer with "external_object_" prefix.
+This preserves complete analytical traceability showing:
+\itemize{
+  \item Which transformations were applied to the origin object (external_object_date/fun entries)
+  \item When embeddings were transferred (romicsTransferEmbeddings entry)
+  \item Which object the embeddings came from (origin entry with name and UUID)
+}
 }
 \author{
 Geremy Clair

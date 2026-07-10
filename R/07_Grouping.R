@@ -270,10 +270,20 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
       # If factor_name is different from main_factor, update the romics_object
       if(factor_name != romics_object$main_factor) {
         message(paste0("Changing factor to ", factor_name, ", this operation may take a few seconds."))
-        romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
-        # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+        # Save existing colors if they exist
+        existing_colors <- NULL
         if("colors_romics" %in% rownames(romics_object$metadata)) {
-          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+          existing_colors <- romics_object$metadata["colors_romics", , drop = FALSE]
+        }
+        romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
+        # Restore the colors if they existed (preserve user-specified colors)
+        if(!is.null(existing_colors)) {
+          romics_object$metadata <- rbind(romics_object$metadata, existing_colors)
+        } else {
+          # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+          if("colors_romics" %in% rownames(romics_object$metadata)) {
+            romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+          }
         }
       }
     }
@@ -355,10 +365,25 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
     color_values <- factor(factor_values)
     color_title <- factor_name
 
-    # Create named color vector for ggplot - match each unique level to its color
-    unique_levels <- unique(as.character(factor_values))
-    idx <- match(unique_levels, as.character(factor_values))
-    colors <- setNames(color_values_mapped[idx], unique_levels)
+    # Create named color vector for ggplot - use metadata colors if available
+    if("colors_romics" %in% rownames(romics_object$metadata)) {
+      # Use the stored colors from metadata
+      colors_metadata <- as.character(romics_object$metadata["colors_romics", ])
+      unique_levels <- unique(as.character(factor_values))
+      # Match each unique level to its color in metadata order
+      colors <- setNames(colors_metadata[match(unique_levels, names(colors_metadata))], unique_levels)
+      # Fill in any missing colors from color_values_mapped
+      missing_idx <- is.na(colors)
+      if(any(missing_idx)) {
+        idx <- match(names(colors)[missing_idx], as.character(factor_values))
+        colors[missing_idx] <- color_values_mapped[idx[!is.na(idx)]]
+      }
+    } else {
+      # Fallback: Create from color_values_mapped
+      unique_levels <- unique(as.character(factor_values))
+      idx <- match(unique_levels, as.character(factor_values))
+      colors <- setNames(color_values_mapped[idx], unique_levels)
+    }
   } else { # color_by == "feature"
     # Extract feature values
     feature_values <- as.numeric(romics_object$data[feature, ])
@@ -421,7 +446,8 @@ romicsPCAplot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FAL
     )
     # Convert to factor if needed
     if(color_by == "factor") {
-      pca_coordinates$color_var <- as.factor(pca_coordinates$color_var)
+      # Ensure factor levels match the order of our color vector
+      pca_coordinates$color_var <- factor(pca_coordinates$color_var, levels = names(colors))
     }
 
     # Determine plot scale
@@ -800,15 +826,37 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       }
     }
 
-    # Always update factor if it's different OR if force_color_update is TRUE
-    # BUT: Don't update if custom color_palette is provided (we'll handle colors ourselves)
-    if(factor_name != romics_object$main_factor || force_color_update) {
+    # Check if the requested factor_name matches the metadata row name for main_factor
+    current_main_factor_name <- rownames(romics_object$metadata)[1]
+    if(!is.null(romics_object$main_factor)) {
+      # Find which row name corresponds to the main_factor values
+      for(i in 1:nrow(romics_object$metadata)) {
+        if(all(as.character(romics_object$metadata[i, ]) == as.character(romics_object$main_factor))) {
+          current_main_factor_name <- rownames(romics_object$metadata)[i]
+          break
+        }
+      }
+    }
+
+    # Only update factor if it's different from current main_factor AND force_color_update is TRUE
+    # OR if we need to change to a different factor
+    if(factor_name != current_main_factor_name || force_color_update) {
       if(is.null(color_palette)) {
         message(paste0("Changing factor to ", factor_name, ", this operation may take a few seconds."))
-        romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
-        # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+        # Save existing colors if they exist
+        existing_colors <- NULL
         if("colors_romics" %in% rownames(romics_object$metadata)) {
-          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+          existing_colors <- romics_object$metadata["colors_romics", , drop = FALSE]
+        }
+        romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
+        # Restore the colors if they existed (preserve user-specified colors)
+        if(!is.null(existing_colors)) {
+          romics_object$metadata <- rbind(romics_object$metadata, existing_colors)
+        } else {
+          # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+          if("colors_romics" %in% rownames(romics_object$metadata)) {
+            romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+          }
         }
       } else {
         message(paste0("Using factor '", factor_name, "' with custom color palette (skipping romicsChangeFactor)."))
@@ -889,10 +937,25 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
 
   # Create color mapping for factor-based coloring
   if(color_by == "factor") {
-    # Create a named vector mapping factor levels to colors
-    unique_levels <- unique(as.character(factor_values))
-    idx <- match(unique_levels, as.character(factor_values))
-    colors <- setNames(color_values_mapped[idx], unique_levels)
+    # Create a named vector mapping factor levels to colors from metadata
+    if("colors_romics" %in% rownames(romics_object$metadata)) {
+      # Use the stored colors from metadata
+      colors_metadata <- as.character(romics_object$metadata["colors_romics", ])
+      unique_levels <- unique(as.character(factor_values))
+      # Match each unique level to its color in metadata order
+      colors <- setNames(colors_metadata[match(unique_levels, names(colors_metadata))], unique_levels)
+      # Fill in any missing colors from color_values_mapped
+      missing_idx <- is.na(colors)
+      if(any(missing_idx)) {
+        idx <- match(names(colors)[missing_idx], as.character(factor_values))
+        colors[missing_idx] <- color_values_mapped[idx[!is.na(idx)]]
+      }
+    } else {
+      # Fallback: Create from color_values_mapped
+      unique_levels <- unique(as.character(factor_values))
+      idx <- match(unique_levels, as.character(factor_values))
+      colors <- setNames(color_values_mapped[idx], unique_levels)
+    }
   }
 
   # For 3D plot
@@ -948,7 +1011,8 @@ romicsUmapPlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
 
     # Convert to factor if needed
     if(color_by == "factor") {
-      umap_coordinates$color_var <- as.factor(umap_coordinates$color_var)
+      # Ensure factor levels match the order of our color vector
+      umap_coordinates$color_var <- factor(umap_coordinates$color_var, levels = names(colors))
     }
 
     # Create individual plot
@@ -1455,10 +1519,20 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
       # If factor_name is different from main_factor, update the romics_object
       if(factor_name != romics_object$main_factor) {
         message(paste0("Changing factor to ", factor_name, ", this operation may take a few seconds."))
-        romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
-        # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+        # Save existing colors if they exist
+        existing_colors <- NULL
         if("colors_romics" %in% rownames(romics_object$metadata)) {
-          romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+          existing_colors <- romics_object$metadata["colors_romics", , drop = FALSE]
+        }
+        romics_object <- romicsChangeFactor(romics_object, main_factor = factor_name)
+        # Restore the colors if they existed (preserve user-specified colors)
+        if(!is.null(existing_colors)) {
+          romics_object$metadata <- rbind(romics_object$metadata, existing_colors)
+        } else {
+          # Clear stale colors_romics so assign_factor_colors() uses fresh color assignment
+          if("colors_romics" %in% rownames(romics_object$metadata)) {
+            romics_object$metadata <- romics_object$metadata[rownames(romics_object$metadata) != "colors_romics", , drop = FALSE]
+          }
         }
       }
     }
@@ -1532,10 +1606,25 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
 
   # Create color mapping for factor-based coloring
   if(color_by == "factor") {
-    # Create a named vector mapping factor levels to colors
-    unique_levels <- unique(as.character(factor_values))
-    idx <- match(unique_levels, as.character(factor_values))
-    colors <- setNames(color_values_mapped[idx], unique_levels)
+    # Create a named vector mapping factor levels to colors from metadata
+    if("colors_romics" %in% rownames(romics_object$metadata)) {
+      # Use the stored colors from metadata
+      colors_metadata <- as.character(romics_object$metadata["colors_romics", ])
+      unique_levels <- unique(as.character(factor_values))
+      # Match each unique level to its color in metadata order
+      colors <- setNames(colors_metadata[match(unique_levels, names(colors_metadata))], unique_levels)
+      # Fill in any missing colors from color_values_mapped
+      missing_idx <- is.na(colors)
+      if(any(missing_idx)) {
+        idx <- match(names(colors)[missing_idx], as.character(factor_values))
+        colors[missing_idx] <- color_values_mapped[idx[!is.na(idx)]]
+      }
+    } else {
+      # Fallback: Create from color_values_mapped
+      unique_levels <- unique(as.character(factor_values))
+      idx <- match(unique_levels, as.character(factor_values))
+      colors <- setNames(color_values_mapped[idx], unique_levels)
+    }
   }
 
   # For 3D plot
@@ -1584,7 +1673,8 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
     )
     # Convert to factor if needed
     if(color_by == "factor") {
-      tsne_coordinates$color_var <- as.factor(tsne_coordinates$color_var)
+      # Ensure factor levels match the order of our color vector
+      tsne_coordinates$color_var <- factor(tsne_coordinates$color_var, levels = names(colors))
     }
 
     # Create individual plot with outline control
@@ -1648,10 +1738,22 @@ romicsTsnePlot <- function(romics_object, Xcomp=1, Ycomp=2, Zcomp=NULL, label=FA
 #' @description This function enables to transfer PCA, UMAP, and t-SNE coordinates/embeddings from one romics_object
 #' to another one providing added flexibility in embeddings generation. The origin and receiving object
 #' have to contain the same <samples> (data columns).
+#'
+#' The function captures complete analytical traceability by recording divergent steps from the origin object,
+#' enabling full understanding of how embeddings were derived and how the objects differ.
+#'
 #' @param origin_romics_object has to be a romics_object created using romicsCreateObject()
 #' @param receiving_romics_object has to be a romics_object created using romicsCreateObject() and containing the same samples as the origin_romics_object.
 #' @param type a vector indicating which embeddings to transfer. Options are "pca", "umap", and "tsne". Default: c("pca","umap","tsne")
-#' @return Returns the receiving_romics_object with the transferred embeddings.
+#' @details This function automatically analyzes the relationship between the two objects using checkRelationRomicsObjects()
+#' and records divergent steps from the origin object in the receiving object's steps layer with "external_object_" prefix.
+#' This preserves complete analytical traceability showing:
+#' \itemize{
+#'   \item Which transformations were applied to the origin object (external_object_date/fun entries)
+#'   \item When embeddings were transferred (romicsTransferEmbeddings entry)
+#'   \item Which object the embeddings came from (origin entry with name and UUID)
+#' }
+#' @return Returns the receiving_romics_object with the transferred embeddings and enhanced step tracking for complete traceability.
 #' @author Geremy Clair
 #' @export
 romicsTransferEmbeddings <- function(origin_romics_object, receiving_romics_object, type = c("pca","umap","tsne")){
@@ -1745,8 +1847,55 @@ romicsTransferEmbeddings <- function(origin_romics_object, receiving_romics_obje
     transfer_embeddings("tsne_component_", "t-SNE")
   }
 
-  # Update steps
+  # ===== ENHANCED STEP TRACKING =====
+  # Analyze relationship between origin and receiving objects to capture divergent steps
+  relationship <- checkRelationRomicsObjects(origin_romics_object, receiving_romics_object, verbose = FALSE)
+
+  # Extract origin object's name from the calling environment
+  origin_name <- deparse(substitute(origin_romics_object))
+  origin_uuid <- origin_romics_object$uuid
+
+  # If objects are related (share UUID), capture divergent steps from origin
+  if(relationship$related) {
+    # Get divergent steps specific to the origin object (these generated the embeddings)
+    divergent_origin_steps <- relationship$divergent_steps_obj1
+
+    if(length(divergent_origin_steps) > 0) {
+      # Extract the corresponding steps from origin object's steps layer
+      # Find indices of divergent steps in the origin object
+      origin_steps_vec <- origin_romics_object$steps
+
+      for(divergent_step in divergent_origin_steps) {
+        # Find this step in the origin object and add it to receiving object with external_object prefix
+        step_indices <- which(origin_steps_vec == divergent_step)
+
+        if(length(step_indices) > 0) {
+          # This is typically a function step (starts with "fun|")
+          original_step <- origin_steps_vec[step_indices[1]]
+
+          # Modify the step entry to indicate it came from external object
+          if(grepl("^fun\\|", original_step)) {
+            external_step <- gsub("^fun\\|", "fun|external_object_fun|", original_step)
+          } else if(grepl("^date\\|", original_step)) {
+            external_step <- gsub("^date\\|", "date|external_object_date|", original_step)
+          } else {
+            external_step <- paste0("external_object_step|", original_step)
+          }
+
+          # Add to receiving object's steps
+          receiving_romics_object$steps <- c(receiving_romics_object$steps, external_step)
+        }
+      }
+    }
+  }
+
+  # Update steps with the transfer operation itself
   receiving_romics_object <- romicsUpdateSteps(receiving_romics_object, arguments)
+
+  # Add origin metadata as final step entry for complete traceability
+  origin_metadata <- paste0("origin|", origin_name, "|UUID=", origin_uuid)
+  receiving_romics_object$steps <- c(receiving_romics_object$steps, origin_metadata)
+
   return(receiving_romics_object)
 }
 

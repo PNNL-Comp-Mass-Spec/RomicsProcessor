@@ -22,7 +22,6 @@ romicsFoldChangeBarplot(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics object containing $data, $statistics, and $metadata layers}
 
 \item{feature_list}{Character vector of features to include in barplot. If NULL, uses all features (limited to 100 max)}

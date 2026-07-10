@@ -17,7 +17,6 @@ romicsFilterFeature(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{ANOVA_filter}{Either 'none', 'p' or 'padj'. Indicates if an the ANOVA filter has to be used to filter features (only the features below the filter will be retained)}

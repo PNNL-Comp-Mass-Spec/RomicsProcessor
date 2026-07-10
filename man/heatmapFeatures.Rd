@@ -2,7 +2,7 @@
 % Please edit documentation in R/08_Heatmap_and_multifeature_plots.R
 \name{heatmapFeatures}
 \alias{heatmapFeatures}
-\title{Create an Interactive Heatmap of Features Grouped by Samples}
+\title{heatmapFeatures()}
 \usage{
 heatmapFeatures(
   romics_object,
@@ -24,44 +24,46 @@ heatmapFeatures(
 )
 }
 \arguments{
+\item{romics_object}{A romics_object created with createRomicsObject()}
 
-\item{romics_object}{A romics_object created using romicsCreateObject()}
+\item{factor}{Character string indicating which factor to use for organizing columns (default: "main" uses the main factor)}
 
-\item{factor}{Character string specifying the factor for grouping samples. Default: "main" uses the main factor. Use romicsFactorNames() to see available factors}
+\item{scale_feature}{Boolean indicating whether to scale feature values across samples (default: TRUE)}
 
-\item{scale_feature}{Logical. If TRUE, scales features by rows (z-score normalization). Default: TRUE}
+\item{feature_list}{Character vector of feature names to include in the heatmap. If NULL, all features are used.}
 
-\item{feature_list}{Character vector of specific features to include. If NULL, uses all features. Default: NULL}
+\item{filter_by_stat_column}{Character string specifying a statistics column name to filter features (e.g., "mean_Group1")}
 
-\item{filter_by_stat_column}{Character string specifying a statistics column for filtering features. If NULL, no filtering. Example: "Healthy_vs_Disease_Ttest_padj". Default: NULL}
+\item{stat_column_filter}{Character string specifying the filter condition as an expression (e.g., "> 100" or "< 0.05")}
 
-\item{stat_column_filter}{Character string with filter expression using <, >, <=, >=, ==, !=. Example: "<0.05" or ">1.5". Only used if filter_by_stat_column is specified. Default: NULL}
+\item{gradient_colors}{Character vector of colors for custom gradient, or NULL to use viridis_option}
 
-\item{gradient_colors}{Character vector of colors for heatmap gradient. If NULL, uses viridis color scale. For 3 colors: c(low, mid, high). For 2 colors: c(low, high). Default: NULL}
+\item{viridis_option}{Character string specifying viridis color palette: "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "mako", or "turbo" (default: "viridis")}
 
-\item{viridis_option}{Character string specifying viridis color palette: "viridis", "plasma", "inferno", "magma", "cividis", "rocket", "mako", "turbo". Only used if gradient_colors is NULL. Default: "viridis"}
+\item{show_completeness}{Boolean indicating whether to display data completeness percentages as a heatmap annotation (default: TRUE)}
 
-\item{show_completeness}{Logical. If TRUE, shows data completeness as tile transparency (alpha). If FALSE, completely missing data (0% completeness) shown as black tiles. Default: TRUE}
+\item{show_dendrogram}{Boolean indicating whether to display hierarchical clustering dendrograms (default: TRUE)}
 
-\item{show_dendrogram}{Logical. If TRUE, displays hierarchical clustering dendrogram on left side of heatmap. Requires ggdendro package. Default: TRUE}
+\item{show_feature_names}{Boolean indicating whether to display feature names on the heatmap (default: FALSE)}
 
-\item{show_feature_names}{Logical. If TRUE, displays feature names on right side of heatmap. Default: FALSE}
+\item{show_clusters}{Boolean indicating whether to color-code hierarchical clusters on the heatmap (default: FALSE)}
 
-\item{show_clusters}{Logical. If TRUE, displays cluster assignments as colored sidebar. Default: FALSE}
+\item{show_cluster_legend}{Boolean indicating whether to display a legend for cluster colors (default: FALSE, only used when show_clusters=TRUE)}
 
-\item{show_cluster_legend}{Logical. If TRUE, displays cluster color legend. Only used if show_clusters=TRUE. Default: FALSE}
+\item{n_clusters}{Numeric value specifying the number of clusters to cut the dendrogram into (required when show_clusters=TRUE, must be >= 2)}
 
-\item{n_clusters}{Integer specifying number of clusters to cut dendrogram into. Only used if show_clusters=TRUE. Must be >= 2. Default: NULL}
+\item{clustering_method}{Character string specifying the hierarchical clustering method passed to hclust() (default: "ward.D")}
 
-\item{clustering_method}{Character string specifying hierarchical clustering method: "complete", "average", "single", "ward.D", "ward.D2". Default: "ward.D"}
-
-\item{collapse_by_factor}{Character or logical. If specified, collapses data by this factor level before plotting (calculates mean within each level). If TRUE, uses the same factor specified in 'factor' parameter. Default: NULL}
+\item{collapse_by_factor}{Character string or TRUE indicating whether to collapse/average features by a different factor before creating the heatmap (default: NULL). If TRUE, uses the same factor as specified by 'factor' parameter.}
 }
 \value{
-A ggplot/cowplot object containing the heatmap visualization. Clustering results attached as attributes via attr(plot, "clustering_results") containing: clusters (list of features per cluster), cluster_assignments (feature-cluster mapping), dendrogram (hierarchical clustering object), n_clusters (number of clusters), method (clustering method used).
+A ComplexHeatmap heatmap object
 }
 \description{
-Generates an interactive heatmap visualization showing feature intensities across sample groups from a romics_object. Features are automatically ordered using hierarchical clustering on imputed data, and the displayed heatmap shows only real data values.
+Creates a heatmap visualization of selected features from a romics_object with hierarchical clustering and optional collapsing by factor groups.
+}
+\details{
+This function creates a ComplexHeatmap visualization of features grouped by the specified factor. Features can be filtered by providing a statistics column and filter expression. The heatmap can optionally show data completeness as a side heatmap, hierarchical clustering dendrograms, and cluster assignments. Using collapse_by_factor creates a secondary level of averaging, useful for viewing group-level patterns.
 }
 \author{
 Geremy Clair

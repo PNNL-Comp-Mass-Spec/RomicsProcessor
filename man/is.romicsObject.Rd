@@ -7,7 +7,6 @@
 is.romicsObject(romics_object, strict = TRUE)
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{strict}{logical (TRUE or FALSE) to indicate whether to check all required components (default: TRUE) or only basic structure}

@@ -7,7 +7,6 @@
 imputeMissing(romics_object, nb_stdev = 1.8, width_stdev = 0.5, seed = 42)
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{nb_stdev}{Numeric. Number of standard deviations to shift the imputation distribution from the median. Default: 1.8}

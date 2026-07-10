@@ -162,9 +162,9 @@ singleFeaturePlot <- function(romics_object, feature = "feature", plot_type = "j
   data_all$group <- factor(data_all$group, levels = all_levels)
   data_plot <- data_all[!is.na(data_all$intensity), ]
 
-  # Get color mapping
-  fill_colors <- setNames(unique(data_all$fill[!is.na(data_all$group)]),
-                          unique(data_all$group[!is.na(data_all$group)]))
+  # Get color mapping - match each group to its color
+  group_to_color <- tapply(data_all$fill, data_all$group, function(x) x[1])
+  fill_colors <- setNames(as.character(group_to_color), names(group_to_color))
 
   # Create base plot
   plot <- ggplot(data_plot, aes(x = group, y = intensity)) +
@@ -222,25 +222,43 @@ singleFeaturePlot <- function(romics_object, feature = "feature", plot_type = "j
         stat_matches <- stat_matches[!duplicated(paste(stat_matches$level1, stat_matches$level2)), ]
       }
 
-      # Add brackets with significance-based coloring
+      # Build data frame for all brackets with significance coloring
       y_increment <- y_bracket_pos
-      y_bracket_pos <- max(data_plot$intensity, na.rm = TRUE) + y_increment
+      y_start <- max(data_plot$intensity, na.rm = TRUE) + y_increment
 
+      bracket_data <- data.frame()
       for (i in 1:nrow(stat_matches)) {
         pval_value <- romics_object$statistics[feature, stat_matches$column_name[i]]
         if (!is.na(pval_value)) {
-          # Determine color based on significance
           bracket_color <- if (pval_value < significance_threshold) "red" else "black"
+          annotation_text <- formatC(as.numeric(pval_value), format = "e", digits = 2)
 
-          plot <- plot +
-            ggsignif::geom_signif(xmin = stat_matches$level1[i],
-                                  xmax = stat_matches$level2[i],
-                                  y_position = y_bracket_pos,
-                                  annotations = formatC(as.numeric(pval_value), format = "e", digits = 2),
-                                  textsize = 3,
-                                  manual = TRUE)
-          y_bracket_pos <- y_bracket_pos + y_increment
+          bracket_data <- rbind(bracket_data, data.frame(
+            xmin = as.numeric(factor(stat_matches$level1[i], levels = all_levels)),
+            xmax = as.numeric(factor(stat_matches$level2[i], levels = all_levels)),
+            y_position = y_start + (i - 1) * y_increment,
+            annotations = annotation_text,
+            sig_color = bracket_color,
+            stringsAsFactors = FALSE
+          ))
         }
+      }
+
+      # Add all brackets using data parameter with aes mapping
+      if (nrow(bracket_data) > 0) {
+        plot <- plot +
+          ggsignif::geom_signif(data = bracket_data,
+                                aes(xmin = xmin, xmax = xmax,
+                                    y_position = y_position, annotations = annotations),
+                                textsize = 3,
+                                tip_length = 0.02,
+                                manual = TRUE,
+                                inherit.aes = FALSE,
+                                color = "black") +
+          geom_text(data = bracket_data[bracket_data$sig_color == "red", ],
+                    aes(x = (xmin + xmax) / 2, y = y_position,
+                        label = annotations),
+                    color = "red", size = 3, inherit.aes = FALSE)
       }
 
       # Print info about which tests were used

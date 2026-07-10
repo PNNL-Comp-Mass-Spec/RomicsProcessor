@@ -12,7 +12,6 @@ romicsMetadataRelations(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{factors}{A character vector (length>2) containing the list of factors of the romics_object. the list of factors can be identified by using the function romicsFactorNames()}

@@ -2,7 +2,19 @@
 #' @description Combine 2 or more Romics_objects, containing the same <Samples>. It will remove the calculated stats ensure the log transformation are identical. For the combinations of multiple spatial objects use the function combineRomicsSpatialObjects()
 #' @param ... A succession of romics_objects the object should have the exact same <sample> names (data column names).
 #' @details This function will combine 2 or more Romics_objects, containing the same <Samples>. It will remove the calculated stats ensure the log transformation are identical. For the combinations of multiple spatial objects use the function combineRomicsSpatialObjects()
-#' @return A combined romics_object containing the normalized data from multiple romics_objects
+#'
+#' The function captures complete analytical traceability by recording divergent steps from all source objects,
+#' enabling full understanding of how combined data was derived and how the source objects differ.
+#'
+#' The steps layer of the combined object records:
+#' \itemize{
+#'   \item `external_object_source` entries indicating which objects were combined (with position index)
+#'   \item Divergent steps from each source object prefixed with "external_object_" to show external origin
+#'   \item The combination operation itself
+#'   \item `origin` entries with names and UUIDs of all source objects for complete traceability
+#' }
+#'
+#' @return A combined romics_object containing the normalized data from multiple romics_objects, with complete step tracking for analytical traceability
 #' @author Geremy Clair
 #' @export
 combineRomicsObjects <- function(...) {
@@ -133,50 +145,67 @@ combineRomicsObjects <- function(...) {
     }
 
     # Process IDs layer if it exists
-    if ("IDs" %in% names(romics_objects[[i]])) {
+    has_IDs <- "IDs" %in% names(romics_objects[[i]])
+    if (has_IDs) {
       current_IDs <- romics_objects[[i]]$IDs
 
-      # Add mode suffix to rownames to match the data layer format
-      modified_rownames <- paste0(rownames(current_IDs), "@", mode_suffix)
+      # Check if IDs is valid (not null and has rows)
+      if (!is.null(current_IDs) && is.data.frame(current_IDs)) {
+        ids_nrow <- nrow(current_IDs)
+        if (!is.na(ids_nrow) && ids_nrow > 0) {
+          # Add mode suffix to rownames to match the data layer format
+          if (!is.null(rownames(current_IDs)) && length(rownames(current_IDs)) > 0) {
+            modified_rownames <- paste0(rownames(current_IDs), "@", mode_suffix)
 
-      # Create a data frame with modified IDs
-      current_IDs_df <- data.frame(
-        combined_ID = modified_rownames,
-        current_IDs,
-        stringsAsFactors = FALSE
-      )
-
-      # Add source information
-      current_IDs_df$source_object <- mode_suffix
-
-      # Combine with existing IDs
-      if (nrow(combined_IDs) == 0) {
-        combined_IDs <- current_IDs_df
-      } else {
-        # Ensure column names match for proper binding
-        common_cols <- intersect(colnames(combined_IDs), colnames(current_IDs_df))
-
-        # If columns don't match perfectly, we need to align them
-        if (length(common_cols) < max(ncol(combined_IDs), ncol(current_IDs_df))) {
-          # Get all unique column names
-          all_cols <- unique(c(colnames(combined_IDs), colnames(current_IDs_df)))
-
-          # Add missing columns with NA values
-          for (col in all_cols) {
-            if (!col %in% colnames(combined_IDs)) {
-              combined_IDs[[col]] <- NA
-            }
-            if (!col %in% colnames(current_IDs_df)) {
-              current_IDs_df[[col]] <- NA
-            }
+            # Set rownames of current_IDs to match the modified format
+            rownames(current_IDs) <- modified_rownames
+          } else {
+            # If no rownames exist, create them from the data
+            modified_rownames <- paste0(1:ids_nrow, "@", mode_suffix)
+            rownames(current_IDs) <- modified_rownames
           }
 
-          # Reorder columns to match
-          combined_IDs <- combined_IDs[, all_cols]
-          current_IDs_df <- current_IDs_df[, all_cols]
-        }
+          # Add source information column
+          current_IDs$source_object <- mode_suffix
 
-        combined_IDs <- rbind(combined_IDs, current_IDs_df)
+          # Combine with existing IDs
+          if (nrow(combined_IDs) == 0) {
+            combined_IDs <- current_IDs
+          } else {
+            # Ensure column names match for proper binding
+            common_cols <- intersect(colnames(combined_IDs), colnames(current_IDs))
+
+            # If columns don't match perfectly, we need to align them
+            if (length(common_cols) < max(ncol(combined_IDs), ncol(current_IDs))) {
+              # Get all unique column names
+              all_cols <- unique(c(colnames(combined_IDs), colnames(current_IDs)))
+
+              # Save rownames before adding columns
+              combined_IDs_rows <- rownames(combined_IDs)
+              current_IDs_rows <- rownames(current_IDs)
+
+              # Add missing columns with NA values
+              for (col in all_cols) {
+                if (!col %in% colnames(combined_IDs)) {
+                  combined_IDs[[col]] <- NA
+                }
+                if (!col %in% colnames(current_IDs)) {
+                  current_IDs[[col]] <- NA
+                }
+              }
+
+              # Restore rownames after adding columns
+              rownames(combined_IDs) <- combined_IDs_rows
+              rownames(current_IDs) <- current_IDs_rows
+
+              # Reorder columns to match
+              combined_IDs <- combined_IDs[, all_cols]
+              current_IDs <- current_IDs[, all_cols]
+            }
+
+            combined_IDs <- rbind(combined_IDs, current_IDs)
+          }
+        }
       }
     }
   }
@@ -258,14 +287,70 @@ combineRomicsObjects <- function(...) {
 
   # Add combined IDs layer if any objects had IDs
   if (nrow(combined_IDs) > 0) {
-    # Set rownames to match the combined data rownames
-    rownames(combined_IDs) <- combined_IDs$combined_ID
-    # Remove the helper column
-    combined_IDs$combined_ID <- NULL
+    # Reorder combined_IDs to match the data layer rownames
+    data_rownames <- rownames(combined_romics_object$data)
 
-    combined_romics_object$IDs <- combined_IDs
-    message("Combined IDs layer created with ", nrow(combined_IDs), " entries")
-    message("IDs have been modified to include source object identifier (@mode)")
+    # Find which data_rownames exist in combined_IDs
+    existing_ids <- data_rownames[data_rownames %in% rownames(combined_IDs)]
+
+    if (length(existing_ids) > 0) {
+      # Reorder IDs to match data layer order, keeping only those that exist
+      combined_IDs_ordered <- combined_IDs[existing_ids, , drop = FALSE]
+
+      combined_romics_object$IDs <- combined_IDs_ordered
+      message("Combined IDs layer created with ", nrow(combined_IDs_ordered), " entries")
+      message("IDs have been reorganized to match data layer structure")
+      message("IDs have been modified to include source object identifier (@mode)")
+
+      # Validate that IDs and data rownames match
+      if (!identical(rownames(combined_romics_object$IDs), existing_ids)) {
+        warning("IDs rownames do not match data rownames exactly")
+      }
+    } else {
+      warning("No IDs matched the combined data layer rownames. IDs layer not added.")
+    }
+  }
+
+  # ===== ENHANCED STEP TRACKING FOR COMBINED OBJECTS =====
+  # Track external object sources to record which objects were combined
+  if (length(romics_objects) > 1) {
+    # For each input object after the first, analyze relationship and record divergent steps
+    for (i in 2:length(romics_objects)) {
+      # Analyze relationship between current object and first object
+      relationship <- checkRelationRomicsObjects(romics_objects[[1]], romics_objects[[i]], verbose = FALSE)
+
+      # Add source object entry with position indicator
+      source_entry <- paste0(
+        "external_object_source|",
+        names(romics_objects)[i], "|UUID=",
+        romics_objects[[i]]$uuid, "|position=", i
+      )
+      combined_romics_object$steps <- c(combined_romics_object$steps, source_entry)
+
+      # If objects are related, record their divergent steps
+      if (relationship$related && length(relationship$divergent_steps_obj2) > 0) {
+        # These are steps unique to the current input object that diverge from the first
+        for (divergent_step in relationship$divergent_steps_obj2) {
+          # Find this step in the current object
+          step_indices <- which(romics_objects[[i]]$steps == divergent_step)
+
+          if (length(step_indices) > 0) {
+            original_step <- romics_objects[[i]]$steps[step_indices[1]]
+
+            # Prefix with external_object_ to indicate it came from an external source
+            if (grepl("^fun\\|", original_step)) {
+              external_step <- gsub("^fun\\|", "fun|external_object_fun|", original_step)
+            } else if (grepl("^date\\|", original_step)) {
+              external_step <- gsub("^date\\|", "date|external_object_date|", original_step)
+            } else {
+              external_step <- paste0("external_object_step|", original_step)
+            }
+
+            combined_romics_object$steps <- c(combined_romics_object$steps, external_step)
+          }
+        }
+      }
+    }
   }
 
   # Add log transformation steps
@@ -284,6 +369,12 @@ combineRomicsObjects <- function(...) {
   combined_romics_object$steps <- c(combined_romics_object$steps,
                                     paste0("date|", gsub(" ", "_", format(Sys.time(), "%b_%d_%Y_%X")), "|combineRomicsObjects"),
                                     paste0("fun|combineRomicsObjects(", paste(names(romics_objects), collapse = ", "), ")"))
+
+  # Add origin metadata entries for all combined objects to enable complete traceability
+  for (i in 1:length(romics_objects)) {
+    origin_entry <- paste0("origin|", names(romics_objects)[i], "|UUID=", romics_objects[[i]]$uuid)
+    combined_romics_object$steps <- c(combined_romics_object$steps, origin_entry)
+  }
 
   # Print summary
   message("Successfully combined ", length(romics_objects), " romics objects:")

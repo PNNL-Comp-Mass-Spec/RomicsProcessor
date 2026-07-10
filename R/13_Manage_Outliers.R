@@ -12,10 +12,8 @@
 #' @export
 romicsOutlierEval<-function(romics_object, seed=42, metrics = c("Correlation", "Proportion_Missing", "MAD", "Skewness"), pvalue_threshold=0.01,label=FALSE){
   arguments<-as.list(match.call())
-  if(!"pmartR" %in% rownames(installed.packages()) & !"package:pmartR"  %in% search()){stop("to run this function the package 'pmartR' has to be installed and loaded")}
-  if(!"pmartR" %in% (.packages())){
-    library("pmartR")
-    print("pmartR was not loaded it was loaded to execute this function")
+  if (!requireNamespace("pmartR", quietly = TRUE)) {
+    stop("The pmartR package is required. Please install it with: install.packages('pmartR')")
   }
   if(!is.romicsObject(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(metrics)){metrics = c("Correlation", "Proportion_Missing", "MAD", "Skewness")}
@@ -24,18 +22,30 @@ romicsOutlierEval<-function(romics_object, seed=42, metrics = c("Correlation", "
   if(missing(label)){label=FALSE}
 
   set.seed(seed)
-  Pmart_data<-romicsPmartR(romics_object)
+  Pmart_data<-romicsToPmartR(romics_object)
   Pmart_data <- group_designation(omicsData = Pmart_data, main_effects = romics_object$main_factor, covariates = NULL)
   rmdfilter<-rmd_filter(Pmart_data, metrics=metrics)
 
-  summary(rmdfilter, pvalue_threshold = pvalue_threshold)
+  rmdsummary <- summary(rmdfilter, pvalue_threshold = pvalue_threshold)
 
   md_threshold<- max(rmdfilter$Log2.md[rmdfilter$pvalue>pvalue_threshold])
+
+  # Identify outlier samples
+  outlier_samples <- rmdfilter$SampleID[rmdfilter$Log2.md > md_threshold]
+  n_outliers <- length(outlier_samples)
+
+  # Display outlier information
+  message(paste0("Outlier evaluation (p-value threshold: ", pvalue_threshold, "):"))
+  message(paste0("  Outliers detected: ", n_outliers, " out of ", ncol(romics_object$data), " samples"))
+  if(n_outliers > 0) {
+    message(paste0("  Outlier samples: ", paste(outlier_samples, collapse = ", ")))
+  }
 
   plot1<-ggplot(rmdfilter,aes(x=pvalue,y=Log2.md))+geom_point(size=4, alpha=0.6,fill="gray75")+
     theme_ROP()+
     geom_hline(aes(yintercept=md_threshold),colour = "red")+
-    ggtitle("pvalue vs. log2(Robust Mahalanobis Distance)")
+    ggtitle("pvalue vs. log2(Robust Mahalanobis Distance)")+
+    ggrepel::geom_text_repel(data=rmdfilter[rmdfilter$Log2.md > md_threshold, ], aes(label=SampleID), size=3)
 
   #force the order to stay the same
   rmdfilter$SampleID<-factor(rmdfilter$SampleID, levels = rmdfilter$SampleID[order(rmdfilter$Group)])
@@ -49,9 +59,10 @@ romicsOutlierEval<-function(romics_object, seed=42, metrics = c("Correlation", "
     scale_color_manual(values=colors)+
     ylab("log2(Robust Mahalanobis Distance)")+
     theme_ROP()+
-    ggtitle(paste0("Sample outlier result (p<",pvalue_threshold,")"))
+    ggtitle(paste0("Sample outlier result (p<",pvalue_threshold,")"))+
+    ggrepel::geom_text_repel(data=rmdfilter[rmdfilter$Log2.md > md_threshold, ], aes(label=SampleID), size=3)
 
-  if (label==TRUE){plot2<-plot2+geom_text(label=rmdfilter$SampleID)}
+  if (label==TRUE){plot2<-plot2+geom_text(aes(label=SampleID))}
 
   return(list(plot1,plot2))
 }
@@ -69,27 +80,38 @@ romicsOutlierEval<-function(romics_object, seed=42, metrics = c("Correlation", "
 #' @export
 romicsOutlierRemove<-function(romics_object, seed=42, metrics = c("Correlation", "Proportion_Missing", "MAD", "Skewness"), pvalue_threshold=0.01){
   arguments<-as.list(match.call())
-  if(!"pmartR" %in% rownames(installed.packages()) & !"package:pmartR"  %in% search()){stop("to run this function the package 'pmartR' has to be installed and loaded")}
-  if(!"pmartR" %in% (.packages())){
-    library("pmartR")
-    print("pmartR was not loaded it was loaded to execute this function")
-    }
+  if (!requireNamespace("pmartR", quietly = TRUE)) {
+    stop("The pmartR package is required. Please install it with: install.packages('pmartR')")
+  }
   if(!is.romicsObject(romics_object) | missing(romics_object)) {stop("romics_object is missing or is not in the appropriate format")}
   if(missing(metrics)){metrics = c("Correlation", "Proportion_Missing", "MAD", "Skewness")}
   if(missing(pvalue_threshold)){pvalue_threshold=0.01}
   if(missing(seed)){set.seed(Sys.time())}
 
   set.seed(seed)
-  Pmart_data<-romicsPmartR(romics_object)
+  Pmart_data<-romicsToPmartR(romics_object)
   Pmart_data <- group_designation(omicsData = Pmart_data, main_effects = romics_object$main_factor, covariates = NULL)
   rmdfilter<-rmd_filter(Pmart_data, metrics=metrics)
 
   rmdsummary<-summary(rmdfilter, pvalue_threshold = pvalue_threshold)
 
+  # Store number of samples before removal
+  n_samples_before <- ncol(romics_object$data)
+
   romics_object$data<-romics_object$data[,!colnames(romics_object$data) %in% rmdsummary$filtered_samples]
   romics_object$metadata<-romics_object$metadata[,!colnames(romics_object$metadata) %in% rmdsummary$filtered_samples]
   romics_object$missingdata<-romics_object$missingdata[,!colnames(romics_object$missingdata) %in% rmdsummary$filtered_samples]
   romics_object<-romicsUpdateColor(romics_object)
+
+  # Display message about removed samples
+  n_removed <- length(rmdsummary$filtered_samples)
+  n_samples_after <- ncol(romics_object$data)
+  message(paste0("Outlier removal complete:"))
+  message(paste0("  Samples removed: ", n_removed))
+  message(paste0("  Samples remaining: ", n_samples_after, " (were ", n_samples_before, ")"))
+  if(n_removed > 0) {
+    message(paste0("  Removed samples: ", paste(rmdsummary$filtered_samples, collapse = ", ")))
+  }
 
   romics_object<-romicsUpdateSteps(romics_object,arguments)
   romics_object<-romicsAddDependency(romics_object,new_dependency = "pmartR")

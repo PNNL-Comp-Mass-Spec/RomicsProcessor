@@ -1,31 +1,72 @@
 # RomicsProcessor
 
-RomicsProcessor is an R package for analyzing bulk, single-cell, and spatial omics dataesets.
-The package provides a structured R object (`romics_object`) to store data, metadata, and processing history,
-enabling reproducible and FAIR-compatible data analysis. RomicsProcessor also supports creating reusable
-analytical pipelines from previously processed objects, allowing for rapid development and method reuse.
+RomicsProcessor is an R package for analyzing bulk, single-cell, and spatial omics datasets.
+The package provides a structured R object (`romics_object`) to store data, metadata, and complete processing history,
+enabling reproducible and FAIR-compatible data analysis. RomicsProcessor enables complete analytical traceability through
+UUID-based object tracking and automatic step logging, supporting reusable analytical pipelines and reliable research reproducibility.
 
-**Version 1.17.0** adds comprehensive format conversion capabilities, including seamless interoperability with Seurat objects and SpatialExperiment formats, alongside enhanced spatial analysis and embeddings support.
+**Version 2.0.0** - A Major Milestone for Analytical Traceability and FAIR Science
+
+This release completes RomicsProcessor's vision for FAIR-compliant omics analysis with:
+- **Complete Object Encapsulation**: Full data, metadata, and processing history within each romics_object
+- **Analytical Traceability**: UUID-based relationship tracking, branching detection, and complete lineage recording
+- **Embedding Provenance**: Full source tracking for transferred embeddings with divergence documentation
+- **Combined Object Lineage**: Complete traceability for combined objects with source UUID and step recording
+- **Spatial Omics Support**: Full integration with spatial analysis frameworks and coordinates
+- **Robust Reproducibility**: Validated pipeline generation and application with identical result reproduction
 
 ## Key Features
 
+### Core Capabilities
 - **Multi-Omics Support**: Handle bulk, single-cell, and spatial omics datasets (proteomics, metabolomics, genomics, etc.)
+- **Complete Object Encapsulation**: Romics_objects contain data, metadata, statistics, processing history, embeddings, and dependencies
 - **Reproducible Analysis**: Full processing history tracking with audit trail ensures complete reproducibility
-- **FAIR Compliant**: Encapsulated romics_objects ensure Findability, Accessibility, Interoperability, and Reusability
-- **Format Interoperability**: Seamless conversion with Seurat objects and SpatialExperiment for ecosystem integration
-- **Large-Scale Spatial Data**: Optimized for hundreds of thousands of data points (multiplexed immunofluorescence, MSI)
-- **Spatial Map Generation**: Interactive visualization of spatial coordinates with feature overlays, clustering patterns, and factor-based coloring
+- **FAIR Compliant**: Findable (UUID), Accessible (R package), Interoperable (format conversion), Reusable (pipelines)
 - **Comprehensive Analysis**: Data import/transformation, normalization, dimensionality reduction, clustering, statistical analysis
-- **Advanced Visualization**: Interactive Shiny web interfaces, publication-quality plots, and interactive spatial maps
-- **Batch Correction**: Combat/SVA methods for multi-batch omics integration
 
-## Recent Improvements (v1.17.0)
+### Analytical Traceability (v2.0 - NEW)
+- **Object Relationship Detection**: `checkRelationRomicsObjects()` identifies branching, linear evolution, or unrelated objects
+- **Embedding Provenance**: Full source tracking with divergence documentation for transferred embeddings
+- **Combined Object Lineage**: Complete traceability recording which objects were combined and their divergent steps
+- **UUID-Based Tracking**: Unique identifiers enable complete analytical chain reconstruction
 
-- 🔄 **Format Conversion**: Convert between Seurat objects and romics_objects bidirectionally (SeuratToRomics, romicsToSeurat)
-- 🗺️ **Spatial Integration**: Export romics_objects to SpatialExperiment format for BANKSY spatial analysis
-- 📍 **Embedding Import**: Automatic PCA, UMAP, and other dimensional reductions preserved during conversions
-- 🚀 **Performance**: Optimized metadata handling and vectorized matrix operations
-- 📝 **Documentation**: Enhanced roxygen documentation with improved formatting and clarity
+### Format Interoperability
+- **Seurat Integration**: Seamless bidirectional conversion with Seurat objects (SeuratToRomics, romicsToSeurat)
+- **SpatialExperiment Support**: Export for BANKSY spatial analysis and integration with Bioconductor ecosystem
+- **Embedding Preservation**: Automatic PCA, UMAP, and other dimensional reductions preserved during conversions
+
+### Spatial Omics
+- **Large-Scale Spatial Data**: Optimized for hundreds of thousands of data points (multiplexed immunofluorescence, MSI)
+- **Spatial Map Generation**: Interactive visualization of spatial coordinates with feature overlays and clustering patterns
+- **Spatial Integration**: Format conversion and coordinate preservation for spatial analysis frameworks
+
+### Advanced Features
+- **Batch Correction**: ComBat/SVA methods with optional reference region guidance
+- **Custom Feature Labeling**: User-specified feature lists for volcano plot annotations
+- **Advanced Visualization**: Interactive Shiny web interfaces, publication-quality plots, spatial maps
+- **Reproducible Pipelines**: Generate and apply analysis pipelines for method reuse and validation
+
+## v2.0.0 Highlights - Complete Analytical Traceability
+
+### Analytical Traceability System
+- 🔗 **UUID-Based Tracking**: Every romics_object has a unique identifier for complete lineage tracing
+- 🌿 **Relationship Detection**: Identify if objects branched from common ancestor, are related through steps, or unrelated
+- 📊 **Branching Point Detection**: Find exact point where analytical pipelines diverged
+- 🔄 **Embedding Provenance**: Full source tracking when embeddings are transferred between objects
+- 📦 **Combined Object Lineage**: Document which objects were combined and what divergent steps exist
+
+### Enhanced Traceability Features
+- ✅ `checkRelationRomicsObjects()` - Analyze relationships between any two romics_objects
+- ✅ `romicsTransferEmbeddings()` - Records origin object UUID, name, and divergent steps
+- ✅ `combineRomicsObjects()` - Tracks all source objects and their contributions
+- ✅ `applyRomicsPipeline()` - Validate reproducibility with identical result reproduction
+
+### Case Study Validation
+The included case study demonstrates end-to-end reproducibility:
+- Analyzed *Bacillus cereus* proteome across 4 growth media (12 samples)
+- Applied analysis pipeline to unprocessed and reset objects
+- Verified identical data, statistics, and embeddings
+- Public raw data available (MassIVE MSV000085696)
 
 ## Installation
 
@@ -41,35 +82,84 @@ install.packages(“devtools”)
 devtools::install_github(“PNNL-Comp-Mass-Spec/RomicsProcessor”)
 ```
 
-### Optional Bioconductor Dependencies
+### Package Installation On-Demand
 
-For enhanced functionality, install these optional packages:
+RomicsProcessor uses a smart dependency system: when you call functions that require optional packages, the package will detect if they're installed and prompt you to install them if needed.
+
+**Examples of functions that prompt for package installation:**
 
 ```R
-# For batch correction (Combat/SVA method)
-BiocManager::install(“sva”)
+# Batch correction with reference regions or ComBat/SVA methods
+# → Will prompt to install: sva
+romics_corrected <- romicsBatchCorrection(romics_obj, batch_factor=”batch”, 
+                                          method=”ComBat”)
 
-# For advanced omics utilities
-install.packages(“pmartR”)
+# Format conversion to/from Seurat objects
+# → Will prompt to install: Seurat
+romics_from_seurat <- SeuratToRomics(seurat_obj)
 
-# For ComplexHeatmap and advanced visualization
-BiocManager::install(“ComplexHeatmap”)
+# Export to SpatialExperiment for BANKSY analysis
+# → Will prompt to install: SpatialExperiment
+spatial_exp <- romicsToSpatialExperiment(romics_spatial_obj)
+
+# Advanced statistical utilities (pmartR integration)
+# → Will prompt to install: pmartR
+pmartR_obj <- romicsToPmartR(romics_obj)
+
+# Advanced heatmap visualization
+# → Will prompt to install: ComplexHeatmap
+heatmap <- romicsComplexHeatmap(romics_obj, features=top_features)
 ```
+
+When you encounter a package requirement, RomicsProcessor will provide clear installation instructions. No need to install packages until you actually use the functionality!
 
 ## System Requirements
 
-- **R**: ≥ 4.0.0
+- **R**: ≥ 4.5.1 (tested with R 4.5.1, recommended for case study reproducibility)
 - **Memory**: For large datasets (>100k samples), recommend ≥16GB RAM
   - Use dimensionally reduced data (PCA/UMAP) with reduced k parameter for memory efficiency
 
-## Example of use
+## Getting Started - Case Study Examples
 
-The folder /Example contain an 
-example romics_objeft
+RomicsProcessor includes a comprehensive case study demonstrating the complete workflow:
+
+```R
+library(RomicsProcessor)
+
+# Load the processed case study dataset
+data(romics_proteins)
+
+# Explore the processed data
+head(romics_proteins$data)  # 1,247 proteins × 12 samples
+romicsSteps(romics_proteins)  # View complete processing history
+
+# Load the reproducible pipeline
+data(romics_pipeline)
+
+# Apply the pipeline to a new dataset
+new_result <- applyRomicsPipeline(new_unprocessed_object, romics_pipeline)
+
+# Check object relationships
+relationship <- checkRelationRomicsObjects(romics_proteins, another_object)
+print(relationship$summary)  # Understand how objects are related
+
+# Generate your own pipeline
+my_pipeline <- createRomicsPipeline(my_processed_object)
+```
+
+### Case Study: Bacillus cereus Proteomics
+The `romics_proteins` dataset contains:
+- **Organism**: Spore-forming foodborne pathogen *Bacillus cereus*
+- **Conditions**: 4 growth media (soil extract, zucchini puree, Luria-Bertani, AOAC)
+- **Samples**: 12 total (3 replicates × 4 conditions)
+- **Features**: 1,247 proteins
+- **Analysis**: Quality filtering, log2-transformation, median centering, statistical analysis
+- **Key Findings**: Media-dependent proteome signatures, sporulation upregulation, toxin production patterns
+- **Raw Data**: Available at MassIVE (MSV000085696) for full reproducibility
 
 ## Cite the code
 
-To cite the package please use the following DOI:
+To cite the package, please use the following DOI:
 [![DOI](https://zenodo.org/badge/206400976.svg)](https://zenodo.org/badge/latestdoi/206400976)
 
 ## Authors

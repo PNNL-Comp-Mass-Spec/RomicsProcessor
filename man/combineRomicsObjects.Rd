@@ -7,17 +7,27 @@
 combineRomicsObjects(...)
 }
 \arguments{
-
 \item{...}{A succession of romics_objects the object should have the exact same <sample> names (data column names).}
 }
 \value{
-A combined romics_object containing the normalized data from multiple romics_objects
+A combined romics_object containing the normalized data from multiple romics_objects, with complete step tracking for analytical traceability
 }
 \description{
 Combine 2 or more Romics_objects, containing the same <Samples>. It will remove the calculated stats ensure the log transformation are identical. For the combinations of multiple spatial objects use the function combineRomicsSpatialObjects()
 }
 \details{
 This function will combine 2 or more Romics_objects, containing the same <Samples>. It will remove the calculated stats ensure the log transformation are identical. For the combinations of multiple spatial objects use the function combineRomicsSpatialObjects()
+
+The function captures complete analytical traceability by recording divergent steps from all source objects,
+enabling full understanding of how combined data was derived and how the source objects differ.
+
+The steps layer of the combined object records:
+\itemize{
+  \item `external_object_source` entries indicating which objects were combined (with position index)
+  \item Divergent steps from each source object prefixed with "external_object_" to show external origin
+  \item The combination operation itself
+  \item `origin` entries with names and UUIDs of all source objects for complete traceability
+}
 }
 \author{
 Geremy Clair

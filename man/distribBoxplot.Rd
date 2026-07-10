@@ -7,7 +7,6 @@
 distribBoxplot(romics_object, aggregate_by = "factor")
 }
 \arguments{
-
 \item{romics_object}{has to be a romics_object}
 
 \item{aggregate_by}{has to be either NA (by default, in this case a Violin will be generated for each sample), or a factor from a romics_object, the list of factor can be found using the function romicsFactorNames()}

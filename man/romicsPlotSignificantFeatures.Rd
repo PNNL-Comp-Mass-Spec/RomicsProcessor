@@ -18,7 +18,6 @@ romicsPlotSignificantFeatures(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object with calculated statistics}
 
 \item{p_threshold}{Numeric value for significance threshold. Default: 0.05}

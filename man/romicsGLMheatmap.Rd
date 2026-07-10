@@ -18,7 +18,6 @@ romicsGLMheatmap(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject() containing calculated GLM binomial test statistics.}
 
 \item{filter_p}{logical (TRUE or FALSE) to indicate if features should be filtered by GLM test p-values.}

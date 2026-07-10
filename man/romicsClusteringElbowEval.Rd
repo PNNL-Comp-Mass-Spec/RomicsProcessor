@@ -17,7 +17,6 @@ romicsClusteringElbowEval(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{method}{Character indicating clustering method: "kmeans" or "fuzzy_cmeans" (default: "kmeans")}

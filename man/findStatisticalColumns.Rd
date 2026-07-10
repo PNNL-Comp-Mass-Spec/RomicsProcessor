@@ -7,7 +7,6 @@
 findStatisticalColumns(romics_object, factor_levels, pval_type)
 }
 \arguments{
-
 \item{romics_object}{A romics_object with statistics}
 
 \item{factor_levels}{Vector of factor levels to compare}

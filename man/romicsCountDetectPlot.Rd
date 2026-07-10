@@ -10,7 +10,6 @@ romicsCountDetectPlot(romics_object, percent = TRUE)
 romicsCountDetectPlot(romics_object, percent = TRUE)
 }
 \arguments{
-
 \item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
 }
 \value{

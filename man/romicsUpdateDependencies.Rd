@@ -7,7 +7,6 @@
 romicsUpdateDependencies(romics_object)
 }
 \arguments{
-
 \item{romics_object}{A romics_object to update}
 }
 \value{

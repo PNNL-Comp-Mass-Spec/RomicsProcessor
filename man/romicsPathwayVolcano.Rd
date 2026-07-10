@@ -26,7 +26,6 @@ romicsPathwayVolcano(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object containing statistical test results}
 
 \item{pathway_list}{A list of character vectors, each containing feature IDs. Names of list elements become pathway labels}

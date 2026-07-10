@@ -7,7 +7,6 @@
 applyRomicsPipeline(romics_object, romics_pipeline)
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{romics_pipeline}{A pipeline created with the romicsCreatePipeline() function.}

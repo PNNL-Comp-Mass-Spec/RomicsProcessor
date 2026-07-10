@@ -37,7 +37,6 @@ romicsLouvainSamples(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{cluster_using}{Character string specifying which data to use for clustering:

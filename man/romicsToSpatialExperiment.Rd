@@ -15,7 +15,6 @@ romicsToSpatialExperiment(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject(). Must contain spatial
 coordinates in the metadata layer.}
 

@@ -7,7 +7,6 @@
 SpatialExperimentToRomics(se_object, main_factor = NULL, omics_type = NULL)
 }
 \arguments{
-
 \item{se_object}{A SpatialExperiment object, typically output from romicsToSpatialExperiment()
 or another spatial analysis package.}
 

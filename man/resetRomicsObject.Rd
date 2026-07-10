@@ -7,7 +7,6 @@
 resetRomicsObject(romics_object, main_factor = NULL)
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{main_factor}{Character string indicating the metadata row to use as main factor. If not provided, the first row will be used.}

@@ -1,0 +1,27 @@
+# R project files
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rapp.history
+
+# Claude Code related
+.claude/
+.claude_session
+
+# macOS
+.DS_Store
+*.DS_Store
+
+# Build artifacts
+*.Rcheck/
+*.tar.gz
+
+# IDE
+.vscode/
+.idea/
+
+# System files
+*.swp
+*.swo
+*~

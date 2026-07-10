@@ -7,7 +7,6 @@
 extractDIANNIDs(file = "/filepath/report.pg_matrix.tsv")
 }
 \arguments{
-
 \item{file}{This has to be the file path and file name of the FragPipe report.pg_matrix.tsv file from which the information has to be extracted}
 }
 \value{

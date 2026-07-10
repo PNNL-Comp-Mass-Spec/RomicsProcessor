@@ -20,7 +20,6 @@ romicsTtest(
 )
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created with the function romicsCreateObject(),}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}

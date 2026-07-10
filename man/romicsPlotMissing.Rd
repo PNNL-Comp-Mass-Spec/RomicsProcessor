@@ -7,7 +7,6 @@
 romicsPlotMissing(romics_object, custom_colors = "colorlist")
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{main_factor}{has to be either "main", "none" or a factor of an romics_object created using romicsCreateObject() the list of factors can be obtained by running the function romicsFactorNames()}

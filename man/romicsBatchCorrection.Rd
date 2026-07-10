@@ -8,31 +8,39 @@ romicsBatchCorrection(
   romics_object,
   batch_factor,
   method = "ComBat",
+  reference_filter = NULL,
   verbose = TRUE,
+  use_ref_params_only = FALSE,
   ...
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
-\item{batch_factor}{A character string specifying the factor contained in the romics_object that will serve as batch covariate. To obtain the list of factors, use romicsFactorNames()}
+\item{batch_factor}{A character string specifying the factor for batch covariate.}
 
-\item{method}{A character string that must be either 'ComBat' or 'mean.only' to indicate how the ComBat function should be run.}
+\item{method}{A character string that must be either 'ComBat', 'mean.only', or 'reference'. Default: "ComBat"}
+
+\item{reference_filter}{A logical vector or function to identify the reference region. Required when method="reference".}
 
 \item{verbose}{Logical. If TRUE, prints detailed information about the batch correction process. Default: TRUE}
 
-\item{...}{Additional parameters passed to sva::ComBat(). See sva::ComBat() documentation for more details.}
+\item{use_ref_params_only}{Logical. When TRUE, learns parameters only from reference region and applies to all data. Default: FALSE}
+
+\item{...}{Additional parameters passed to sva::ComBat().}
 }
 \value{
 This function returns a transformed romics_object with batch-corrected data.
 }
 \description{
-Performs the sva::ComBat() batch correction on the data layer of the romics_object. The data layer must not contain missing values and the factor utilized will be the one used for the correction.
+Performs batch correction on the data layer of the romics_object with options to use a reference region.
 }
 \details{
-This function performs ComBat batch correction on a romics_object. It can be performed using the ComBat method or using a mean.only method. The batch factor is automatically converted to the appropriate format for ComBat. See sva::ComBat() documentation for more details.
+This function performs batch correction on a romics_object. When method="reference", it uses the reference
+region to learn batch effect patterns and applies the same correction to all samples uniformly.
+
+For the reference-based method, you must provide a reference_filter that identifies the reference region.
 }
 \author{
-Geremy Clair
+Modified by Brittney Gorman, with backward-compatible enhancements
 }

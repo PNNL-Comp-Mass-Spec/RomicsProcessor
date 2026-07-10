@@ -16,7 +16,6 @@ romicsGlmBinomial(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object with data and metadata layers}
 
 \item{factor}{Character string specifying which factor to use for grouping. Default: "main" uses the main factor}

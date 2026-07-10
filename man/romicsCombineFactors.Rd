@@ -13,7 +13,6 @@ romicsCombineFactors(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{list_of_factors}{A character vector (length=>1) containing names of factors of the romics_object in the desired order. The list of factor names can be identified by using the function romicsFactorNames().}

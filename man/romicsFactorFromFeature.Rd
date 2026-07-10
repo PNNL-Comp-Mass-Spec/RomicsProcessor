@@ -2,7 +2,7 @@
 % Please edit documentation in R/19_metadata_plots_and_operations.R
 \name{romicsFactorFromFeature}
 \alias{romicsFactorFromFeature}
-\title{Create Metadata Factor from Feature}
+\title{romicsFactorFromFeature()}
 \usage{
 romicsFactorFromFeature(
   romics_object,
@@ -21,38 +21,43 @@ romicsFactorFromFeature(
 )
 }
 \arguments{
+\item{romics_object}{A romics_object created with createRomicsObject()}
 
-\item{romics_object}{A romics_object created using romicsCreateObject().}
+\item{feature}{Character string specifying the name of the feature to classify samples by}
 
-\item{feature}{A character string specifying the name of the feature to use. Must be present in rownames of the data layer.}
+\item{method}{Character string specifying the classification method: "presence" (default), "value", or "percentage"
+- "presence": Classifies samples as present (has value) or absent (NA)
+- "value": Classifies samples based on a fixed cutpoint value
+- "percentage": Classifies samples into 2-4 groups based on percentile cutpoints}
 
-\item{method}{Classification method: "presence" (present/absent), "value" (above/below a fixed value), "percentage" (above/below a percentile). Default: "presence".}
+\item{value}{Numeric cutpoint value for method = "value". Required when method = "value".}
 
-\item{value}{Numeric value for splitting when method = "value", Required when method = "value".}
+\item{percentage}{Numeric value between 0 and 100 specifying the percentile cutpoint for method = "percentage" (default: 50 for median split)}
 
-\item{percentage}{Numeric between 0 and 100 for percentage method (e.g., 75 for top 25% vs bottom 75%). Default: 50.}
+\item{n_groups}{Numeric value (2, 3, or 4) specifying the number of groups to create for method = "percentage" (default: 2)}
 
-\item{n_groups}{Integer for number of groups when using percentage method with equal splits (2, 3, or 4). Default: 2. When > 2, overrides percentage parameter.}
+\item{factor_name}{Character string specifying the name for the new factor in metadata. If NULL, automatically generated based on method and feature name.}
 
-\item{factor_name}{Character string for the name of the new factor. If NULL, auto-generated based on method. Default: NULL.}
+\item{labels}{Character vector specifying custom labels for factor levels. Length must match the number of groups created.}
 
-\item{labels}{Character vector of custom labels. Length depends on n_groups. If NULL, auto-generated. For binary splits, order is c(high, low). Default: NULL.}
+\item{na_label}{Character string specifying the label for missing values (default: "absent")}
 
-\item{na_label}{Character string for samples where the feature is NA/not detected. Default: "absent".}
+\item{na_as_low}{Boolean indicating whether to treat NA values as low values in percentage-based classification (default: FALSE)}
 
-\item{na_as_low}{Logical. For binary methods, should NA values be treated as "low" rather than a separate category? Default: FALSE.}
+\item{strict_inequality}{Boolean indicating whether to use strict inequality (< or >) versus non-strict (<= or >=) for cutpoints (default: FALSE)}
 
-\item{strict_inequality}{Logical. Use strict inequality (>) or >= for high group. Default: FALSE (uses >).}
+\item{include_value_in_name}{Boolean indicating whether to include the cutpoint value in the factor name (default: TRUE)}
 
-\item{include_value_in_name}{Logical. Include value/percentage in auto-generated factor name. Default: TRUE.}
-
-\item{verbose}{Logical. Print detailed summary. Default: TRUE.}
+\item{verbose}{Boolean indicating whether to display informative messages during execution (default: TRUE)}
 }
 \value{
-Returns the romics_object with the newly created factor added to its metadata.
+A modified romics_object with the new factor added to the metadata layer
 }
 \description{
-Creates a new factor in the metadata based on a feature's intensity using various classification methods.
+Creates a new factor in the metadata layer by classifying samples based on feature values using presence/absence, value-based, or percentage-based methods.
+}
+\details{
+This function creates a new factor by partitioning samples based on a single feature's values. The "percentage" method divides samples into n_groups based on equally spaced percentile cutpoints. For example, with n_groups=3 and percentage=50, samples are split at the 25th, 50th, and 75th percentiles.
 }
 \author{
 Geremy Clair

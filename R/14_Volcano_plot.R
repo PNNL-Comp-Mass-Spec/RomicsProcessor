@@ -6,9 +6,10 @@
 #' @param stat_type 't.test', 'wilcox.test', 'LMM' or 'auto' to indicate what statistics to use for the volcano plots generation. If 'auto', will detect available tests.
 #' @param plot either 'all' if all paired comparisons have to be displayed OR a vector of numeric values comprised between 1 and the maximum number of possible plots generated.
 #' @param plotly logical (TRUE or FALSE) to indicate whether to return interactive plotly plots (TRUE) or static ggplot plots (FALSE).
-#' @param label_features logical (TRUE or FALSE) to indicate whether to label top features on the plot.
-#' @param top_features numeric value indicating the number of top upregulated and downregulated features to label (only those passing the filters).
+#' @param label_features logical (TRUE or FALSE) to indicate whether to label features on the plot.
+#' @param top_features numeric value indicating the number of top upregulated and downregulated features to label (only those passing the filters). Ignored if label_features_list is specified.
 #' @param top_features_by 'abundance' or 'p' to indicate the criteria for selecting top features. 'abundance' selects by fold change magnitude, 'p' selects by p-value significance.
+#' @param label_features_list character vector of feature IDs to label on the plot. If provided, overrides top_features and top_features_by.
 #' @param xlim numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.
 #' @param ylim numeric vector of length 2 specifying the y-axis limits (e.g., c(0, 10)), or a single numeric value to set max y-limit (min is set to 0). If NULL and auto_ylim=TRUE, limits are set based on data max.
 #' @param auto_ylim logical (TRUE or FALSE) to automatically set ylim based on the maximum -log10(p) value in the data (default: TRUE). Ignored if ylim is manually specified.
@@ -22,7 +23,8 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
                           colors = c("#2cbcb2", "#242021", "#d44e28"),
                           stat_type = "auto", plot = "all", plotly = FALSE,
                           label_features = FALSE, top_features = 10, top_features_by = "abundance",
-                          xlim = NULL, ylim = NULL, auto_ylim = TRUE, size = 2, alpha = 0.5) {
+                          label_features_list = NULL, xlim = NULL, ylim = NULL, auto_ylim = TRUE,
+                          size = 2, alpha = 0.5) {
 
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
     stop("romics_object is missing or is not in the appropriate format")
@@ -65,6 +67,13 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
   if(!top_features_by %in% c("abundance", "p")){
     warning("'top_features_by' should be either 'abundance' or 'p'. 'abundance' was used by default.")
     top_features_by = "abundance"
+  }
+  if(missing(label_features_list)){label_features_list = NULL}
+  if(!is.null(label_features_list)){
+    if(!is.character(label_features_list)){
+      warning("'label_features_list' should be a character vector. NULL was used by default.")
+      label_features_list = NULL
+    }
   }
   if(missing(plot)){plot = "all"}
   if(missing(xlim)){xlim = NULL}
@@ -136,8 +145,7 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
   # Remove columns with p or padj (depending on the p_type)
   if (p_type == "p") {
     stats <- stats[, !grepl("_padj$", colnames(stats))]
-  }
-  if (p_type == "padj") {
+  } else if (p_type == "padj") {
     stats <- stats[, !grepl("_p$", colnames(stats))]
   }
 
@@ -162,19 +170,10 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
   }
 
   # Transform the test columns to calculate the -log10(p(test))
-  # Replace any p-values <= 0 or >= 1 with valid boundaries before log transformation
-  test_col[test_col <= 0 | is.na(test_col)] <- 1e-320  # Smallest positive number R can represent
-  test_col[test_col >= 1] <- 1
   test_col <- log10(test_col) * -1
-  # Cap at 320 to avoid infinite values
-  test_col[test_col > 320 | is.infinite(test_col)] <- 320
 
   # Identify the fold_change columns
-  if(stat_type == "LMM" | clustered_data){
-    fc_col <- stats[, grepl("log\\(.*\\/.*\\)", colnames(stats)), drop = FALSE]
-  } else {
-    fc_col <- stats[, grepl("log\\(.*\\/.*\\)", colnames(stats)), drop = FALSE]
-  }
+  fc_col <- stats[, grepl("\\/", colnames(stats)), drop = FALSE]
 
   # Check if all fold changes are logged
   if(sum(grepl("log\\(", colnames(fc_col))) == ncol(fc_col)){
@@ -284,33 +283,38 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
         }
       }
 
-      # Prepare labels for top features
+      # Prepare labels for features
       df$label <- ""
-      if(label_features && top_features > 0) {
-        # Get top upregulated features (passing filters)
-        up_features <- df[grepl("up_in_", df$class), ]
-        if(nrow(up_features) > 0) {
-          if(top_features_by == "abundance") {
-            up_features <- up_features[order(up_features$fc, decreasing = TRUE), ]
-          } else {
-            up_features <- up_features[order(up_features$p, decreasing = TRUE), ]
+      if(label_features) {
+        if(!is.null(label_features_list)) {
+          # Use user-provided list
+          df$label[df$ID %in% label_features_list] <- df$ID[df$ID %in% label_features_list]
+        } else if(top_features > 0) {
+          # Get top upregulated features (passing filters)
+          up_features <- df[grepl("up_in_", df$class), ]
+          if(nrow(up_features) > 0) {
+            if(top_features_by == "abundance") {
+              up_features <- up_features[order(up_features$fc, decreasing = TRUE), ]
+            } else {
+              up_features <- up_features[order(up_features$p, decreasing = TRUE), ]
+            }
+            n_up_to_label <- min(top_features, nrow(up_features))
+            if(n_up_to_label > 0) {
+              df$label[df$ID %in% up_features$ID[1:n_up_to_label]] <- df$ID[df$ID %in% up_features$ID[1:n_up_to_label]]
+            }
           }
-          n_up_to_label <- min(top_features, nrow(up_features))
-          if(n_up_to_label > 0) {
-            df$label[df$ID %in% up_features$ID[1:n_up_to_label]] <- df$ID[df$ID %in% up_features$ID[1:n_up_to_label]]
-          }
-        }
-        # Get top downregulated features (passing filters)
-        down_features <- df[grepl("down_in_", df$class), ]
-        if(nrow(down_features) > 0) {
-          if(top_features_by == "abundance") {
-            down_features <- down_features[order(down_features$fc, decreasing = FALSE), ]
-          } else {
-            down_features <- down_features[order(down_features$p, decreasing = TRUE), ]
-          }
-          n_down_to_label <- min(top_features, nrow(down_features))
-          if(n_down_to_label > 0) {
-            df$label[df$ID %in% down_features$ID[1:n_down_to_label]] <- df$ID[df$ID %in% down_features$ID[1:n_down_to_label]]
+          # Get top downregulated features (passing filters)
+          down_features <- df[grepl("down_in_", df$class), ]
+          if(nrow(down_features) > 0) {
+            if(top_features_by == "abundance") {
+              down_features <- down_features[order(down_features$fc, decreasing = FALSE), ]
+            } else {
+              down_features <- down_features[order(down_features$p, decreasing = TRUE), ]
+            }
+            n_down_to_label <- min(top_features, nrow(down_features))
+            if(n_down_to_label > 0) {
+              df$label[df$ID %in% down_features$ID[1:n_down_to_label]] <- df$ID[df$ID %in% down_features$ID[1:n_down_to_label]]
+            }
           }
         }
       }
@@ -408,9 +412,10 @@ romicsVolcano <- function(romics_object, p_type = "p", p = 0.05, min_fold_change
 #' @param min_fold_change numeric value indicating the minimum fold change threshold
 #' @param colors character vector of length 3 used to color the features (down, non-significant, up)
 #' @param plotly logical (TRUE or FALSE) to indicate whether to return interactive plotly plots (TRUE) or static ggplot plots (FALSE)
-#' @param label_features logical (TRUE or FALSE) to indicate whether to label top features on the plot
-#' @param top_features numeric value indicating the number of top upregulated and downregulated features to label
+#' @param label_features logical (TRUE or FALSE) to indicate whether to label features on the plot
+#' @param top_features numeric value indicating the number of top upregulated and downregulated features to label. Ignored if label_features_list is specified.
 #' @param top_features_by 'abundance' or 'p' to indicate the criteria for selecting top features
+#' @param label_features_list character vector of feature IDs to label on the plot. If provided, overrides top_features and top_features_by.
 #' @param n_cols numeric value indicating the number of columns in the multipanel layout (NULL for auto square-ish grid)
 #' @param return_plot logical (TRUE or FALSE) to indicate whether to return the plot object instead of printing it (default: FALSE)
 #' @param xlim numeric vector of length 2 specifying the x-axis limits (e.g., c(-2, 2)). If NULL, limits are determined automatically.
@@ -426,8 +431,9 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
                                    p_type = "p", p = 0.05, min_fold_change = 0.6,
                                    colors = c("#2cbcb2", "#242021", "#d44e28"),
                                    plotly = FALSE, label_features = FALSE, top_features = 10,
-                                   top_features_by = "abundance", n_cols = NULL, return_plot = FALSE,
-                                   xlim = NULL, ylim = NULL, auto_ylim = TRUE, size = 2, alpha = 0.5) {
+                                   top_features_by = "abundance", label_features_list = NULL, n_cols = NULL,
+                                   return_plot = FALSE, xlim = NULL, ylim = NULL, auto_ylim = TRUE,
+                                   size = 2, alpha = 0.5) {
   # Input validation
   if(!is.romicsObject(romics_object) | missing(romics_object)) {
     stop("romics_object is missing or is not in the appropriate format")
@@ -518,6 +524,13 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
     warning("'top_features_by' should be either 'abundance' or 'p'. 'abundance' was used by default.")
     top_features_by = "abundance"
   }
+  if(missing(label_features_list)){label_features_list = NULL}
+  if(!is.null(label_features_list)){
+    if(!is.character(label_features_list)){
+      warning("'label_features_list' should be a character vector. NULL was used by default.")
+      label_features_list = NULL
+    }
+  }
   if(!is.null(n_cols)){
     if(!is.numeric(n_cols) | n_cols < 1 | n_cols != round(n_cols)){
       warning("'n_cols' should be a positive integer or NULL (auto). NULL was used by default.")
@@ -585,26 +598,28 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
   # Remove columns with p or padj (depending on the p_type)
   if (p_type == "p") {
     stats <- stats[, !grepl("_padj$", colnames(stats))]
-  }
-  if (p_type == "padj") {
+  } else if (p_type == "padj") {
     stats <- stats[, !grepl("_p$", colnames(stats))]
   }
 
   # Filter columns for the specified cluster based on stat_type
   # The 'within' parameter specifies the actual cluster name to search for
+  # Use grep with fixed=TRUE to handle special characters like parentheses literally
+
   if(stat_type == "t.test"){
-    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within, "$|log\\(.*\\/.*\\)_within_", within, "_")
-    test_pattern <- paste0("_within_", within, "_Ttest_")
+    test_suffix <- "_Ttest_"
   } else if(stat_type == "wilcox.test"){
-    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within, "$|log\\(.*\\/.*\\)_within_", within, "_")
-    test_pattern <- paste0("_within_", within, "_Wilcox_test_")
+    test_suffix <- "_Wilcox_test_"
   } else if(stat_type == "LMM"){
-    fc_pattern   <- paste0("log\\(.*\\/.*\\)_within_", within, "$|log\\(.*\\/.*\\)_within_", within, "_")
-    test_pattern <- paste0("_within_", within, "_LMMtest_")
+    test_suffix <- "_LMMtest_"
   }
 
-  fc_cols   <- grepl(fc_pattern,   colnames(stats))
-  test_cols <- grepl(test_pattern, colnames(stats))
+  # Find fold change columns: must contain "log(" and the within pattern
+  fc_cols <- grepl("log\\(.*\\/.*\\)_within_", colnames(stats)) &
+             grepl(paste0("_within_", within), colnames(stats), fixed = TRUE)
+
+  # Find test columns using fixed matching for the within part
+  test_cols <- grepl(paste0("_within_", within, test_suffix), colnames(stats), fixed = TRUE)
 
   if(sum(fc_cols) == 0 | sum(test_cols) == 0) {
     stop(paste0("No statistics found for cluster '", within, "' with stat_type '", stat_type,
@@ -616,12 +631,16 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
   test_col <- as.matrix(stats[, test_cols, drop = FALSE])
 
   # Process test columns based on stat_type — strip _within_<cluster>_<test>_... suffix
+  # Use perl=TRUE with fixed escape to handle special characters
   if(stat_type == "t.test"){
-    colnames(test_col) <- sub(paste0("_within_", within, "_Ttest_.*"),      "", colnames(test_col))
+    pattern <- paste0("_within_", gsub("([\\\\().+*?^$|])", "\\\\\\1", within), "_Ttest_.*")
+    colnames(test_col) <- sub(pattern, "", colnames(test_col), perl = TRUE)
   } else if(stat_type == "wilcox.test"){
-    colnames(test_col) <- sub(paste0("_within_", within, "_Wilcox_test_.*"), "", colnames(test_col))
+    pattern <- paste0("_within_", gsub("([\\\\().+*?^$|])", "\\\\\\1", within), "_Wilcox_test_.*")
+    colnames(test_col) <- sub(pattern, "", colnames(test_col), perl = TRUE)
   } else if(stat_type == "LMM"){
-    colnames(test_col) <- sub(paste0("_within_", within, "_LMMtest_.*"),     "", colnames(test_col))
+    pattern <- paste0("_within_", gsub("([\\\\().+*?^$|])", "\\\\\\1", within), "_LMMtest_.*")
+    colnames(test_col) <- sub(pattern, "", colnames(test_col), perl = TRUE)
   }
   colnames(test_col) <- sub("_vs_", "\\/", colnames(test_col))
 
@@ -717,31 +736,36 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
       }
     }
 
-    # Prepare labels for top features
+    # Prepare labels for features
     df$label <- ""
-    if(label_features && top_features > 0) {
-      up_features <- df[grepl("up_in_", df$class), ]
-      if(nrow(up_features) > 0) {
-        if(top_features_by == "abundance") {
-          up_features <- up_features[order(up_features$fc, decreasing = TRUE), ]
-        } else {
-          up_features <- up_features[order(up_features$p, decreasing = TRUE), ]
+    if(label_features) {
+      if(!is.null(label_features_list)) {
+        # Use user-provided list
+        df$label[df$ID %in% label_features_list] <- df$ID[df$ID %in% label_features_list]
+      } else if(top_features > 0) {
+        up_features <- df[grepl("up_in_", df$class), ]
+        if(nrow(up_features) > 0) {
+          if(top_features_by == "abundance") {
+            up_features <- up_features[order(up_features$fc, decreasing = TRUE), ]
+          } else {
+            up_features <- up_features[order(up_features$p, decreasing = TRUE), ]
+          }
+          n_up_to_label <- min(top_features, nrow(up_features))
+          if(n_up_to_label > 0) {
+            df$label[df$ID %in% up_features$ID[1:n_up_to_label]] <- df$ID[df$ID %in% up_features$ID[1:n_up_to_label]]
+          }
         }
-        n_up_to_label <- min(top_features, nrow(up_features))
-        if(n_up_to_label > 0) {
-          df$label[df$ID %in% up_features$ID[1:n_up_to_label]] <- df$ID[df$ID %in% up_features$ID[1:n_up_to_label]]
-        }
-      }
-      down_features <- df[grepl("down_in_", df$class), ]
-      if(nrow(down_features) > 0) {
-        if(top_features_by == "abundance") {
-          down_features <- down_features[order(down_features$fc, decreasing = FALSE), ]
-        } else {
-          down_features <- down_features[order(down_features$p, decreasing = TRUE), ]
-        }
-        n_down_to_label <- min(top_features, nrow(down_features))
-        if(n_down_to_label > 0) {
-          df$label[df$ID %in% down_features$ID[1:n_down_to_label]] <- df$ID[df$ID %in% down_features$ID[1:n_down_to_label]]
+        down_features <- df[grepl("down_in_", df$class), ]
+        if(nrow(down_features) > 0) {
+          if(top_features_by == "abundance") {
+            down_features <- down_features[order(down_features$fc, decreasing = FALSE), ]
+          } else {
+            down_features <- down_features[order(down_features$p, decreasing = TRUE), ]
+          }
+          n_down_to_label <- min(top_features, nrow(down_features))
+          if(n_down_to_label > 0) {
+            df$label[df$ID %in% down_features$ID[1:n_down_to_label]] <- df$ID[df$ID %in% down_features$ID[1:n_down_to_label]]
+          }
         }
       }
     }
@@ -751,6 +775,12 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
     xaxis_title <- paste0("log", log_type, "(", comparison, ")")
 
     if(!plotly){
+      # Skip if dataframe is empty
+      if(nrow(df) == 0) {
+        warning(paste0("No data available for comparison '", comparison, "' in cluster '", within, "'. Skipping this plot."))
+        next
+      }
+
       fig <- ggplot(df, aes(x = fc, y = p, colour = class)) +
         geom_point(alpha = alpha, size = size) +
         theme_ROP() +
@@ -763,8 +793,12 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
               axis.title  = element_text(size = 9))
 
       # Add axis limits if specified
-      if(!is.null(xlim) | !is.null(ylim_current)){
-        fig <- fig + coord_cartesian(xlim = xlim, ylim = ylim_current, expand = FALSE)
+      # Use scale_*_continuous for hard limits instead of coord_cartesian to ensure they're preserved in multi-panel plots
+      if(!is.null(xlim)){
+        fig <- fig + scale_x_continuous(limits = xlim, expand = c(0, 0))
+      }
+      if(!is.null(ylim_current)){
+        fig <- fig + scale_y_continuous(limits = ylim_current, expand = c(0, 0))
       }
 
       if(label_features && any(df$label != "")) {
@@ -778,6 +812,12 @@ romicsVolcanoByCluster <- function(romics_object, within = NULL, cluster_factor 
       plot_list[[i]] <- fig
 
     } else {
+      # Skip if dataframe is empty
+      if(nrow(df) == 0) {
+        warning(paste0("No data available for comparison '", comparison, "' in cluster '", within, "'. Skipping this plot."))
+        next
+      }
+
       hover_text <- paste("ID=", df$ID)
       if(label_features) {
         hover_text[df$label != ""] <- paste("ID=", df$ID[df$label != ""], "(Top feature)")

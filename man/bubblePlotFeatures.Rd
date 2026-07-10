@@ -14,7 +14,6 @@ bubblePlotFeatures(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{factor}{has to be either 'main" or a factor of the romics_object, the list of factor can be retrieved using the function romicsFactorNames()}

@@ -7,7 +7,6 @@
 romicsPmartR(romics_object, type = "proData")
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using the function romicsCreateObject()}
 
 \item{type}{Has to be "lipidData","proData","pepData","metabData" to indicate what data type to use for the pmartR object}

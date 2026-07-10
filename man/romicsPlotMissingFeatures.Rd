@@ -11,7 +11,6 @@ romicsPlotMissingFeatures(
 )
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{features}{has to be either empty or a character vector containing a list of features. if a character list of vector is used only the requested features will be shown.}

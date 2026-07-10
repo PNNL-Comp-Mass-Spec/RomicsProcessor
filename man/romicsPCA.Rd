@@ -31,7 +31,6 @@ romicsPCA(
 )
 }
 \arguments{
-
 \item{romics_object}{has to be a romics_object created using romicsCreateObject()}
 
 \item{verbose}{boolean. If TRUE, also assigns the complete PCA results to PCA_results in the global environment}

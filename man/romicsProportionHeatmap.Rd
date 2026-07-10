@@ -17,7 +17,6 @@ romicsProportionHeatmap(
 )
 }
 \arguments{
-
 \item{proportion_test_result}{The list returned by romicsProportionTestPairwise.}
 
 \item{title}{A character string for the plot title. Default:

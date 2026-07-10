@@ -19,7 +19,6 @@ romicsClusteringHeatmap(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{cluster_column}{Character indicating which clustering column to use from statistics layer

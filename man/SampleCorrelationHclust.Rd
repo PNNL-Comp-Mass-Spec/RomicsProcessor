@@ -13,7 +13,6 @@ SampleCorrelationHclust(
 )
 }
 \arguments{
-
 \item{romics_object}{an object of type romics_object}
 
 \item{corr_type}{has to be either 'pearson', 'kendall',or 'spearman', indicates the type of correlation calculated.}

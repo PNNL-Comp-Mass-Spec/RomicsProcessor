@@ -7,7 +7,6 @@
 romicsMean(romics_object, factor = "main")
 }
 \arguments{
-
 \item{romics_object}{A object created using the function romicsCreateObject().}
 
 \item{main_factor}{Either 'main' OR any factor from the romics_object, the list of factors from a romics object can be obtained using the function romicsFactorNames().}

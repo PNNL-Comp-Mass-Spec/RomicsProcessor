@@ -7,7 +7,6 @@
 romicsFreqMissingFeatures(romics_object = romics_object, binwidth = 1)
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{binwidth}{has to be a numeric value indicating the width of the desired frequency bins, 1 will be used by default.}

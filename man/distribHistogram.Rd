@@ -13,7 +13,6 @@ distribHistogram(
 )
 }
 \arguments{
-
 \item{romics_object}{has to be a log transformed romics_object created using romicsCreateObject() and transformed using the function log2transform() or log10transform()}
 
 \item{bin}{has to be a numerical value indicating the width of the frequency bins to use for the visualization}

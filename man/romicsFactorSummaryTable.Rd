@@ -15,7 +15,6 @@ romicsFactorSummaryTable(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{split_by_factor}{A character vector (length=1) containing a factor of the romics_object that will define the rows/categories. The list of factors can be identified by using the function romicsFactorNames()}

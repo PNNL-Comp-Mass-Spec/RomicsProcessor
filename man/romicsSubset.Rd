@@ -23,7 +23,6 @@ romicsSubset(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{subset_vector}{A character vector of factor levels or colnames to keep in the object.}

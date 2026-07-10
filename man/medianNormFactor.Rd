@@ -7,7 +7,6 @@
 medianNormFactor(romics_object, factor = "main")
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{factor}{Character. Factor name from romics_object to use for grouping. Use "main" for the main factor. Default: "main"}

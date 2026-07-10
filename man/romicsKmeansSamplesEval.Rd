@@ -23,7 +23,6 @@ romicsKmeansSamplesEval(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject()}
 
 \item{iter.max}{The maximum number of iterations allowed. Default: 100}

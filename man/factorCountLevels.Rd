@@ -14,7 +14,6 @@ factorCountLevels(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using romicsCreateObject().}
 
 \item{factor}{A character vector (length=1) containing a factor of the romics_object. The list of factors can be identified by using the function romicsFactorNames().}
@@ -35,23 +34,6 @@ Indicates in a vector how many times each level of a factor is detected, with op
 }
 \details{
 Generates a count of how many times each level is seen in a factor. Can return either a named numeric vector or a ggplot bar chart.
-}
-\examples{
-\dontrun{
-# Get counts as a named vector
-counts <- factorCountLevels(romics_object = my_romics, factor = "Treatment")
-
-# Generate a plot
-factorCountLevels(romics_object = my_romics, factor = "Treatment", plot = TRUE)
-
-# Customize the plot
-factorCountLevels(romics_object = my_romics, factor = "Sex",
-                  plot = TRUE, textsize = 4, fill_color = "gray50", order = TRUE)
-
-# Access specific level count
-counts <- factorCountLevels(romics_object = my_romics, factor = "Sex")
-counts["Male"]
-}
 }
 \author{
 Geremy Clair

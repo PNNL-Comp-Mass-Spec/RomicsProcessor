@@ -7,7 +7,6 @@
 pFrequencyPlot(romics_object, p_columns = "all", p = 0.05, bin_width = 0.01)
 }
 \arguments{
-
 \item{romics_object}{A romics_object created with the function romicsCreateObject()}
 
 \item{p_columns}{'all' by default, otherwise it can be a text vector containing the columns to be plotted.}

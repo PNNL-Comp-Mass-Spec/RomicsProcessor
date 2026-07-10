@@ -15,7 +15,6 @@ romicsFuzzyCMeans(
 )
 }
 \arguments{
-
 \item{romics_object}{A romics_object created using createRomicsObject()}
 
 \item{n_clusters}{Numeric indicating the number of clusters to create (default: 3)}

@@ -7,7 +7,6 @@
 romicsStatLayer(romics_object = romics_object)
 }
 \arguments{
-
 \item{romics_object}{An romics_object containing a statistic layer}
 }
 \value{

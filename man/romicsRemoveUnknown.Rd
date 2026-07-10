@@ -7,7 +7,6 @@
 romicsRemoveUnknown(romics_object, unknown_identifier_txt = "Unknown")
 }
 \arguments{
-
 \item{romics_object}{has to be an romics_object created using romicsCreateObject()}
 
 \item{unknown_identifier_txt}{string that indicates which features are unknown and are to be removed by default the string 'Unknown'}
