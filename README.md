@@ -5,68 +5,7 @@ The package provides a structured R object (`romics_object`) to store data, meta
 enabling reproducible and FAIR-compatible data analysis. RomicsProcessor enables complete analytical traceability through
 UUID-based object tracking and automatic step logging, supporting reusable analytical pipelines and reliable research reproducibility.
 
-**Version 2.0.0** - A Major Milestone for Analytical Traceability and FAIR Science
 
-This release completes RomicsProcessor's vision for FAIR-compliant omics analysis with:
-- **Complete Object Encapsulation**: Full data, metadata, and processing history within each romics_object
-- **Analytical Traceability**: UUID-based relationship tracking, branching detection, and complete lineage recording
-- **Embedding Provenance**: Full source tracking for transferred embeddings with divergence documentation
-- **Combined Object Lineage**: Complete traceability for combined objects with source UUID and step recording
-- **Spatial Omics Support**: Full integration with spatial analysis frameworks and coordinates
-- **Robust Reproducibility**: Validated pipeline generation and application with identical result reproduction
-
-## Key Features
-
-### Core Capabilities
-- **Multi-Omics Support**: Handle bulk, single-cell, and spatial omics datasets (proteomics, metabolomics, genomics, etc.)
-- **Complete Object Encapsulation**: Romics_objects contain data, metadata, statistics, processing history, embeddings, and dependencies
-- **Reproducible Analysis**: Full processing history tracking with audit trail ensures complete reproducibility
-- **FAIR Compliant**: Findable (UUID), Accessible (R package), Interoperable (format conversion), Reusable (pipelines)
-- **Comprehensive Analysis**: Data import/transformation, normalization, dimensionality reduction, clustering, statistical analysis
-
-### Analytical Traceability (v2.0 - NEW)
-- **Object Relationship Detection**: `checkRelationRomicsObjects()` identifies branching, linear evolution, or unrelated objects
-- **Embedding Provenance**: Full source tracking with divergence documentation for transferred embeddings
-- **Combined Object Lineage**: Complete traceability recording which objects were combined and their divergent steps
-- **UUID-Based Tracking**: Unique identifiers enable complete analytical chain reconstruction
-
-### Format Interoperability
-- **Seurat Integration**: Seamless bidirectional conversion with Seurat objects (SeuratToRomics, romicsToSeurat)
-- **SpatialExperiment Support**: Export for BANKSY spatial analysis and integration with Bioconductor ecosystem
-- **Embedding Preservation**: Automatic PCA, UMAP, and other dimensional reductions preserved during conversions
-
-### Spatial Omics
-- **Large-Scale Spatial Data**: Optimized for hundreds of thousands of data points (multiplexed immunofluorescence, MSI)
-- **Spatial Map Generation**: Interactive visualization of spatial coordinates with feature overlays and clustering patterns
-- **Spatial Integration**: Format conversion and coordinate preservation for spatial analysis frameworks
-
-### Advanced Features
-- **Batch Correction**: ComBat/SVA methods with optional reference region guidance
-- **Custom Feature Labeling**: User-specified feature lists for volcano plot annotations
-- **Advanced Visualization**: Interactive Shiny web interfaces, publication-quality plots, spatial maps
-- **Reproducible Pipelines**: Generate and apply analysis pipelines for method reuse and validation
-
-## v2.0.0 Highlights - Complete Analytical Traceability
-
-### Analytical Traceability System
-- 🔗 **UUID-Based Tracking**: Every romics_object has a unique identifier for complete lineage tracing
-- 🌿 **Relationship Detection**: Identify if objects branched from common ancestor, are related through steps, or unrelated
-- 📊 **Branching Point Detection**: Find exact point where analytical pipelines diverged
-- 🔄 **Embedding Provenance**: Full source tracking when embeddings are transferred between objects
-- 📦 **Combined Object Lineage**: Document which objects were combined and what divergent steps exist
-
-### Enhanced Traceability Features
-- ✅ `checkRelationRomicsObjects()` - Analyze relationships between any two romics_objects
-- ✅ `romicsTransferEmbeddings()` - Records origin object UUID, name, and divergent steps
-- ✅ `combineRomicsObjects()` - Tracks all source objects and their contributions
-- ✅ `applyRomicsPipeline()` - Validate reproducibility with identical result reproduction
-
-### Case Study Validation
-The included case study demonstrates end-to-end reproducibility:
-- Analyzed *Bacillus cereus* proteome across 4 growth media (12 samples)
-- Applied analysis pipeline to unprocessed and reset objects
-- Verified identical data, statistics, and embeddings
-- Public raw data available (MassIVE MSV000085696)
 
 ## Installation
 
@@ -182,5 +121,68 @@ E-mail: proteomics@pnnl.gov
 RomicsProcessor is licensed under the 2-Clause BSD License; 
 you may not use this file except in compliance with the License.  You may obtain 
 a copy of the License at https://opensource.org/licenses/BSD-2-Clause
+
+**Version 2.0.0** - A Major Milestone for Analytical Traceability and FAIR Science
+
+This release completes RomicsProcessor's vision for FAIR-compliant omics analysis with:
+- **Complete Object Encapsulation**: Full data, metadata, and processing history within each romics_object
+- **Analytical Traceability**: UUID-based relationship tracking, branching detection, and complete lineage recording
+- **Embedding Provenance**: Full source tracking for transferred embeddings with divergence documentation
+- **Combined Object Lineage**: Complete traceability for combined objects with source UUID and step recording
+- **Spatial Omics Support**: Full integration with spatial analysis frameworks and coordinates
+- **Robust Reproducibility**: Validated pipeline generation and application with identical result reproduction
+
+## Key Features
+
+### Core Capabilities
+- **Multi-Omics Support**: Handle bulk, single-cell, and spatial omics datasets (proteomics, metabolomics, genomics, etc.)
+- **Complete Object Encapsulation**: Romics_objects contain data, metadata, statistics, processing history, embeddings, and dependencies
+- **Reproducible Analysis**: Full processing history tracking with audit trail ensures complete reproducibility
+- **FAIR Compliant**: Findable (UUID), Accessible (R package), Interoperable (format conversion), Reusable (pipelines)
+- **Comprehensive Analysis**: Data import/transformation, normalization, dimensionality reduction, clustering, statistical analysis
+
+### Analytical Traceability (v2.0 - NEW)
+- **Object Relationship Detection**: `checkRelationRomicsObjects()` identifies branching, linear evolution, or unrelated objects
+- **Embedding Provenance**: Full source tracking with divergence documentation for transferred embeddings
+- **Combined Object Lineage**: Complete traceability recording which objects were combined and their divergent steps
+- **UUID-Based Tracking**: Unique identifiers enable complete analytical chain reconstruction
+
+### Format Interoperability
+- **Seurat Integration**: Seamless bidirectional conversion with Seurat objects (SeuratToRomics, romicsToSeurat)
+- **SpatialExperiment Support**: Export for BANKSY spatial analysis and integration with Bioconductor ecosystem
+- **Embedding Preservation**: Automatic PCA, UMAP, and other dimensional reductions preserved during conversions
+
+### Spatial Omics
+- **Large-Scale Spatial Data**: Optimized for hundreds of thousands of data points (multiplexed immunofluorescence, MSI)
+- **Spatial Map Generation**: Interactive visualization of spatial coordinates with feature overlays and clustering patterns
+- **Spatial Integration**: Format conversion and coordinate preservation for spatial analysis frameworks
+
+### Advanced Features
+- **Batch Correction**: ComBat/SVA methods with optional reference region guidance
+- **Custom Feature Labeling**: User-specified feature lists for volcano plot annotations
+- **Advanced Visualization**: Interactive Shiny web interfaces, publication-quality plots, spatial maps
+- **Reproducible Pipelines**: Generate and apply analysis pipelines for method reuse and validation
+
+## v2.0.0 Highlights - Complete Analytical Traceability
+
+### Analytical Traceability System
+- 🔗 **UUID-Based Tracking**: Every romics_object has a unique identifier for complete lineage tracing
+- 🌿 **Relationship Detection**: Identify if objects branched from common ancestor, are related through steps, or unrelated
+- 📊 **Branching Point Detection**: Find exact point where analytical pipelines diverged
+- 🔄 **Embedding Provenance**: Full source tracking when embeddings are transferred between objects
+- 📦 **Combined Object Lineage**: Document which objects were combined and what divergent steps exist
+
+### Enhanced Traceability Features
+- ✅ `checkRelationRomicsObjects()` - Analyze relationships between any two romics_objects
+- ✅ `romicsTransferEmbeddings()` - Records origin object UUID, name, and divergent steps
+- ✅ `combineRomicsObjects()` - Tracks all source objects and their contributions
+- ✅ `applyRomicsPipeline()` - Validate reproducibility with identical result reproduction
+
+### Case Study Validation
+The included case study demonstrates end-to-end reproducibility:
+- Analyzed *Bacillus cereus* proteome across 4 growth media (12 samples)
+- Applied analysis pipeline to unprocessed and reset objects
+- Verified identical data, statistics, and embeddings
+- Public raw data available (MassIVE MSV000085696)
 
 Copyright 2019 Battelle Memorial Institute
