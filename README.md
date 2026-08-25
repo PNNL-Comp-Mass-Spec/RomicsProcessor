@@ -74,12 +74,17 @@ The included case study demonstrates end-to-end reproducibility:
 
 ```R
 install.packages(“devtools”)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("ggtree")
+BiocManager::install("ComplexHeatmap")
 ```
 
 ### Install from GitHub
 
 ```R
-devtools::install_github(“PNNL-Comp-Mass-Spec/RomicsProcessor”)
+devtools::install_github("PNNL-Comp-Mass-Spec/RomicsProcessor")
 ```
 
 ### Package Installation On-Demand
